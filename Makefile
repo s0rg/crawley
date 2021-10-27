@@ -16,13 +16,13 @@ export GOARCH=amd64
 
 build: build-linux
 
-build-linux: lint
+build-linux: vet
 	GOOS=linux go build -ldflags "${LDFLAGS}" -o "${BIN}" "${SRC}"
 
-build-windows: lint
+build-windows: vet
 	GOOS=windows go build -ldflags "${LDFLAGS}" -o "${BIN}".exe "${SRC}"
 
-build-darwin: lint
+build-darwin: vet
 	GOOS=darwin go build -ldflags "${LDFLAGS}" -o "${BIN}".osx "${SRC}"
 
 vet:
