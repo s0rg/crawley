@@ -6,3 +6,24 @@
 
 # crawley
 The unix-way web crawler
+It crawls web pages and prints any link it can found within, the scan depth can also be configured.
+
+# usage
+```
+crawley [flags] url
+
+where flags can be:
+
+-delay duration
+    per-request delay
+-depth int
+    scan depth
+-skip-ssl
+    skip ssl verification
+-user-agent string
+    user-agent string
+-version
+    show version
+-workers int
+    number of workers
+```
