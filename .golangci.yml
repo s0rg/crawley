@@ -1,0 +1,44 @@
+linters-settings:
+  gocritic:
+    disabled-checks:
+      - commentFormatting
+    enabled-tags:
+      - performance
+      - diagnostic
+      - style
+      - opinionated
+
+linters:
+  enable-all: true
+  disable:
+    - testpackage
+    - gochecknoglobals
+    - exhaustivestruct
+    - exhaustive
+    - forbidigo
+    - goerr113
+    - gomnd
+    - gci
+    # deprecated :(
+    - interfacer
+    - maligned
+    - scopelint
+    - golint
+  fast: false
+
+output:
+  format: 'colored-line-number'
+  print-issued-lines: true
+  print-linter-name: true
+
+issues:
+  exclude-rules:
+    - path: pkg/client/http.go
+      text: "G402" # G402: TLS InsecureSkipVerify set true.
+      linters:
+        - gosec
+    - path: ._test\.go
+      linters:
+        - funlen
+        - ifshort
+        - cyclop
