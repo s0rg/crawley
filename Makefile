@@ -32,7 +32,7 @@ lint: vet
 	golangci-lint run
 
 test: vet
-	go test -race -count 1 -v -tags=test -coverprofile="${COP}" ./...
+	CGO_ENABLED=1 go test -race -count 1 -v -tags=test -coverprofile="${COP}" ./...
 
 test-cover: test
 	go tool cover -func="${COP}"
