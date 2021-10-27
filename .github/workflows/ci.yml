@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+  test:
+    runs-on: ubuntu-latest
+    environment:
+      name: ci
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - name: test-cover
+        run: make test
+      - name: send-report
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > cc-test-reporter
+          chmod u+x cc-test-reporter
+          ./cc-test-reporter before-build
+          ./cc-test-reporter format-coverage test.cover --input-type gocov --prefix github.com/${{ github.repository }}
+          ./cc-test-reporter upload-coverage
