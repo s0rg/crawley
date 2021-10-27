@@ -6,7 +6,8 @@
 
 # crawley
 The unix-way web crawler
-It crawls web pages and prints any link it can found within, the scan depth can also be configured.
+It crawls web pages and prints any link it can found within.
+Scan depth (by default - 0) can be configured via flags.
 
 # usage
 ```
