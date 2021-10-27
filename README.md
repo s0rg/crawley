@@ -10,14 +10,14 @@ The unix-way web crawler.
 
 It crawls web pages and prints any link it can find.
 
-Scan depth (by default - 0) can be configured via cli flags.
+Scan depth (by default - 0) can be configured.
 
 # features
 
-- fast SAX-parser (powered by golang.org/x/net/html)
+- fast SAX-parser (powered by `golang.org/x/net/html`)
 - small (<1000 SLOC), idiomatic, 100% test covered codebase
 - grabs most of useful resources links (pics, videos, audios, etc...)
-- links are streamed to stdout
+- found links are streamed to stdout and guranteed to be unique
 
 # usage
 ```
