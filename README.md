@@ -6,16 +6,18 @@
 
 # crawley
 
-    The unix-way web crawler.
-    It crawls web pages and prints any link it can found within.
-    Scan depth (by default - 0) can be configured via cli flags.
+The unix-way web crawler.
+
+It crawls web pages and prints any link it can found within.
+
+Scan depth (by default - 0) can be configured via cli flags.
 
 # features
 
- - fast SAX-parser (powered by golang.org/x/net/html)
- - small (<1000 SLOC), idiomatic, 100% test covered codebase
- - grabs most of useful resources links (pics, videos, audios, etc...)
- - links are streamed to stdout
+- fast SAX-parser (powered by golang.org/x/net/html)
+- small (<1000 SLOC), idiomatic, 100% test covered codebase
+- grabs most of useful resources links (pics, videos, audios, etc...)
+- links are streamed to stdout
 
 # usage
 ```
