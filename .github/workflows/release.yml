@@ -40,11 +40,6 @@ jobs:
           make build-darwin
           zip -j dist/darwin_amd64.zip bin/crawley.osx LICENSE
 
-      - name: echo token
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-        run: echo "$env:GITHUB_TOKEN"
-
       - name: release
         id: create_release
         uses: goreleaser/goreleaser-action@v2
