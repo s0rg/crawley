@@ -15,11 +15,13 @@ const (
 	reqTimeout  = 10 * time.Second
 )
 
+// HTTP holds pre-configured http.Client.
 type HTTP struct {
 	ua string
 	c  *http.Client
 }
 
+// New creates and configure client for later use.
 func New(ua string, conns int, skipSSL bool) (h *HTTP) {
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
@@ -46,6 +48,7 @@ func New(ua string, conns int, skipSSL bool) (h *HTTP) {
 	}
 }
 
+// Get sends http GET request, returns non-closed body or error.
 func (h *HTTP) Get(ctx context.Context, url string) (body io.ReadCloser, err error) {
 	var req *http.Request
 
@@ -60,6 +63,7 @@ func (h *HTTP) Get(ctx context.Context, url string) (body io.ReadCloser, err err
 	return body, nil
 }
 
+// Head sends http HEAD request, return response headers or error.
 func (h *HTTP) Head(ctx context.Context, url string) (hdrs http.Header, err error) {
 	var req *http.Request
 

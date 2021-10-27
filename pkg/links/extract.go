@@ -16,8 +16,10 @@ const (
 	jsScheme = "javascript"
 )
 
+// Handler is a callback for found links.
 type Handler func(a atom.Atom, u *url.URL)
 
+// Extract run `handler` for every link found inside html from `r`, rebasing them to `b` (if need).
 func Extract(b *url.URL, r io.ReadCloser, handler Handler) {
 	defer r.Close()
 

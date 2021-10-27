@@ -24,7 +24,9 @@ const (
 )
 
 var (
-	GitHash      string
+	// GitHash contains git hash, filled from Makefile.
+	GitHash string
+	// BuildDate contains build date, filled from Makefile.
 	BuildDate    string
 	defaultAgent = "Mozilla/5.0 (compatible; " + appName + "/" + appVersion + "-" + GitHash + ")"
 	fVersion     = flag.Bool("version", false, "show version")
