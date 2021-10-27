@@ -14,7 +14,7 @@ import (
 
 const (
 	appName      = "Crawley"
-	appVersion   = "v0.9.5"
+	appVersion   = "v1.0.0"
 	appURL       = "https://github.com/s0rg/crawley"
 	minWorkers   = 1
 	maxWorkers   = 64
