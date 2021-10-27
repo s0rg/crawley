@@ -1,0 +1,68 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: create release
+    runs-on: ubuntu-latest
+    steps:
+      - name: set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.17
+        id: go
+
+      - name: check out code
+        uses: actions/checkout@v2
+
+      - name: go modules
+        run: go mod vendor
+
+      - name: make dist dir
+        run: mkdir dist
+
+      - name: build linux
+        run: |
+          make build-linux
+          zip -j dist/linux_amd64.zip bin/crawley LICENSE
+
+      - name: build windows
+        run: |
+          make build-windows
+          zip -j dist/windows_amd64.zip bin/crawley.exe LICENSE
+
+      - name: build OSX
+        run: |
+          make build-darwin
+          zip -j dist/darwin_amd64.zip bin/crawley.osx LICENSE
+
+      - name: release
+        id: create_release
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: upload linux release
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux_amd64.zip
+          path: dist/linux_amd64.zip
+
+      - name: upload windows release
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows_amd64.zip
+          path: dist/windows_amd64.zip
+
+      - name: upload OSX release
+        uses: actions/upload-artifact@v2
+        with:
+          name: darwin_amd64.zip
+          path: dist/darwin_amd64.zip
