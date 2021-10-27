@@ -41,7 +41,9 @@ jobs:
           zip -j dist/darwin_amd64.zip bin/crawley.osx LICENSE
 
       - name: echo token
-        run: echo ${{ secrets.GH_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: echo "$env:GITHUB_TOKEN"
 
       - name: release
         id: create_release
@@ -50,7 +52,7 @@ jobs:
           version: latest
           args: release --rm-dist
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
       - name: upload linux release
         uses: actions/upload-artifact@v2
