@@ -40,6 +40,9 @@ jobs:
           make build-darwin
           zip -j dist/darwin_amd64.zip bin/crawley.osx LICENSE
 
+      - name: echo token
+        run: echo ${{ secrets.GH_TOKEN }}
+
       - name: release
         id: create_release
         uses: goreleaser/goreleaser-action@v2
