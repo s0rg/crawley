@@ -84,12 +84,15 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 
 	c.crawlCh <- base
 
-	for w := 1; w > 0; {
-		t := <-c.taskCh
+	var t task
 
-		if t.Done {
+	for w := 1; w > 0; {
+		t = <-c.taskCh
+
+		switch {
+		case t.Done:
 			w--
-		} else if seen.Add(urlHash(t.URI)) {
+		case seen.Add(urlHash(t.URI)):
 			if c.crawl(base, &t) {
 				w++
 			}

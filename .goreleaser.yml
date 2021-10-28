@@ -1,5 +1,9 @@
 # .goreleaser.yml
 project_name: crawley
+before:
+  hooks:
+    - go mod tidy
+    - go mod vendor
 builds:
   - env: [CGO_ENABLED=0]
     ldflags:
