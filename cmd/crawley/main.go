@@ -14,7 +14,6 @@ import (
 
 const (
 	appName      = "Crawley"
-	appVersion   = "v1.0.0"
 	appURL       = "https://github.com/s0rg/crawley"
 	minWorkers   = 1
 	maxWorkers   = 64
@@ -24,11 +23,10 @@ const (
 )
 
 var (
-	// GitHash contains git hash, filled from Makefile.
-	GitHash string
-	// BuildDate contains build date, filled from Makefile.
-	BuildDate    string
-	defaultAgent = "Mozilla/5.0 (compatible; " + appName + "/" + appVersion + "-" + GitHash + ")"
+	gitHash      string
+	gitVersion   string
+	buildDate    string
+	defaultAgent = "Mozilla/5.0 (compatible; " + appName + "/" + gitVersion + "-" + gitHash + ")"
 	fVersion     = flag.Bool("version", false, "show version")
 	fSkipSSL     = flag.Bool("skip-ssl", false, "skip ssl verification")
 	fDepth       = flag.Int("depth", 0, "scan depth")
@@ -85,7 +83,7 @@ func main() {
 	flag.Parse()
 
 	if *fVersion {
-		fmt.Printf("%s %s git: %s build: %s site: %s\n", appName, appVersion, GitHash, BuildDate, appURL)
+		fmt.Printf("%s %s git: %s build: %s site: %s\n", appName, gitVersion, gitHash, buildDate, appURL)
 
 		return
 	}

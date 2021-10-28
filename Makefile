@@ -4,10 +4,11 @@ BIN=bin/crawley
 SRC=./cmd/crawley
 COP=test.coverage
 
-GIT_HASH=`git rev-parse --short HEAD`
+GIT_TAG=`git describe --abbrev=0 || echo -n "no-tag"`
+GIT_HASH=`git rev-parse --short HEAD || echo -n "no-git"`
 BUILD_AT=`date +%FT%T%z`
 
-LDFLAGS=-w -s -X main.GitHash=${GIT_HASH} -X main.BuildDate=${BUILD_AT}
+LDFLAGS=-w -s -X main.gitHash=${GIT_HASH} -X main.buildDate=${BUILD_AT} -X main.gitVersion=${GIT_TAG}
 
 .PHONY: build
 
