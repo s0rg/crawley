@@ -10,7 +10,7 @@
 
 Crawls web pages and prints any link it can find.
 
-Scan depth (by default - 0) can be configured.
+Scan depth (limited by starting host and path, by default - 0) can be configured.
 
 # features
 
@@ -21,7 +21,7 @@ Scan depth (by default - 0) can be configured.
 
 # installation
 
-- [binaries](https://github.com/crawley/releases) for Linux, macOS and Windows
+- [binaries](https://github.com/s0rg/crawley/releases) for Linux, macOS and Windows
 
 # usage
 ```
