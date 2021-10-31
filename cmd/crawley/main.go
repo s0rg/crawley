@@ -26,7 +26,7 @@ var (
 	gitHash      string
 	gitVersion   string
 	buildDate    string
-	defaultAgent = "Mozilla/5.0 (compatible; " + appName + "/" + gitVersion + "-" + gitHash + ")"
+	defaultAgent = "Mozilla/5.0 (compatible; Win64; x64) " + appName + "/" + gitVersion + "-" + gitHash
 	fVersion     = flag.Bool("version", false, "show version")
 	fSkipSSL     = flag.Bool("skip-ssl", false, "skip ssl verification")
 	fDepth       = flag.Int("depth", 0, "scan depth")

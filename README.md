@@ -5,6 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/s0rg/crawley/blob/main/LICENSE)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/s0rg/crawley)](go.mod)
 [![Release](https://img.shields.io/github/v/release/s0rg/crawley)](https://github.com/s0rg/crawley/releases/latest)
+![Downloads](https://img.shields.io/github/downloads/s0rg/crawley/total.svg)
 
 # crawley
 

@@ -1,7 +1,10 @@
+# release workflow
 name: release
 
 on:
   push:
+    branches:
+      - master
     tags:
       - 'v*'
 
@@ -19,9 +22,6 @@ jobs:
       - name: check out code
         uses: actions/checkout@v2
 
-      - name: go modules
-        run: go mod vendor
-
       - name: release
         id: create_release
         uses: goreleaser/goreleaser-action@v2
@@ -30,21 +30,3 @@ jobs:
           args: release -f .goreleaser.yml --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-
-      - name: upload release
-        uses: actions/upload-artifact@v2
-        with:
-          name: linux_amd64.zip
-          path: dist/linux_amd64.zip
-
-      - name: upload windows release
-        uses: actions/upload-artifact@v2
-        with:
-          name: windows_amd64.zip
-          path: dist/windows_amd64.zip
-
-      - name: upload OSX release
-        uses: actions/upload-artifact@v2
-        with:
-          name: darwin_amd64.zip
-          path: dist/darwin_amd64.zip
