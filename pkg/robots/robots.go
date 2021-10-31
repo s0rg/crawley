@@ -6,54 +6,43 @@ import (
 	"github.com/s0rg/crawley/pkg/set"
 )
 
-type accessMode byte
-
-const (
-	allowAll accessMode = 0
-	gotRules accessMode = 1
-	denyAll  accessMode = 2
-)
-
 type TXT struct {
 	links    set.String
 	deny     set.String
 	sitemaps set.String
-	ua       string
 	mode     accessMode
 }
 
-func NewAllowAll() *TXT {
+func AllowALL() *TXT {
 	return &TXT{}
 }
 
-func NewDenyAll() *TXT {
+func DenyALL() *TXT {
 	return &TXT{mode: denyAll}
 }
 
-func NewFromReader(ua string, r io.Reader) (t *TXT, err error) {
+func FromReader(ua string, r io.Reader) (t *TXT, err error) {
 	t = &TXT{
-		mode:  gotRules,
-		ua:    ua,
-		links: make(set.String),
-		deny:  make(set.String),
+		mode:     gotRules,
+		links:    make(set.String),
+		deny:     make(set.String),
+		sitemaps: make(set.String),
 	}
 
-	if err = parseRobots(r, t); err != nil {
+	if err = parseRobots(r, ua, t); err != nil {
 		return
 	}
 
 	return t, nil
 }
 
-func (t *TXT) CanAccess(path string) (yes bool) {
+func (t *TXT) Forbidden(path string) (yes bool) {
 	switch t.mode {
 	case gotRules:
-		if _, ok := t.deny[path]; !ok {
-			yes = true
-		}
-	case allowAll:
-		yes = true
+		_, yes = t.deny[path]
 	case denyAll:
+		yes = true
+	case allowAll:
 	}
 
 	return yes

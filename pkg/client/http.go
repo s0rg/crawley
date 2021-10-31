@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"io"
 	"net"
 	"net/http"
@@ -99,7 +98,8 @@ func (h *HTTP) request(req *http.Request) (body io.ReadCloser, hdrs http.Header,
 	}
 
 	dropContents(resp.Body)
-	err = errors.New(resp.Status)
+
+	err = ErrFromResp(resp)
 
 	return
 }

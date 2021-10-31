@@ -16,10 +16,17 @@ import (
 	"github.com/s0rg/crawley/pkg/client"
 	"github.com/s0rg/crawley/pkg/links"
 	"github.com/s0rg/crawley/pkg/path"
+	"github.com/s0rg/crawley/pkg/robots"
 	"github.com/s0rg/crawley/pkg/set"
 )
 
+type RobotsAction byte
+
 const (
+	RobotsIgnore RobotsAction = 0
+	RobotsFetch  RobotsAction = 1
+	RobotsAbide  RobotsAction = 2
+
 	nMID = 64
 	nBIG = nMID * 2
 
@@ -45,16 +52,25 @@ type Crawler struct {
 	handleCh  chan string
 	crawlCh   chan *url.URL
 	taskCh    chan task
+	robotsAct RobotsAction
+	robots    *robots.TXT
 }
 
 // New creates Crawler instance.
-func New(ua string, workers, depth int, delay time.Duration, skipSSL bool) (c *Crawler) {
+func New(
+	ua string,
+	workers, depth int,
+	delay time.Duration,
+	skipSSL bool,
+	robotsAction RobotsAction,
+) (c *Crawler) {
 	c = &Crawler{
 		UserAgent: ua,
 		Workers:   workers,
 		Depth:     depth,
 		Delay:     delay,
 		SkipSSL:   skipSSL,
+		robotsAct: robotsAction,
 	}
 
 	return c
@@ -75,10 +91,16 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 
 	defer c.close()
 
-	seen := make(set.U64)
+	web := client.New(c.UserAgent, c.Workers, c.SkipSSL)
 
+	seen := make(set.U64)
 	seen.Add(urlHash(base))
-	c.startCrawlers()
+
+	c.initRobots(base, web)
+
+	for i := 0; i < c.Workers; i++ {
+		go c.crawler(web)
+	}
 
 	go c.handler(fn)
 
@@ -113,6 +135,10 @@ func (c *Crawler) crawl(b *url.URL, t *task) (yes bool) {
 		return
 	}
 
+	if c.robotsAct == RobotsAbide && c.robots.Forbidden(t.URI.Path) {
+		return
+	}
+
 	go func(u *url.URL) { c.crawlCh <- u }(t.URI)
 
 	return true
@@ -130,12 +156,18 @@ func (c *Crawler) close() {
 	close(c.taskCh)
 }
 
-func (c *Crawler) startCrawlers() {
-	web := client.New(c.UserAgent, c.Workers, c.SkipSSL)
+func (c *Crawler) initRobots(uri *url.URL, web *client.HTTP) {
+	if c.robotsAct == RobotsIgnore {
+		c.robots = robots.AllowALL()
 
-	for i := 0; i < c.Workers; i++ {
-		go c.crawler(web)
+		return
 	}
+
+	// 1. construct url
+	// 2. fetch body + response code
+	// 3. parse
+
+	return
 }
 
 func (c *Crawler) linkHandler(a atom.Atom, u *url.URL) {

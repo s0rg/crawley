@@ -8,17 +8,8 @@ import (
 	"strings"
 )
 
-type tokenKind byte
-
 const (
-	// token kinds
-	kindNone      tokenKind = 0
-	kindUserAgent tokenKind = 1
-	kindAllow     tokenKind = 2
-	kindDisallow  tokenKind = 3
-	kindSitemap   tokenKind = 4
-
-	// token values
+	defaultAgent  = "*"
 	tokenSep      = ':'
 	tokenComment  = '#'
 	tokenAllow    = "allow"
@@ -27,7 +18,6 @@ const (
 	tokenSitemap2 = "site-map"
 	tokenUA1      = "useragent"
 	tokenUA2      = "user-agent"
-	defaultAgent  = "*"
 )
 
 func parseTokenKind(b []byte) (k tokenKind) {
@@ -77,7 +67,7 @@ func extractToken(b []byte) (k tokenKind, v string) {
 	return kind, string(val)
 }
 
-func parseRobots(r io.Reader, t *TXT) (err error) {
+func parseRobots(r io.Reader, ua string, t *TXT) (err error) {
 	var (
 		s    = bufio.NewScanner(r)
 		deny bool
@@ -88,7 +78,7 @@ func parseRobots(r io.Reader, t *TXT) (err error) {
 	for s.Scan() {
 		switch k, v := extractToken(s.Bytes()); k {
 		case kindUserAgent:
-			deny = (v == defaultAgent || strings.Contains(t.ua, v))
+			deny = (v == defaultAgent || strings.Contains(ua, v))
 
 		case kindDisallow:
 			if deny {

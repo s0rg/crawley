@@ -112,7 +112,7 @@ func Test_Crawler(t *testing.T) {
 		results = append(results, s)
 	}
 
-	c := New("", 1, 1, time.Millisecond*50, false)
+	c := New("", 1, 1, time.Millisecond*50, false, RobotsIgnore)
 
 	if err := c.Run(ts.URL, handler); err != nil {
 		t.Errorf("run: %v", err)
@@ -147,7 +147,7 @@ func Test_Crawler(t *testing.T) {
 func Test_CrawlerBadLink(t *testing.T) {
 	t.Parallel()
 
-	c := New("", 1, 1, time.Millisecond*50, false)
+	c := New("", 1, 1, time.Millisecond*50, false, RobotsIgnore)
 
 	if err := c.Run("%", nil); err == nil {
 		t.Error("run - no error")
@@ -163,7 +163,7 @@ func Test_CrawlerBadHead(t *testing.T) {
 
 	defer ts.Close()
 
-	c := New("", 1, 1, time.Millisecond*50, false)
+	c := New("", 1, 1, time.Millisecond*50, false, RobotsIgnore)
 
 	if err := c.Run(ts.URL, nil); err != nil {
 		t.Error("run - error")
@@ -185,7 +185,7 @@ func Test_CrawlerBadGet(t *testing.T) {
 
 	defer ts.Close()
 
-	c := New("", 1, 1, time.Millisecond*50, false)
+	c := New("", 1, 1, time.Millisecond*50, false, RobotsIgnore)
 
 	if err := c.Run(ts.URL, nil); err != nil {
 		t.Error("run - error")

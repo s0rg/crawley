@@ -3,7 +3,7 @@ package set
 // String holds set of string values.
 type String map[string]stub
 
-// Add add value to set, replacing previos instances.
+// Add add value to set, replacing previous instances.
 func (ss String) Add(v string) {
 	ss[v] = stub{}
 }
