@@ -1,20 +1,22 @@
 # .goreleaser.yml
 project_name: crawley
+
 before:
   hooks:
     - go mod tidy
-    - go mod vendor
+
 builds:
   - env: [CGO_ENABLED=0]
     ldflags:
       - -s -w
-      - -X main.gitHash={{.ShortCommit}}
-      - -X main.gitVersion={{.Tag}}
       - -X main.buildDate={{.Date}}
+      - -X main.gitVersion={{.Tag}}
+      - -X main.gitHash={{.ShortCommit}}
     goos:
       - linux
-      - windows
       - darwin
+      - freebsd
+      - windows
     goarch:
       - amd64
       - arm64
@@ -24,3 +26,23 @@ builds:
     id: "crawley"
     dir: .
     main: ./cmd/crawley
+    hooks:
+      post: 'upx --brute {{ .Path }}'
+
+archives:
+  - format: tar.gz
+    replacements:
+      386: i386
+      amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+
+changelog:
+  filters:
+    exclude:
+      - '^chore'
+      - '^docs'
+      - '^refactor'
+      - '^style'
+      - '^test'

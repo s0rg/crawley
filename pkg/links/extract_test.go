@@ -176,6 +176,7 @@ func Test_extractURLS(t *testing.T) {
 	const (
 		raw1 = `<html><a href="result">here</a></html>`
 		raw2 = `<html><video></video></html>`
+		raw3 = `<html><!-- http://test/result --></html>`
 	)
 
 	tests := []struct {
@@ -186,6 +187,7 @@ func Test_extractURLS(t *testing.T) {
 	}{
 		{"ok", raw1, true, testRes1},
 		{"bad", raw2, false, nil},
+		{"comment", raw3, true, testRes1},
 	}
 
 	for _, tt := range tests {
@@ -198,7 +200,7 @@ func Test_extractURLS(t *testing.T) {
 
 			var res *url.URL
 
-			Extract(testBase, io.NopCloser(buf), func(_ atom.Atom, u *url.URL) {
+			Extract(testBase, io.NopCloser(buf), true, func(_ atom.Atom, u *url.URL) {
 				res = u
 			})
 
@@ -208,5 +210,31 @@ func Test_extractURLS(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func Test_extractComment(t *testing.T) {
+	const comment = `
+loremipsumhTTp://foo fdfdfs HttPs://bar
+       http://
+ https://baz  http://boo"`
+
+	t.Parallel()
+
+	res := []string{}
+	want := []string{"foo", "bar", "baz", "boo"}
+
+	handler := func(_ atom.Atom, u *url.URL) {
+		res = append(res, u.Host)
+	}
+
+	extractComment(comment, handler)
+
+	if len(res) != 4 {
+		t.Error("unexpected len")
+	}
+
+	if !reflect.DeepEqual(res, want) {
+		t.Error("unexpected result")
 	}
 }

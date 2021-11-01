@@ -2,11 +2,13 @@ package crawler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"hash/fnv"
 	"io"
 	"log"
 	"mime"
+	"net/http"
 	"net/url"
 	"sync"
 	"time"
@@ -16,16 +18,29 @@ import (
 	"github.com/s0rg/crawley/pkg/client"
 	"github.com/s0rg/crawley/pkg/links"
 	"github.com/s0rg/crawley/pkg/path"
+	"github.com/s0rg/crawley/pkg/robots"
 	"github.com/s0rg/crawley/pkg/set"
 )
 
+type crawlClient interface {
+	Get(context.Context, string) (io.ReadCloser, error)
+	Head(context.Context, string) (http.Header, error)
+}
+
+type RobotsAction byte
+
 const (
+	RobotsIgnore  RobotsAction = 0
+	RobotsCrawl   RobotsAction = 1
+	RobotsRespect RobotsAction = 2
+
 	nMID = 64
 	nBIG = nMID * 2
 
-	crawlTimeout = 5 * time.Second
-	contentType  = "Content-Type"
-	contentHTML  = "text/html"
+	crawlTimeout  = 5 * time.Second
+	robotsTimeout = 3 * time.Second
+	contentType   = "Content-Type"
+	contentHTML   = "text/html"
 )
 
 type task struct {
@@ -41,20 +56,31 @@ type Crawler struct {
 	Workers   int
 	Depth     int
 	SkipSSL   bool
+	Brute     bool
 	wg        sync.WaitGroup
 	handleCh  chan string
 	crawlCh   chan *url.URL
 	taskCh    chan task
+	robotsAct RobotsAction
+	robots    *robots.TXT
 }
 
 // New creates Crawler instance.
-func New(ua string, workers, depth int, delay time.Duration, skipSSL bool) (c *Crawler) {
+func New(
+	ua string,
+	workers, depth int,
+	delay time.Duration,
+	skipSSL, brute bool,
+	robotsAction RobotsAction,
+) (c *Crawler) {
 	c = &Crawler{
 		UserAgent: ua,
 		Workers:   workers,
 		Depth:     depth,
 		Delay:     delay,
 		SkipSSL:   skipSSL,
+		Brute:     brute,
+		robotsAct: robotsAction,
 	}
 
 	return c
@@ -76,9 +102,14 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 	defer c.close()
 
 	seen := make(set.U64)
-
 	seen.Add(urlHash(base))
-	c.startCrawlers()
+
+	web := client.New(c.UserAgent, c.Workers, c.SkipSSL)
+	c.initRobots(base, web)
+
+	for i := 0; i < c.Workers; i++ {
+		go c.crawler(web)
+	}
 
 	go c.handler(fn)
 
@@ -113,6 +144,10 @@ func (c *Crawler) crawl(b *url.URL, t *task) (yes bool) {
 		return
 	}
 
+	if c.robotsAct == RobotsRespect && c.robots.Forbidden(t.URI.Path) {
+		return
+	}
+
 	go func(u *url.URL) { c.crawlCh <- u }(t.URI)
 
 	return true
@@ -130,11 +165,63 @@ func (c *Crawler) close() {
 	close(c.taskCh)
 }
 
-func (c *Crawler) startCrawlers() {
-	web := client.New(c.UserAgent, c.Workers, c.SkipSSL)
+func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
+	c.robots = robots.AllowALL()
 
-	for i := 0; i < c.Workers; i++ {
-		go c.crawler(web)
+	if c.robotsAct == RobotsIgnore {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), robotsTimeout)
+	defer cancel()
+
+	body, err := web.Get(ctx, robots.URL(host))
+	if err != nil {
+		var herr client.HTTPError
+
+		if !errors.As(err, &herr) {
+			log.Println("get robots:", err)
+
+			return
+		}
+
+		if herr.Code() == 500 {
+			c.robots = robots.DenyALL()
+		}
+
+		return
+	}
+
+	defer body.Close()
+
+	rbt, err := robots.FromReader(c.UserAgent, body)
+	if err != nil {
+		log.Println("parse robots:", err)
+
+		return
+	}
+
+	c.robots = rbt
+
+	c.crawlRobots(host)
+}
+
+func (c *Crawler) crawlRobots(host *url.URL) {
+	base := *host
+	base.Fragment = ""
+	base.RawQuery = ""
+
+	for _, u := range c.robots.Links() {
+		t := base
+		t.Path = u
+
+		c.linkHandler(atom.A, &t)
+	}
+
+	for _, u := range c.robots.Sitemaps() {
+		if t, e := url.Parse(u); e == nil {
+			c.linkHandler(atom.A, t)
+		}
 	}
 }
 
@@ -149,7 +236,7 @@ func (c *Crawler) linkHandler(a atom.Atom, u *url.URL) {
 	c.taskCh <- t
 }
 
-func (c *Crawler) crawler(web *client.HTTP) {
+func (c *Crawler) crawler(web crawlClient) {
 	defer c.wg.Done()
 
 	for uri := range c.crawlCh {
@@ -172,7 +259,7 @@ func (c *Crawler) crawler(web *client.HTTP) {
 			if body, err := web.Get(ctx, us); err != nil {
 				log.Printf("GET %s error: %v", us, err)
 			} else {
-				links.Extract(uri, body, c.linkHandler)
+				links.Extract(uri, body, c.Brute, c.linkHandler)
 			}
 		}
 
@@ -196,7 +283,11 @@ func canCrawl(a, b *url.URL, d int) (yes bool) {
 	}
 
 	depth, found := path.Depth(a.EscapedPath(), b.EscapedPath())
-	if !found || depth > d {
+	if !found {
+		return
+	}
+
+	if d >= 0 && depth > d {
 		return
 	}
 

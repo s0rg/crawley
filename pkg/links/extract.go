@@ -1,8 +1,11 @@
 package links
 
 import (
+	"bufio"
+	"bytes"
 	"io"
 	"net/url"
+	"strings"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -20,7 +23,7 @@ const (
 type Handler func(a atom.Atom, u *url.URL)
 
 // Extract run `handler` for every link found inside html from `r`, rebasing them to `b` (if need).
-func Extract(b *url.URL, r io.ReadCloser, handler Handler) {
+func Extract(b *url.URL, r io.ReadCloser, brute bool, handler Handler) {
 	defer r.Close()
 
 	var (
@@ -34,6 +37,49 @@ func Extract(b *url.URL, r io.ReadCloser, handler Handler) {
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
 			extractToken(b, tkns.Token(), &key, handler)
+		case html.CommentToken:
+			if brute {
+				extractComment(tkns.Token().Data, handler)
+			}
+		}
+	}
+}
+
+func extractComment(s string, h Handler) {
+	ss := bufio.NewScanner(strings.NewReader(s))
+	ss.Split(bufio.ScanWords)
+
+	const (
+		prefixHTTP  = "http://"
+		prefixHTTPS = "https://"
+		endBytes    = `<(')>"`
+	)
+
+	var (
+		buf, low []byte
+		pos, end int
+	)
+
+	for ss.Scan() {
+		buf = ss.Bytes()
+		low = bytes.ToLower(buf)
+
+		if pos = bytes.Index(low, []byte(prefixHTTP)); pos == -1 {
+			pos = bytes.Index(low, []byte(prefixHTTPS))
+		}
+
+		if pos == -1 {
+			continue
+		}
+
+		if end = bytes.IndexAny(low[pos:], endBytes); end > -1 {
+			buf = buf[:pos+end]
+		}
+
+		if uri := bytes.TrimSpace(buf[pos:]); len(uri) > 0 {
+			if u, err := url.Parse(string(uri)); err == nil && u.Host != "" {
+				h(atom.A, u)
+			}
 		}
 	}
 }

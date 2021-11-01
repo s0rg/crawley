@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"io"
 	"net"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 )
 
 const (
+	idleTimeout = 5 * time.Second
 	dialTimeout = 5 * time.Second
 	reqTimeout  = 10 * time.Second
 )
@@ -31,10 +31,11 @@ func New(ua string, conns int, skipSSL bool) (h *HTTP) {
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: skipSSL,
 		},
+		IdleConnTimeout:     idleTimeout,
 		TLSHandshakeTimeout: dialTimeout,
 		MaxConnsPerHost:     conns,
-		MaxIdleConns:        0,
-		MaxIdleConnsPerHost: 0,
+		MaxIdleConns:        conns,
+		MaxIdleConnsPerHost: conns,
 	}
 
 	client := &http.Client{
@@ -99,7 +100,8 @@ func (h *HTTP) request(req *http.Request) (body io.ReadCloser, hdrs http.Header,
 	}
 
 	dropContents(resp.Body)
-	err = errors.New(resp.Status)
+
+	err = ErrFromResp(resp)
 
 	return
 }

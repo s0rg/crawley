@@ -5,6 +5,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"runtime"
 	"time"
@@ -26,14 +27,34 @@ var (
 	gitHash      string
 	gitVersion   string
 	buildDate    string
-	defaultAgent = "Mozilla/5.0 (compatible; " + appName + "/" + gitVersion + "-" + gitHash + ")"
 	fVersion     = flag.Bool("version", false, "show version")
+	fBrute       = flag.Bool("brute", false, "scan html comments")
 	fSkipSSL     = flag.Bool("skip-ssl", false, "skip ssl verification")
-	fDepth       = flag.Int("depth", 0, "scan depth")
+	fSilent      = flag.Bool("silent", false, "suppress info and error messages in stderr")
+	fDepth       = flag.Int("depth", 0, "scan depth, set to -1 for unlimited")
 	fWorkers     = flag.Int("workers", runtime.NumCPU(), "number of workers")
 	fDelay       = flag.Duration("delay", defaultDelay, "per-request delay")
 	fUA          = flag.String("user-agent", defaultAgent, "user-agent string")
+	fRobots      = flag.String("robots", "ignore", "action for robots.txt: ignore / crawl / respect")
+	defaultAgent = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + gitVersion + "-" + gitHash
 )
+
+func actionFromString(s string) (a crawler.RobotsAction, err error) {
+	switch s {
+	case "ignore":
+		a = crawler.RobotsIgnore
+	case "crawl":
+		a = crawler.RobotsCrawl
+	case "respect":
+		a = crawler.RobotsRespect
+	default:
+		err = fmt.Errorf("unknown: '%s'", s)
+
+		return
+	}
+
+	return a, nil
+}
 
 func sanitize(workers, depth int, delay time.Duration) (wrk, dep int, dur time.Duration) {
 	wrk = minWorkers
@@ -44,8 +65,10 @@ func sanitize(workers, depth int, delay time.Duration) (wrk, dep int, dur time.D
 		}
 	}
 
-	if dep = minDepth; dep < depth {
-		dep = depth
+	if dep = depth; dep != -1 {
+		if dep = minDepth; dep < depth {
+			dep = depth
+		}
 	}
 
 	if dur = minDelay; dur < delay {
@@ -60,12 +83,17 @@ func printer(s string) {
 }
 
 func crawl(
-	uri, ua string,
+	uri, ua, action string,
 	workers, depth int,
 	delay time.Duration,
-	skipSSL bool,
+	skipSSL, brute bool,
 ) error {
-	c := crawler.New(ua, workers, depth, delay, skipSSL)
+	act, err := actionFromString(action)
+	if err != nil {
+		return fmt.Errorf("action: %w", err)
+	}
+
+	c := crawler.New(ua, workers, depth, delay, skipSSL, brute, act)
 
 	log.Printf("%s started for: %s", appName, uri)
 	log.Printf("workers: %d depth: %d delay: %s", workers, depth, delay)
@@ -94,9 +122,22 @@ func main() {
 		return
 	}
 
+	if *fSilent {
+		log.SetOutput(io.Discard)
+	}
+
 	wnum, depth, delay := sanitize(*fWorkers, *fDepth, *fDelay)
 
-	if err := crawl(flag.Arg(0), *fUA, wnum, depth, delay, *fSkipSSL); err != nil {
+	if err := crawl(
+		flag.Arg(0),
+		*fUA,
+		*fRobots,
+		wnum,
+		depth,
+		delay,
+		*fSkipSSL,
+		*fBrute,
+	); err != nil {
 		log.Fatal("crawler:", err)
 	}
 }

@@ -1,6 +1,8 @@
 package set
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_U64(t *testing.T) {
 	t.Parallel()

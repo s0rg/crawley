@@ -4,12 +4,12 @@ package set
 type U64 map[uint64]stub
 
 // Add try add value to set, returns true on success.
-func (s U64) Add(v uint64) (ok bool) {
-	if _, ok = s[v]; ok {
+func (us U64) Add(v uint64) (ok bool) {
+	if _, ok = us[v]; ok {
 		return false
 	}
 
-	s[v] = stub{}
+	us[v] = stub{}
 
 	return true
 }
