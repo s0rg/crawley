@@ -26,6 +26,7 @@ Crawls web pages and prints any link it can find.
 - [binaries](https://github.com/s0rg/crawley/releases) for Linux, macOS and Windows
 
 # usage
+
 ```
 crawley [flags] url
 

@@ -20,7 +20,7 @@ const (
 type Handler func(a atom.Atom, u *url.URL)
 
 // Extract run `handler` for every link found inside html from `r`, rebasing them to `b` (if need).
-func Extract(b *url.URL, r io.ReadCloser, handler Handler) {
+func Extract(b *url.URL, r io.ReadCloser, brute bool, handler Handler) {
 	defer r.Close()
 
 	var (
@@ -34,8 +34,16 @@ func Extract(b *url.URL, r io.ReadCloser, handler Handler) {
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
 			extractToken(b, tkns.Token(), &key, handler)
+		case html.CommentToken:
+			if brute {
+				extractComment(b, tkns.Token(), handler)
+			}
 		}
 	}
+}
+
+func extractComment(b *url.URL, t html.Token, h Handler) {
+	// TODO: implement
 }
 
 func extractToken(b *url.URL, t html.Token, k *string, h Handler) {

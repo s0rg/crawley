@@ -56,6 +56,7 @@ type Crawler struct {
 	Workers   int
 	Depth     int
 	SkipSSL   bool
+	Brute     bool
 	wg        sync.WaitGroup
 	handleCh  chan string
 	crawlCh   chan *url.URL
@@ -69,7 +70,7 @@ func New(
 	ua string,
 	workers, depth int,
 	delay time.Duration,
-	skipSSL bool,
+	skipSSL, brute bool,
 	robotsAction RobotsAction,
 ) (c *Crawler) {
 	c = &Crawler{
@@ -78,6 +79,7 @@ func New(
 		Depth:     depth,
 		Delay:     delay,
 		SkipSSL:   skipSSL,
+		Brute:     brute,
 		robotsAct: robotsAction,
 	}
 
@@ -257,7 +259,7 @@ func (c *Crawler) crawler(web crawlClient) {
 			if body, err := web.Get(ctx, us); err != nil {
 				log.Printf("GET %s error: %v", us, err)
 			} else {
-				links.Extract(uri, body, c.linkHandler)
+				links.Extract(uri, body, c.Brute, c.linkHandler)
 			}
 		}
 

@@ -121,7 +121,7 @@ func Test_Crawler(t *testing.T) {
 		results = append(results, s)
 	}
 
-	c := New("", 1, 1, time.Millisecond*50, false, RobotsIgnore)
+	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsIgnore)
 
 	if err := c.Run(ts.URL, handler); err != nil {
 		t.Errorf("run: %v", err)
@@ -156,7 +156,7 @@ func Test_Crawler(t *testing.T) {
 func Test_CrawlerBadLink(t *testing.T) {
 	t.Parallel()
 
-	c := New("", 1, 1, time.Millisecond*50, false, RobotsIgnore)
+	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsIgnore)
 
 	if err := c.Run("%", nil); err == nil {
 		t.Error("run - no error")
@@ -172,7 +172,7 @@ func Test_CrawlerBadHead(t *testing.T) {
 
 	defer ts.Close()
 
-	c := New("", 1, 1, time.Millisecond*50, false, RobotsIgnore)
+	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsIgnore)
 
 	if err := c.Run(ts.URL, nil); err != nil {
 		t.Error("run - error")
@@ -194,7 +194,7 @@ func Test_CrawlerBadGet(t *testing.T) {
 
 	defer ts.Close()
 
-	c := New("", 1, 1, time.Millisecond*50, false, RobotsIgnore)
+	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsIgnore)
 
 	if err := c.Run(ts.URL, nil); err != nil {
 		t.Error("run - error")
@@ -269,7 +269,7 @@ sitemap: http://other.host/sitemap.xml`
 		resA.Add(s)
 	}
 
-	cA := New("a", 1, 1, time.Millisecond*50, false, RobotsRespect)
+	cA := New("a", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
 
 	if err := cA.Run(ts.URL, handlerA); err != nil {
 		t.Error("run A - error:", err)
@@ -303,7 +303,7 @@ sitemap: http://other.host/sitemap.xml`
 		resB.Add(s)
 	}
 
-	cB := New("b", 1, 1, time.Millisecond*50, false, RobotsRespect)
+	cB := New("b", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
 
 	if err := cB.Run(ts.URL, handlerB); err != nil {
 		t.Error("run B - error:", err)
@@ -351,7 +351,7 @@ func Test_CrawlerRobots500(t *testing.T) {
 		res = append(res, s)
 	}
 
-	c := New("", 1, 1, time.Millisecond*50, false, RobotsRespect)
+	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
 
 	if err := c.Run(ts.URL, handler); err != nil {
 		t.Error("run error:", err)
@@ -387,7 +387,7 @@ func Test_CrawlerRobots400(t *testing.T) {
 		res = append(res, s)
 	}
 
-	c := New("", 1, 1, time.Millisecond*50, false, RobotsRespect)
+	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
 
 	if err := c.Run(ts.URL, handler); err != nil {
 		t.Error("run error:", err)
@@ -430,7 +430,7 @@ func Test_CrawlerRobotsRequestErr(t *testing.T) {
 		base, _ = url.Parse("http://test/")
 		genErr  = errors.New("generic error")
 		tc      = testClient{err: genErr}
-		c       = New("", 1, 1, time.Millisecond*50, false, RobotsRespect)
+		c       = New("", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
 	)
 
 	c.initRobots(base, &tc)
@@ -447,7 +447,7 @@ func Test_CrawlerRobotsBodytErr(t *testing.T) {
 		base, _ = url.Parse("http://test/")
 		genErr  = errors.New("generic error")
 		tc      = testClient{err: nil, bodyIO: io.NopCloser(&errReader{err: genErr})}
-		c       = New("", 1, 1, time.Millisecond*50, false, RobotsRespect)
+		c       = New("", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
 	)
 
 	c.initRobots(base, &tc)

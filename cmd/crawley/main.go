@@ -28,6 +28,7 @@ var (
 	buildDate    string
 	defaultAgent = "Mozilla/5.0 (compatible; Win64; x64) Mr. " + appName + "/" + gitVersion + "-" + gitHash
 	fVersion     = flag.Bool("version", false, "show version")
+	fBrute       = flag.Bool("brute", false, "scan html comments")
 	fSkipSSL     = flag.Bool("skip-ssl", false, "skip ssl verification")
 	fDepth       = flag.Int("depth", 0, "scan depth, set to -1 for unlimited")
 	fWorkers     = flag.Int("workers", runtime.NumCPU(), "number of workers")
@@ -83,14 +84,14 @@ func crawl(
 	uri, ua, action string,
 	workers, depth int,
 	delay time.Duration,
-	skipSSL bool,
+	skipSSL, brute bool,
 ) error {
 	act, err := actionFromString(action)
 	if err != nil {
 		return fmt.Errorf("action: %w", err)
 	}
 
-	c := crawler.New(ua, workers, depth, delay, skipSSL, act)
+	c := crawler.New(ua, workers, depth, delay, skipSSL, brute, act)
 
 	log.Printf("%s started for: %s", appName, uri)
 	log.Printf("workers: %d depth: %d delay: %s", workers, depth, delay)
@@ -121,7 +122,16 @@ func main() {
 
 	wnum, depth, delay := sanitize(*fWorkers, *fDepth, *fDelay)
 
-	if err := crawl(flag.Arg(0), *fUA, *fRobots, wnum, depth, delay, *fSkipSSL); err != nil {
+	if err := crawl(
+		flag.Arg(0),
+		*fUA,
+		*fRobots,
+		wnum,
+		depth,
+		delay,
+		*fSkipSSL,
+		*fBrute,
+	); err != nil {
 		log.Fatal("crawler:", err)
 	}
 }
