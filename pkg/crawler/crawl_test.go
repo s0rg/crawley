@@ -357,6 +357,10 @@ func Test_CrawlerRobots500(t *testing.T) {
 	if len(res) != 0 {
 		t.Error("unexpected len")
 	}
+
+	if !c.robots.Forbidden("/some") {
+		t.Error("not forbidden")
+	}
 }
 
 func Test_CrawlerRobots400(t *testing.T) {
@@ -388,6 +392,10 @@ func Test_CrawlerRobots400(t *testing.T) {
 
 	if len(res) != 0 {
 		t.Error("unexpected len")
+	}
+
+	if c.robots.Forbidden("/some") {
+		t.Error("forbidden")
 	}
 }
 
