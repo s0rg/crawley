@@ -24,7 +24,7 @@ Crawls web pages and prints any link it can find.
 
 # installation
 
-- [binaries](https://github.com/s0rg/crawley/releases) for Linux, FreeBSD, macOS and Windows
+- [binaries](https://github.com/s0rg/crawley/releases) for Linux, macOS and Windows
 
 # usage
 
