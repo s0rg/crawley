@@ -41,6 +41,8 @@ possible flags:
   	scan depth, set to -1 for unlimited
 -robots string
   	action for robots.txt: ignore/crawl/respect (default "ignore")
+-silent
+    suppress info and error messages in stderr
 -skip-ssl
   	skip ssl verification
 -user-agent string
