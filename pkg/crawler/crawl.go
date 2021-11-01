@@ -27,11 +27,15 @@ type crawlClient interface {
 	Head(context.Context, string) (http.Header, error)
 }
 
+// RobotsAction is a action for robots.txt.
 type RobotsAction byte
 
 const (
-	RobotsIgnore  RobotsAction = 0
-	RobotsCrawl   RobotsAction = 1
+	// RobotsIgnore ignores robots.txt completly.
+	RobotsIgnore RobotsAction = 0
+	// RobotsCrawl crawls urls from robots.txt, ignoring its rules.
+	RobotsCrawl RobotsAction = 1
+	// RobotsRespect same as above, but respects given rules.
 	RobotsRespect RobotsAction = 2
 
 	nMID = 64

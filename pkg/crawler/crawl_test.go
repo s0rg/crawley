@@ -279,20 +279,12 @@ sitemap: http://other.host/sitemap.xml`
 		t.Fatal("unexpected len for A")
 	}
 
-	if !resA.Has(resSitemap) {
-		t.Error("no sitemap for A")
+	if !resA.Has(resSitemap) || !resA.Has(resHostB) {
+		t.Error("miss something in A")
 	}
 
-	if !resA.Has(resHostB) {
-		t.Error("no hostB for A")
-	}
-
-	if resA.Has(resHostA) {
-		t.Error("hostA for A")
-	}
-
-	if resA.Has(resHostC) {
-		t.Error("hostC for A")
+	if resA.Has(resHostA) || resA.Has(resHostC) {
+		t.Error("unexpected elements in A")
 	}
 
 	// case B
@@ -313,20 +305,12 @@ sitemap: http://other.host/sitemap.xml`
 		t.Fatal("unexpected len for B")
 	}
 
-	if !resB.Has(resSitemap) {
-		t.Error("no sitemap for B")
-	}
-
 	if resB.Has(resHostB) {
-		t.Error("hostB for B")
+		t.Error("unexpected elements in B")
 	}
 
-	if !resB.Has(resHostA) {
-		t.Error("no hostA for B")
-	}
-
-	if !resB.Has(resHostC) {
-		t.Error("no hostC for B")
+	if !resB.Has(resSitemap) || !resB.Has(resHostA) || !resB.Has(resHostC) {
+		t.Error("miss something in B")
 	}
 }
 

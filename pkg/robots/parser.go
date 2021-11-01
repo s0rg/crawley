@@ -41,21 +41,16 @@ func extractToken(b []byte) (k tokenKind, v string) {
 		b = b[:pos] // cut-off comments (if any)
 	}
 
-	if b = bytes.TrimSpace(b); len(b) == 0 {
-		return
-	}
+	b = bytes.TrimSpace(b)
 
 	if pos = bytes.IndexByte(b, tokenSep); pos == -1 {
 		return
 	}
 
-	var key []byte
-	if key = bytes.TrimSpace(b[:pos]); len(key) == 0 {
-		return
-	}
+	key := bytes.TrimSpace(b[:pos])
+	kind := parseTokenKind(key)
 
-	var kind tokenKind
-	if kind = parseTokenKind(key); kind == kindNone {
+	if kind == kindNone {
 		return
 	}
 

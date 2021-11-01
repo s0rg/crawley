@@ -9,6 +9,7 @@ import (
 
 const path = "/robots.txt"
 
+// TXT holds parsed robots.txt contents and/or access mode.
 type TXT struct {
 	links    set.String
 	deny     set.String
@@ -16,14 +17,17 @@ type TXT struct {
 	mode     accessMode
 }
 
+// AllowALL returns empty TXT that allows all.
 func AllowALL() *TXT {
 	return &TXT{}
 }
 
+// DenyALL returns empty TXT that denies all.
 func DenyALL() *TXT {
 	return &TXT{mode: denyAll}
 }
 
+// FromReader parse robots.txt body from given reader.
 func FromReader(ua string, r io.Reader) (t *TXT, err error) {
 	t = &TXT{
 		mode:     gotRules,
@@ -39,6 +43,7 @@ func FromReader(ua string, r io.Reader) (t *TXT, err error) {
 	return t, nil
 }
 
+// URL construct robots.txt url for given host.
 func URL(u *url.URL) (rv string) {
 	var t url.URL
 
@@ -49,6 +54,7 @@ func URL(u *url.URL) (rv string) {
 	return t.String()
 }
 
+// Forbidden checks if path is forbidden by given rules and mode.
 func (t *TXT) Forbidden(path string) (yes bool) {
 	switch t.mode {
 	case gotRules:
@@ -61,10 +67,12 @@ func (t *TXT) Forbidden(path string) (yes bool) {
 	return yes
 }
 
+// Sitemaps returns list of parsed sitemaps urls.
 func (t *TXT) Sitemaps() (rv []string) {
 	return t.sitemaps.List()
 }
 
+// Links returns list of parsed rules urls (both allowed and denided, for all useragents).
 func (t *TXT) Links() (rv []string) {
 	return t.links.List()
 }
