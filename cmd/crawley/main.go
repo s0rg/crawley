@@ -5,6 +5,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"runtime"
 	"time"
@@ -26,15 +27,16 @@ var (
 	gitHash      string
 	gitVersion   string
 	buildDate    string
-	defaultAgent = "Mozilla/5.0 (compatible; Win64; x64) Mr. " + appName + "/" + gitVersion + "-" + gitHash
 	fVersion     = flag.Bool("version", false, "show version")
 	fBrute       = flag.Bool("brute", false, "scan html comments")
 	fSkipSSL     = flag.Bool("skip-ssl", false, "skip ssl verification")
+	fSilent      = flag.Bool("silent", false, "suppress info and error messages in stderr")
 	fDepth       = flag.Int("depth", 0, "scan depth, set to -1 for unlimited")
 	fWorkers     = flag.Int("workers", runtime.NumCPU(), "number of workers")
 	fDelay       = flag.Duration("delay", defaultDelay, "per-request delay")
 	fUA          = flag.String("user-agent", defaultAgent, "user-agent string")
-	fRobots      = flag.String("robots", "ignore", "action for robots.txt: ignore/crawl/respect")
+	fRobots      = flag.String("robots", "ignore", "action for robots.txt: ignore / crawl / respect")
+	defaultAgent = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + gitVersion + "-" + gitHash
 )
 
 func actionFromString(s string) (a crawler.RobotsAction, err error) {
@@ -118,6 +120,10 @@ func main() {
 		flag.Usage()
 
 		return
+	}
+
+	if *fSilent {
+		log.SetOutput(io.Discard)
 	}
 
 	wnum, depth, delay := sanitize(*fWorkers, *fDepth, *fDelay)

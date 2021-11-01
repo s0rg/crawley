@@ -219,6 +219,8 @@ loremipsumhTTp://foo fdfdfs HttPs://bar
        http://
  https://baz  http://boo"`
 
+	t.Parallel()
+
 	res := []string{}
 	want := []string{"foo", "bar", "baz", "boo"}
 
