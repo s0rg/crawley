@@ -12,14 +12,14 @@
 
 Crawls web pages and prints any link it can find.
 
-Scan depth (limited by starting host and path, by default - 0) can be configured.
-
 # features
 
 - fast SAX-parser (powered by `golang.org/x/net/html`)
 - small (<1000 SLOC), idiomatic, 100% test covered codebase
 - grabs most of useful resources links (pics, videos, audios, etc...)
 - found links are streamed to stdout and guranteed to be unique
+- scan depth (limited by starting host and path, by default - 0) can be configured
+- can crawl `robots.txt` rules and sitemaps
 
 # installation
 
@@ -32,15 +32,17 @@ crawley [flags] url
 possible flags:
 
 -delay duration
-    per-request delay
+  	per-request delay (default 250ms)
 -depth int
-    scan depth
+  	scan depth, set to -1 for unlimited
+-robots string
+  	action for robots.txt: ignore/crawl/respect (default "ignore")
 -skip-ssl
-    skip ssl verification
+  	skip ssl verification
 -user-agent string
-    user-agent string
+  	user-agent string
 -version
-    show version
+  	show version
 -workers int
-    number of workers
+  	number of workers
 ```

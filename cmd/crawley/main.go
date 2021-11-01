@@ -29,7 +29,7 @@ var (
 	defaultAgent = "Mozilla/5.0 (compatible; Win64; x64) Mr. " + appName + "/" + gitVersion + "-" + gitHash
 	fVersion     = flag.Bool("version", false, "show version")
 	fSkipSSL     = flag.Bool("skip-ssl", false, "skip ssl verification")
-	fDepth       = flag.Int("depth", 0, "scan depth")
+	fDepth       = flag.Int("depth", 0, "scan depth, set to -1 for unlimited")
 	fWorkers     = flag.Int("workers", runtime.NumCPU(), "number of workers")
 	fDelay       = flag.Duration("delay", defaultDelay, "per-request delay")
 	fUA          = flag.String("user-agent", defaultAgent, "user-agent string")
@@ -62,8 +62,10 @@ func sanitize(workers, depth int, delay time.Duration) (wrk, dep int, dur time.D
 		}
 	}
 
-	if dep = minDepth; dep < depth {
-		dep = depth
+	if dep = depth; dep != -1 {
+		if dep = minDepth; dep < depth {
+			dep = depth
+		}
 	}
 
 	if dur = minDelay; dur < delay {

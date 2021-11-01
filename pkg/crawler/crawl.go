@@ -281,7 +281,11 @@ func canCrawl(a, b *url.URL, d int) (yes bool) {
 	}
 
 	depth, found := path.Depth(a.EscapedPath(), b.EscapedPath())
-	if !found || depth > d {
+	if !found {
+		return
+	}
+
+	if d >= 0 && depth > d {
 		return
 	}
 

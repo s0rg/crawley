@@ -44,6 +44,9 @@ func Test_canCrawl(t *testing.T) {
 		{"url2-2", args{b: base, u: url2, d: 2}, true},
 		{"url2-3", args{b: base, u: url2, d: 3}, true},
 		{"badh-1", args{b: base, u: badh, d: 1}, false},
+		{"url2-0-1", args{b: base, u: url0, d: -1}, false},
+		{"url2-1-1", args{b: base, u: url1, d: -1}, true},
+		{"url2-2-1", args{b: base, u: url2, d: -1}, true},
 	}
 
 	for _, tt := range tests {
