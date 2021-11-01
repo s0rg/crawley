@@ -14,16 +14,17 @@ Crawls web pages and prints any link it can find.
 
 # features
 
-- fast SAX-parser (powered by `golang.org/x/net/html`)
+- fast SAX-parser for html (powered by `golang.org/x/net/html`)
 - small (<1000 SLOC), idiomatic, 100% test covered codebase
-- grabs most of useful resources links (pics, videos, audios, etc...)
-- found links are streamed to stdout and guranteed to be unique
+- grabs most of useful resources urls (pics, videos, audios, etc...)
+- found urls are streamed to stdout and guranteed to be unique
 - scan depth (limited by starting host and path, by default - 0) can be configured
 - can crawl `robots.txt` rules and sitemaps
+- `brute` mode - scan html comments for urls (this can lead to bogus results)
 
 # installation
 
-- [binaries](https://github.com/s0rg/crawley/releases) for Linux, macOS and Windows
+- [binaries](https://github.com/s0rg/crawley/releases) for Linux, FreeBSD, macOS and Windows
 
 # usage
 
@@ -32,6 +33,8 @@ crawley [flags] url
 
 possible flags:
 
+-brute
+    scan html comments
 -delay duration
   	per-request delay (default 250ms)
 -depth int
