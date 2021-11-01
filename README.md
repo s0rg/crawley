@@ -36,19 +36,19 @@ possible flags:
 -brute
     scan html comments
 -delay duration
-  	per-request delay (default 250ms)
+    per-request delay (default 250ms)
 -depth int
-  	scan depth, set to -1 for unlimited
+    scan depth, set to -1 for unlimited
 -robots string
-  	action for robots.txt: ignore/crawl/respect (default "ignore")
+    action for robots.txt: ignore/crawl/respect (default "ignore")
 -silent
     suppress info and error messages in stderr
 -skip-ssl
-  	skip ssl verification
+    skip ssl verification
 -user-agent string
-  	user-agent string
+    user-agent string
 -version
-  	show version
+    show version
 -workers int
-  	number of workers
+    number of workers
 ```
