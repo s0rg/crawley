@@ -17,6 +17,7 @@ linters:
     - exhaustive
     - forbidigo
     - goerr113
+    - gofumpt
     - gomnd
     - gci
     # deprecated :(

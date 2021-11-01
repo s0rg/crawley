@@ -11,6 +11,7 @@ func (ss String) Add(v string) {
 // Has checks if value is already present in set.
 func (ss String) Has(v string) (ok bool) {
 	_, ok = ss[v]
+
 	return
 }
 

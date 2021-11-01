@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"mime"
+	"net/http"
 	"net/url"
 	"sync"
 	"time"
@@ -20,6 +21,11 @@ import (
 	"github.com/s0rg/crawley/pkg/robots"
 	"github.com/s0rg/crawley/pkg/set"
 )
+
+type crawlClient interface {
+	Get(context.Context, string) (io.ReadCloser, error)
+	Head(context.Context, string) (http.Header, error)
+}
 
 type RobotsAction byte
 
@@ -157,7 +163,7 @@ func (c *Crawler) close() {
 	close(c.taskCh)
 }
 
-func (c *Crawler) initRobots(host *url.URL, web *client.HTTP) {
+func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
 	c.robots = robots.AllowALL()
 
 	if c.robotsAct == RobotsIgnore {
@@ -228,7 +234,7 @@ func (c *Crawler) linkHandler(a atom.Atom, u *url.URL) {
 	c.taskCh <- t
 }
 
-func (c *Crawler) crawler(web *client.HTTP) {
+func (c *Crawler) crawler(web crawlClient) {
 	defer c.wg.Done()
 
 	for uri := range c.crawlCh {

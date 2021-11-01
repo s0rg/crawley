@@ -14,9 +14,9 @@ func ErrFromResp(resp *http.Response) (err error) {
 
 	// reduce possible statuses to only two - 400 or 500
 	switch {
-	case code > http.StatusInternalServerError:
+	case code >= http.StatusInternalServerError:
 		code = http.StatusInternalServerError
-	case code > http.StatusBadRequest:
+	case code >= http.StatusBadRequest:
 		code = http.StatusBadRequest
 	}
 

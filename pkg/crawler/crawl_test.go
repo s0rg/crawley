@@ -1,6 +1,8 @@
 package crawler
 
 import (
+	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +13,8 @@ import (
 
 	"github.com/s0rg/crawley/pkg/set"
 )
+
+const robotsEP = "/robots.txt"
 
 func Test_canCrawl(t *testing.T) {
 	t.Parallel()
@@ -217,7 +221,7 @@ sitemap: http://other.host/sitemap.xml`
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.RequestURI {
-		case "/robots.txt":
+		case robotsEP:
 			_, _ = io.WriteString(w, robot)
 
 		case "/a":
@@ -324,9 +328,120 @@ sitemap: http://other.host/sitemap.xml`
 }
 
 func Test_CrawlerRobots500(t *testing.T) {
+	t.Parallel()
 
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.RequestURI {
+		case robotsEP:
+			w.WriteHeader(http.StatusInternalServerError)
+
+		default:
+			_, _ = io.WriteString(w, "")
+		}
+	}))
+
+	defer ts.Close()
+
+	res := []string{}
+
+	handler := func(s string) {
+		res = append(res, s)
+	}
+
+	c := New("", 1, 1, time.Millisecond*50, false, RobotsRespect)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Error("run error:", err)
+	}
+
+	if len(res) != 0 {
+		t.Error("unexpected len")
+	}
 }
 
 func Test_CrawlerRobots400(t *testing.T) {
+	t.Parallel()
 
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.RequestURI {
+		case robotsEP:
+			w.WriteHeader(http.StatusForbidden)
+
+		default:
+			_, _ = io.WriteString(w, "")
+		}
+	}))
+
+	defer ts.Close()
+
+	res := []string{}
+
+	handler := func(s string) {
+		res = append(res, s)
+	}
+
+	c := New("", 1, 1, time.Millisecond*50, false, RobotsRespect)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Error("run error:", err)
+	}
+
+	if len(res) != 0 {
+		t.Error("unexpected len")
+	}
+}
+
+type testClient struct {
+	err    error
+	bodyIO io.ReadCloser
+}
+
+func (tc *testClient) Get(_ context.Context, _ string) (body io.ReadCloser, err error) {
+	return tc.bodyIO, tc.err
+}
+
+func (tc *testClient) Head(_ context.Context, _ string) (h http.Header, err error) {
+	return
+}
+
+type errReader struct {
+	err error
+}
+
+func (er *errReader) Read(_ []byte) (n int, err error) {
+	return 0, er.err
+}
+
+func Test_CrawlerRobotsRequestErr(t *testing.T) {
+	t.Parallel()
+
+	var (
+		base, _ = url.Parse("http://test/")
+		genErr  = errors.New("generic error")
+		tc      = testClient{err: genErr}
+		c       = New("", 1, 1, time.Millisecond*50, false, RobotsRespect)
+	)
+
+	c.initRobots(base, &tc)
+
+	if c.robots.Forbidden("/some") {
+		t.Error("forbidden")
+	}
+}
+
+func Test_CrawlerRobotsBodytErr(t *testing.T) {
+	t.Parallel()
+
+	var (
+		base, _ = url.Parse("http://test/")
+		genErr  = errors.New("generic error")
+		tc      = testClient{err: nil, bodyIO: io.NopCloser(&errReader{err: genErr})}
+		c       = New("", 1, 1, time.Millisecond*50, false, RobotsRespect)
+	)
+
+	c.initRobots(base, &tc)
+
+	if c.robots.Forbidden("/some") {
+		t.Error("forbidden")
+	}
 }
