@@ -33,17 +33,17 @@ var (
 	fWorkers     = flag.Int("workers", runtime.NumCPU(), "number of workers")
 	fDelay       = flag.Duration("delay", defaultDelay, "per-request delay")
 	fUA          = flag.String("user-agent", defaultAgent, "user-agent string")
-	fRobots      = flag.String("robots", "ignore", "action for robots.txt / sitemaps: ignore/fetch/abide")
+	fRobots      = flag.String("robots", "ignore", "action for robots.txt: ignore/crawl/respect")
 )
 
 func actionFromString(s string) (a crawler.RobotsAction, err error) {
 	switch s {
 	case "ignore":
 		a = crawler.RobotsIgnore
-	case "fetch":
-		a = crawler.RobotsFetch
-	case "abide":
-		a = crawler.RobotsAbide
+	case "crawl":
+		a = crawler.RobotsCrawl
+	case "respect":
+		a = crawler.RobotsRespect
 	default:
 		err = fmt.Errorf("unknown: '%s'", s)
 

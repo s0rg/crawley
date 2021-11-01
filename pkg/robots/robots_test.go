@@ -3,6 +3,7 @@ package robots
 import (
 	"bytes"
 	"errors"
+	"net/url"
 	"testing"
 )
 
@@ -22,6 +23,14 @@ disallow: /g
 user-agent: *
 disallow:
 unknown: ha-ha`
+
+type errReader struct {
+	err error
+}
+
+func (er *errReader) Read(_ []byte) (n int, err error) {
+	return 0, er.err
+}
 
 func Benchmark_FromReader(b *testing.B) {
 	buf := bytes.NewBufferString(rawRobots)
@@ -82,14 +91,6 @@ func Test_NewDenyAll(t *testing.T) {
 	}
 }
 
-type errReader struct {
-	err error
-}
-
-func (er *errReader) Read(_ []byte) (n int, err error) {
-	return 0, er.err
-}
-
 func Test_ErrReader(t *testing.T) {
 	var (
 		genErr = errors.New("generic error")
@@ -105,5 +106,28 @@ func Test_ErrReader(t *testing.T) {
 
 	if !errors.Is(err, genErr) {
 		t.Error("bad error")
+	}
+}
+
+func Test_URL(t *testing.T) {
+	testCases := []string{
+		"http://example.com/",
+		"http://example.com/some/path",
+		"http://example.com/some/path?with=query",
+	}
+
+	const wantURL = "http://example.com/robots.txt"
+
+	t.Parallel()
+
+	for _, c := range testCases {
+		u, err := url.Parse(c)
+		if err != nil {
+			t.Fatalf("cannot parse: %s: %v", c, err)
+		}
+
+		if URL(u) != wantURL {
+			t.Errorf("fail for: %s", c)
+		}
 	}
 }

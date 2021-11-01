@@ -2,6 +2,7 @@ package crawler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"hash/fnv"
 	"io"
@@ -23,16 +24,17 @@ import (
 type RobotsAction byte
 
 const (
-	RobotsIgnore RobotsAction = 0
-	RobotsFetch  RobotsAction = 1
-	RobotsAbide  RobotsAction = 2
+	RobotsIgnore  RobotsAction = 0
+	RobotsCrawl   RobotsAction = 1
+	RobotsRespect RobotsAction = 2
 
 	nMID = 64
 	nBIG = nMID * 2
 
-	crawlTimeout = 5 * time.Second
-	contentType  = "Content-Type"
-	contentHTML  = "text/html"
+	crawlTimeout  = 5 * time.Second
+	robotsTimeout = 3 * time.Second
+	contentType   = "Content-Type"
+	contentHTML   = "text/html"
 )
 
 type task struct {
@@ -91,11 +93,10 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 
 	defer c.close()
 
-	web := client.New(c.UserAgent, c.Workers, c.SkipSSL)
-
 	seen := make(set.U64)
 	seen.Add(urlHash(base))
 
+	web := client.New(c.UserAgent, c.Workers, c.SkipSSL)
 	c.initRobots(base, web)
 
 	for i := 0; i < c.Workers; i++ {
@@ -135,7 +136,7 @@ func (c *Crawler) crawl(b *url.URL, t *task) (yes bool) {
 		return
 	}
 
-	if c.robotsAct == RobotsAbide && c.robots.Forbidden(t.URI.Path) {
+	if c.robotsAct == RobotsRespect && c.robots.Forbidden(t.URI.Path) {
 		return
 	}
 
@@ -156,18 +157,64 @@ func (c *Crawler) close() {
 	close(c.taskCh)
 }
 
-func (c *Crawler) initRobots(uri *url.URL, web *client.HTTP) {
+func (c *Crawler) initRobots(host *url.URL, web *client.HTTP) {
+	c.robots = robots.AllowALL()
+
 	if c.robotsAct == RobotsIgnore {
-		c.robots = robots.AllowALL()
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), robotsTimeout)
+	defer cancel()
+
+	body, err := web.Get(ctx, robots.URL(host))
+	if err != nil {
+		var herr client.HTTPError
+
+		if !errors.As(err, &herr) {
+			log.Println("get robots:", err)
+
+			return
+		}
+
+		if herr.Code() == 500 {
+			c.robots = robots.DenyALL()
+		}
 
 		return
 	}
 
-	// 1. construct url
-	// 2. fetch body + response code
-	// 3. parse
+	defer body.Close()
 
-	return
+	rbt, err := robots.FromReader(c.UserAgent, body)
+	if err != nil {
+		log.Println("parse robots:", err)
+
+		return
+	}
+
+	c.robots = rbt
+
+	c.crawlRobots(host)
+}
+
+func (c *Crawler) crawlRobots(host *url.URL) {
+	base := *host
+	base.Fragment = ""
+	base.RawQuery = ""
+
+	for _, u := range c.robots.Links() {
+		t := base
+		t.Path = u
+
+		c.linkHandler(atom.A, &t)
+	}
+
+	for _, u := range c.robots.Sitemaps() {
+		if t, e := url.Parse(u); e == nil {
+			c.linkHandler(atom.A, t)
+		}
+	}
 }
 
 func (c *Crawler) linkHandler(a atom.Atom, u *url.URL) {

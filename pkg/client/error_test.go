@@ -12,6 +12,8 @@ func Test_HTTPError(t *testing.T) {
 		msg  = "infernal server error"
 	)
 
+	t.Parallel()
+
 	e := HTTPError{code: code, msg: msg}
 
 	if e.Error() != msg {
@@ -28,6 +30,8 @@ func Test_HTTPErrorFromResponse(t *testing.T) {
 		resp http.Response
 		herr HTTPError
 	)
+
+	t.Parallel()
 
 	resp.Status = "test"
 	resp.StatusCode = http.StatusBadGateway

@@ -2,9 +2,12 @@ package robots
 
 import (
 	"io"
+	"net/url"
 
 	"github.com/s0rg/crawley/pkg/set"
 )
+
+const path = "/robots.txt"
 
 type TXT struct {
 	links    set.String
@@ -34,6 +37,16 @@ func FromReader(ua string, r io.Reader) (t *TXT, err error) {
 	}
 
 	return t, nil
+}
+
+func URL(u *url.URL) (rv string) {
+	var t url.URL
+
+	t.Scheme = u.Scheme
+	t.Host = u.Host
+	t.Path = path
+
+	return t.String()
 }
 
 func (t *TXT) Forbidden(path string) (yes bool) {

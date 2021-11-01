@@ -12,7 +12,7 @@ type HTTPError struct {
 func ErrFromResp(resp *http.Response) (err error) {
 	code := resp.StatusCode
 
-	// reduce possible statuses to pair - 400 or 500
+	// reduce possible statuses to only two - 400 or 500
 	switch {
 	case code > http.StatusInternalServerError:
 		code = http.StatusInternalServerError

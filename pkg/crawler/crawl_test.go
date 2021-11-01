@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/s0rg/crawley/pkg/set"
 )
 
 func Test_canCrawl(t *testing.T) {
@@ -190,4 +192,141 @@ func Test_CrawlerBadGet(t *testing.T) {
 	if err := c.Run(ts.URL, nil); err != nil {
 		t.Error("run - error")
 	}
+}
+
+func Test_CrawlerRobots(t *testing.T) {
+	t.Parallel()
+
+	const (
+		body  = `<html><a href="/a">a</a><a href="/b">b</a><a href="/c">c</a></html>`
+		bodyA = `<html><a href="http://a">a</a></html>`
+		bodyB = `<html><a href="http://b">b</a></html>`
+		bodyC = `<html><a href="http://c">c</a></html>`
+		robot = `useragent: a
+disallow: /a
+disallow: /c
+user-agent: b
+disallow: /b
+sitemap: http://other.host/sitemap.xml`
+
+		resSitemap = "http://other.host/sitemap.xml"
+		resHostA   = "http://a/"
+		resHostB   = "http://b/"
+		resHostC   = "http://c/"
+	)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.RequestURI {
+		case "/robots.txt":
+			_, _ = io.WriteString(w, robot)
+
+		case "/a":
+			switch r.Method {
+			case http.MethodHead:
+				w.Header().Add(contentType, contentHTML)
+
+			case http.MethodGet:
+				_, _ = io.WriteString(w, bodyA)
+			}
+
+		case "/b":
+			switch r.Method {
+			case http.MethodHead:
+				w.Header().Add(contentType, contentHTML)
+
+			case http.MethodGet:
+				_, _ = io.WriteString(w, bodyB)
+			}
+
+		case "/c":
+			switch r.Method {
+			case http.MethodHead:
+				w.Header().Add(contentType, contentHTML)
+
+			case http.MethodGet:
+				_, _ = io.WriteString(w, bodyC)
+			}
+
+		default:
+			_, _ = io.WriteString(w, body)
+		}
+	}))
+
+	defer ts.Close()
+
+	// case A
+
+	resA := make(set.String)
+
+	handlerA := func(s string) {
+		resA.Add(s)
+	}
+
+	cA := New("a", 1, 1, time.Millisecond*50, false, RobotsRespect)
+
+	if err := cA.Run(ts.URL, handlerA); err != nil {
+		t.Error("run A - error:", err)
+	}
+
+	if len(resA) != 5 {
+		t.Fatal("unexpected len for A")
+	}
+
+	if !resA.Has(resSitemap) {
+		t.Error("no sitemap for A")
+	}
+
+	if !resA.Has(resHostB) {
+		t.Error("no hostB for A")
+	}
+
+	if resA.Has(resHostA) {
+		t.Error("hostA for A")
+	}
+
+	if resA.Has(resHostC) {
+		t.Error("hostC for A")
+	}
+
+	// case B
+
+	resB := make(set.String)
+
+	handlerB := func(s string) {
+		resB.Add(s)
+	}
+
+	cB := New("b", 1, 1, time.Millisecond*50, false, RobotsRespect)
+
+	if err := cB.Run(ts.URL, handlerB); err != nil {
+		t.Error("run B - error:", err)
+	}
+
+	if len(resB) != 6 {
+		t.Fatal("unexpected len for B")
+	}
+
+	if !resB.Has(resSitemap) {
+		t.Error("no sitemap for B")
+	}
+
+	if resB.Has(resHostB) {
+		t.Error("hostB for B")
+	}
+
+	if !resB.Has(resHostA) {
+		t.Error("no hostA for B")
+	}
+
+	if !resB.Has(resHostC) {
+		t.Error("no hostC for B")
+	}
+}
+
+func Test_CrawlerRobots500(t *testing.T) {
+
+}
+
+func Test_CrawlerRobots400(t *testing.T) {
+
 }

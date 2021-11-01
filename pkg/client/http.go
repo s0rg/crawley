@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	idleTimeout = 5 * time.Second
 	dialTimeout = 5 * time.Second
 	reqTimeout  = 10 * time.Second
 )
@@ -30,10 +31,11 @@ func New(ua string, conns int, skipSSL bool) (h *HTTP) {
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: skipSSL,
 		},
+		IdleConnTimeout:     idleTimeout,
 		TLSHandshakeTimeout: dialTimeout,
 		MaxConnsPerHost:     conns,
-		MaxIdleConns:        0,
-		MaxIdleConnsPerHost: 0,
+		MaxIdleConns:        conns,
+		MaxIdleConnsPerHost: conns,
 	}
 
 	client := &http.Client{
