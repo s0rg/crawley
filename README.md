@@ -14,7 +14,7 @@ Crawls web pages and prints any link it can find.
 
 # features
 
-- fast SAX-parser for html (powered by `golang.org/x/net/html`)
+- fast html SAX-parser (powered by `golang.org/x/net/html`)
 - small (<1000 SLOC), idiomatic, 100% test covered codebase
 - grabs most of useful resources urls (pics, videos, audios, etc...)
 - found urls are streamed to stdout and guranteed to be unique
@@ -39,6 +39,8 @@ possible flags:
     per-request delay (default 250ms)
 -depth int
     scan depth, set to -1 for unlimited
+-help
+    this flags (and their defaults) description
 -robots string
     action for robots.txt: ignore/crawl/respect (default "ignore")
 -silent

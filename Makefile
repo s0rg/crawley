@@ -4,16 +4,15 @@ BIN=bin/crawley
 SRC=./cmd/crawley
 COP=test.coverage
 
-GIT_TAG=`git describe --abbrev=0 || echo -n "no-tag"`
-GIT_HASH=`git rev-parse --short HEAD || echo -n "no-git"`
+GIT_TAG=`git describe --abbrev=0 2>/dev/null || echo -n "no-tag"`
+GIT_HASH=`git rev-parse --short HEAD 2>/dev/null || echo -n "no-git"`
 BUILD_AT=`date +%FT%T%z`
 
 LDFLAGS=-w -s -X main.gitHash=${GIT_HASH} -X main.buildDate=${BUILD_AT} -X main.gitVersion=${GIT_TAG}
 
-.PHONY: build
-
 export CGO_ENABLED=0
-export GOARCH=amd64
+
+.PHONY: build
 
 build: build-linux
 
@@ -39,7 +38,7 @@ test-cover: test
 	go tool cover -func="${COP}"
 
 clean:
+	[ -f "${COP}" ] && rm "${COP}"
 	[ -f "${BIN}" ] && rm "${BIN}"
 	[ -f "${BIN}".exe ] && rm "${BIN}".exe
 	[ -f "${BIN}".osx ] && rm "${BIN}".osx
-	[ -f "${COP}" ] && rm "${COP}"
