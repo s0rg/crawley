@@ -1,41 +1,38 @@
 package path
 
 import (
+	"path"
 	"strings"
 )
+
+const pathSep = '/'
+
+func isPathSep(r rune) (yes bool) {
+	return r == pathSep
+}
 
 // Depth calculates relative depth for `sub` to `base` resorces path.
 func Depth(base, sub string) (n int, ok bool) {
 	var (
-		bp = splitPath(base)
-		sp = splitPath(sub)
+		bn = path.Clean(base)
+		sn = path.Clean(sub)
 	)
 
-	if len(sp) < len(bp) {
+	if len(sn) <= len(bn) {
 		return
 	}
 
-	for i := 0; i < len(bp); i++ {
-		if bp[i] != sp[i] {
-			return
+	if !strings.HasPrefix(sn, bn) {
+		return
+	}
+
+	fields := strings.FieldsFunc(sn[len(bn):], isPathSep)
+
+	for i := 0; i < len(fields); i++ {
+		if fields[i] != "" {
+			n++
 		}
 	}
 
-	return len(sp) - len(bp), true
-}
-
-func splitPath(p string) (o []string) {
-	return dropSpaces(strings.Split(p, "/"))
-}
-
-func dropSpaces(s []string) (o []string) {
-	o = make([]string, 0, len(s))
-
-	for _, v := range s {
-		if v != "" {
-			o = append(o, v)
-		}
-	}
-
-	return o
+	return n, true
 }

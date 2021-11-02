@@ -1,71 +1,8 @@
 package path
 
 import (
-	"reflect"
 	"testing"
 )
-
-func Test_dropSpaces(t *testing.T) {
-	type args struct {
-		s []string
-	}
-
-	tests := []struct {
-		name  string
-		args  args
-		wantO []string
-	}{
-		{"ones", args{s: []string{"", "1", ""}}, []string{"1"}},
-		{"twos", args{s: []string{"2", "", "2"}}, []string{"2", "2"}},
-		{"threes", args{s: []string{"", "", "3"}}, []string{"3"}},
-		{"empty", args{s: []string{"", "", ""}}, []string{}},
-	}
-
-	t.Parallel()
-
-	for _, tt := range tests {
-		tc := tt
-
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
-			if gotO := dropSpaces(tc.args.s); !reflect.DeepEqual(gotO, tc.wantO) {
-				t.Errorf("dropSpaces() = %v, want %v", gotO, tc.wantO)
-			}
-		})
-	}
-}
-
-func Test_splitPath(t *testing.T) {
-	type args struct {
-		p string
-	}
-
-	tests := []struct {
-		name  string
-		args  args
-		wantO []string
-	}{
-		{"empty", args{p: "/"}, []string{}},
-		{"foo", args{p: "/foo"}, []string{"foo"}},
-		{"foo-bar", args{p: "/foo/bar"}, []string{"foo", "bar"}},
-		{"foo-bar-baz", args{p: "/foo/bar//baz"}, []string{"foo", "bar", "baz"}},
-	}
-
-	t.Parallel()
-
-	for _, tt := range tests {
-		tc := tt
-
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
-			if gotO := splitPath(tc.args.p); !reflect.DeepEqual(gotO, tc.wantO) {
-				t.Errorf("splitPath() = %v, want %v", gotO, tc.wantO)
-			}
-		})
-	}
-}
 
 func Test_Depth(t *testing.T) {
 	type args struct {
@@ -84,6 +21,7 @@ func Test_Depth(t *testing.T) {
 		{"c-bad", args{base: "/a/b", sub: "/c"}, 0, false},
 		{"b-ok", args{base: "/a", sub: "/a/b"}, 1, true},
 		{"c-ok", args{base: "/a", sub: "/a/b/c"}, 2, true},
+		{"d-bad", args{base: "/a/b/c", sub: "/d/b/c/a"}, 0, false},
 	}
 
 	t.Parallel()
@@ -102,5 +40,18 @@ func Test_Depth(t *testing.T) {
 				t.Errorf("pathDepth() gotFound = %v, want %v", gotFound, tc.wantFound)
 			}
 		})
+	}
+}
+
+func Benchmark_Depth(b *testing.B) {
+	const (
+		x = "/some/rather/long/path"
+		y = "/some/rather/long/path/but/longer"
+	)
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_, _ = Depth(x, y)
 	}
 }
