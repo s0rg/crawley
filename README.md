@@ -21,6 +21,7 @@ Crawls web pages and prints any link it can find.
 - scan depth (limited by starting host and path, by default - 0) can be configured
 - can crawl `robots.txt` rules and sitemaps
 - `brute` mode - scan html comments for urls (this can lead to bogus results)
+- make use of `HTTP_PROXY` / `HTTPS_PROXY` environment values
 
 # installation
 
