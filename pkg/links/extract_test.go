@@ -117,6 +117,7 @@ func Test_extractToken(t *testing.T) {
 		{Key: keySRCS, Val: "result"},
 		{Key: keyHREF, Val: "result"},
 		{Key: keyDATA, Val: "result"},
+		{Key: keyACTION, Val: "result"},
 	}
 
 	tests := []struct {
@@ -141,6 +142,7 @@ func Test_extractToken(t *testing.T) {
 		{"audio-empty", html.Token{DataAtom: atom.Audio}, "", keySRC, false, testRes1},
 		{"picture-empty", html.Token{DataAtom: atom.Picture}, "", keySRCS, false, testRes1},
 		{"source-src-ok", html.Token{DataAtom: atom.Source, Attr: attrs}, keySRC, keySRC, true, testRes1},
+		{"form-action-ok", html.Token{DataAtom: atom.Form, Attr: attrs}, "", "", true, testRes1},
 	}
 
 	for _, tt := range tests {
@@ -177,6 +179,7 @@ func Test_extractURLS(t *testing.T) {
 		raw1 = `<html><a href="result">here</a></html>`
 		raw2 = `<html><video></video></html>`
 		raw3 = `<html><!-- http://test/result --></html>`
+		raw4 = `<html><form action="result"></form></html>`
 	)
 
 	tests := []struct {
@@ -185,9 +188,10 @@ func Test_extractURLS(t *testing.T) {
 		hasLink bool
 		lnk     *url.URL
 	}{
-		{"ok", raw1, true, testRes1},
-		{"bad", raw2, false, nil},
+		{"ok-1", raw1, true, testRes1},
+		{"ok-4", raw4, true, testRes1},
 		{"comment", raw3, true, testRes1},
+		{"bad", raw2, false, nil},
 	}
 
 	for _, tt := range tests {

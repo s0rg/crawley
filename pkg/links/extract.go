@@ -12,11 +12,12 @@ import (
 )
 
 const (
-	keySRC   = "src"
-	keySRCS  = "srcset"
-	keyHREF  = "href"
-	keyDATA  = "data"
-	jsScheme = "javascript"
+	keySRC    = "src"
+	keySRCS   = "srcset"
+	keyHREF   = "href"
+	keyDATA   = "data"
+	keyACTION = "action"
+	jsScheme  = "javascript"
 )
 
 // Handler is a callback for found links.
@@ -96,6 +97,9 @@ func extractToken(b *url.URL, t html.Token, k *string, h Handler) {
 
 	case atom.Img, atom.Image, atom.Iframe, atom.Script, atom.Track:
 		u, ok = extractTag(b, &t, keySRC)
+
+	case atom.Form:
+		u, ok = extractTag(b, &t, keyACTION)
 
 	case atom.Object:
 		u, ok = extractTag(b, &t, keyDATA)
