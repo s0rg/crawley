@@ -16,54 +16,6 @@ import (
 
 const robotsEP = "/robots.txt"
 
-func Test_canCrawl(t *testing.T) {
-	t.Parallel()
-
-	type args struct {
-		b *url.URL
-		u *url.URL
-		d int
-	}
-
-	base, _ := url.Parse("http://test/some/path")
-	badh, _ := url.Parse("http://other/path")
-	url0, _ := url.Parse("http://test/some")
-	url1, _ := url.Parse("http://test/some/path/even")
-	url2, _ := url.Parse("http://test/some/path/even/more")
-	url3, _ := url.Parse("http://test")
-
-	tests := []struct {
-		name    string
-		args    args
-		wantYes bool
-	}{
-		{"url0-1", args{b: base, u: url0, d: 1}, false},
-		{"url1-0", args{b: base, u: url1, d: 0}, false},
-		{"url1-1", args{b: base, u: url1, d: 1}, true},
-		{"url2-0", args{b: base, u: url2, d: 0}, false},
-		{"url2-1", args{b: base, u: url2, d: 1}, false},
-		{"url2-2", args{b: base, u: url2, d: 2}, true},
-		{"url2-3", args{b: base, u: url2, d: 3}, true},
-		{"badh-1", args{b: base, u: badh, d: 1}, false},
-		{"url2-0-1", args{b: base, u: url0, d: -1}, false},
-		{"url2-1-1", args{b: base, u: url1, d: -1}, true},
-		{"url2-2-1", args{b: base, u: url2, d: -1}, true},
-		{"url3-3", args{b: base, u: url3, d: 0}, false},
-	}
-
-	for _, tt := range tests {
-		tc := tt
-
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
-			if gotYes := canCrawl(tc.args.b, tc.args.u, tc.args.d); gotYes != tc.wantYes {
-				t.Errorf("canCrawl() = %v, want %v", gotYes, tc.wantYes)
-			}
-		})
-	}
-}
-
 func Test_urlHash(t *testing.T) {
 	t.Parallel()
 

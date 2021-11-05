@@ -11,10 +11,11 @@ linters-settings:
 linters:
   enable-all: true
   disable:
-    - testpackage
-    - gochecknoglobals
     - exhaustivestruct
+    - gochecknoglobals
+    - testpackage
     - exhaustive
+    - varnamelen
     - forbidigo
     - goerr113
     - gofumpt
@@ -22,8 +23,8 @@ linters:
     - gci
     # deprecated :(
     - interfacer
-    - maligned
     - scopelint
+    - maligned
     - golint
   fast: false
 

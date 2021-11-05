@@ -53,7 +53,7 @@ func New(ua string, conns int, skipSSL bool) (h *HTTP) {
 func (h *HTTP) Get(ctx context.Context, url string) (body io.ReadCloser, err error) {
 	var req *http.Request
 
-	if req, err = http.NewRequestWithContext(ctx, http.MethodGet, url, nil); err != nil {
+	if req, err = http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody); err != nil {
 		return
 	}
 
@@ -68,7 +68,7 @@ func (h *HTTP) Get(ctx context.Context, url string) (body io.ReadCloser, err err
 func (h *HTTP) Head(ctx context.Context, url string) (hdrs http.Header, err error) {
 	var req *http.Request
 
-	if req, err = http.NewRequestWithContext(ctx, http.MethodHead, url, nil); err != nil {
+	if req, err = http.NewRequestWithContext(ctx, http.MethodHead, url, http.NoBody); err != nil {
 		return
 	}
 

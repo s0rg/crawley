@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/s0rg/crawley/pkg/crawler"
@@ -39,23 +41,6 @@ var (
 	defaultAgent = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + gitVersion + "-" + gitHash
 )
 
-func actionFromString(s string) (a crawler.RobotsAction, err error) {
-	switch s {
-	case "ignore":
-		a = crawler.RobotsIgnore
-	case "crawl":
-		a = crawler.RobotsCrawl
-	case "respect":
-		a = crawler.RobotsRespect
-	default:
-		err = fmt.Errorf("unknown: '%s'", s)
-
-		return
-	}
-
-	return a, nil
-}
-
 func sanitize(workers, depth int, delay time.Duration) (wrk, dep int, dur time.Duration) {
 	wrk = minWorkers
 	if workers > wrk {
@@ -79,7 +64,7 @@ func sanitize(workers, depth int, delay time.Duration) (wrk, dep int, dur time.D
 }
 
 func printer(s string) {
-	fmt.Println(s)
+	_, _ = os.Stdout.WriteString(s + "\n")
 }
 
 func crawl(
@@ -88,9 +73,9 @@ func crawl(
 	delay time.Duration,
 	skipSSL, brute bool,
 ) error {
-	act, err := actionFromString(action)
+	act, err := crawler.ParseAction(strings.ToLower(action))
 	if err != nil {
-		return fmt.Errorf("action: %w", err)
+		return fmt.Errorf("%w: %s", err, action)
 	}
 
 	c := crawler.New(ua, workers, depth, delay, skipSSL, brute, act)

@@ -17,7 +17,6 @@ import (
 
 	"github.com/s0rg/crawley/pkg/client"
 	"github.com/s0rg/crawley/pkg/links"
-	"github.com/s0rg/crawley/pkg/path"
 	"github.com/s0rg/crawley/pkg/robots"
 	"github.com/s0rg/crawley/pkg/set"
 )
@@ -27,17 +26,7 @@ type crawlClient interface {
 	Head(context.Context, string) (http.Header, error)
 }
 
-// RobotsAction is a action for robots.txt.
-type RobotsAction byte
-
 const (
-	// RobotsIgnore ignores robots.txt completly.
-	RobotsIgnore RobotsAction = 0
-	// RobotsCrawl crawls urls from robots.txt, ignoring its rules.
-	RobotsCrawl RobotsAction = 1
-	// RobotsRespect same as above, but respects given rules.
-	RobotsRespect RobotsAction = 2
-
 	nMID = 64
 	nBIG = nMID * 2
 
@@ -279,33 +268,6 @@ func (c *Crawler) handler(fn func(string)) {
 	}
 
 	c.wg.Done()
-}
-
-func canCrawl(a, b *url.URL, d int) (yes bool) {
-	if a.Host != b.Host {
-		return
-	}
-
-	var apath, bpath string
-
-	if apath = a.Path; apath == "" {
-		apath = "/"
-	}
-
-	if bpath = b.Path; bpath == "" {
-		bpath = "/"
-	}
-
-	depth, found := path.Depth(apath, bpath)
-	if !found {
-		return
-	}
-
-	if d >= 0 && depth > d {
-		return
-	}
-
-	return true
 }
 
 func urlHash(u *url.URL) (sum uint64) {
