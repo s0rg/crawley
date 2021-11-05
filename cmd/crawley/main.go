@@ -80,14 +80,14 @@ func crawl(
 
 	c := crawler.New(ua, workers, depth, delay, skipSSL, brute, act)
 
-	log.Printf("%s started for: %s", appName, uri)
-	log.Printf("workers: %d depth: %d delay: %s", workers, depth, delay)
+	log.Printf("[*] workers: %d depth: %d delay: %s", workers, depth, delay)
+	log.Printf("[*] crawling url: %s", uri)
 
 	if err := c.Run(uri, printer); err != nil {
 		return fmt.Errorf("run: %w", err)
 	}
 
-	log.Printf("complete for: %s", uri)
+	log.Printf("[*] complete")
 
 	return nil
 }

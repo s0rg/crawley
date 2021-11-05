@@ -173,7 +173,7 @@ func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
 		var herr client.HTTPError
 
 		if !errors.As(err, &herr) {
-			log.Println("get robots:", err)
+			log.Println("[-] GET /robots.txt:", err)
 
 			return
 		}
@@ -189,7 +189,7 @@ func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
 
 	rbt, err := robots.FromReader(c.UserAgent, body)
 	if err != nil {
-		log.Println("parse robots:", err)
+		log.Println("[-] parse robots.txt:", err)
 
 		return
 	}
@@ -241,7 +241,7 @@ func (c *Crawler) crawler(web crawlClient) {
 		var parse bool
 
 		if hdrs, err := web.Head(ctx, us); err != nil {
-			log.Printf("HEAD %s error: %v", us, err)
+			log.Printf("[-] HEAD %s: %v", us, err)
 		} else if typ, _, perr := mime.ParseMediaType(hdrs.Get(contentType)); perr == nil {
 			parse = typ == contentHTML
 		}
@@ -250,7 +250,7 @@ func (c *Crawler) crawler(web crawlClient) {
 			time.Sleep(c.Delay)
 
 			if body, err := web.Get(ctx, us); err != nil {
-				log.Printf("GET %s error: %v", us, err)
+				log.Printf("[-] GET %s: %v", us, err)
 			} else {
 				links.Extract(uri, body, c.Brute, c.linkHandler)
 			}
