@@ -27,6 +27,11 @@ Crawls web pages and prints any link it can find.
 
 - [binaries](https://github.com/s0rg/crawley/releases) for Linux, macOS and Windows
 
+## Archlinux User Repository
+
+Crawley is available in the AUR. Linux distributions with access to it can obtain the package from [here](https://aur.archlinux.org/packages/crawley-bin/).
+You can also use your favourite AUR helper to install it, e. g. `paru -S crawley-bin`.
+
 # usage
 
 ```
