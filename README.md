@@ -25,7 +25,7 @@ Crawls web pages and prints any link it can find.
 
 # installation
 
-- [binaries](https://github.com/s0rg/crawley/releases) for Linux, macOS and Windows
+- [binaries](https://github.com/s0rg/crawley/releases) for Linux, FreeBSD, macOS and Windows
 
 ## Archlinux User Repository
 
@@ -42,17 +42,19 @@ possible flags:
 -brute
     scan html comments
 -delay duration
-    per-request delay (default 250ms)
+    per-request delay (0 - disable) (default 150ms)
 -depth int
-    scan depth, set to -1 for unlimited
+    scan depth (-1 - unlimited)
 -help
     this flags (and their defaults) description
 -robots string
-    action for robots.txt: ignore/crawl/respect (default "ignore")
+    policy for robots.txt: ignore / crawl / respect (default "ignore")
 -silent
     suppress info and error messages in stderr
 -skip-ssl
     skip ssl verification
+-skip-dirs
+    skip non-resource urls in output
 -user-agent string
     user-agent string
 -version

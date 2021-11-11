@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_HTTPError(t *testing.T) {
+func TestHTTPError(t *testing.T) {
 	const (
 		code = 666
 		msg  = "infernal server error"
@@ -25,7 +25,7 @@ func Test_HTTPError(t *testing.T) {
 	}
 }
 
-func Test_HTTPErrorFromResponse(t *testing.T) {
+func TestHTTPErrorFromResponse(t *testing.T) {
 	var (
 		resp http.Response
 		herr HTTPError

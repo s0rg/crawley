@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_relativeDepth(t *testing.T) {
+func TestRelativeDepth(t *testing.T) {
 	type args struct {
 		base string
 		sub  string
@@ -44,7 +44,7 @@ func Test_relativeDepth(t *testing.T) {
 	}
 }
 
-func Benchmark_Depth(b *testing.B) {
+func BenchmarkDepth(b *testing.B) {
 	const (
 		x = "/some/rather/long/path"
 		y = "/some/rather/long/path/but/longer"
@@ -57,7 +57,7 @@ func Benchmark_Depth(b *testing.B) {
 	}
 }
 
-func Test_canCrawl(t *testing.T) {
+func TestCanCrawl(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
@@ -102,5 +102,26 @@ func Test_canCrawl(t *testing.T) {
 				t.Errorf("canCrawl() = %v, want %v", gotYes, tc.wantYes)
 			}
 		})
+	}
+}
+
+func TestIsResorce(t *testing.T) {
+	t.Parallel()
+
+	type testCase struct {
+		Val  string
+		Want bool
+	}
+
+	cases := []testCase{
+		{"/some/path", false},
+		{"/some/other/path/", false},
+		{"/path/to/some/resource.zip", true},
+	}
+
+	for _, tc := range cases {
+		if got := isResorce(tc.Val); got != tc.Want {
+			t.Errorf("failed for: '%s' got: %t", tc.Val, got)
+		}
 	}
 }

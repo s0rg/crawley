@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"hash/fnv"
 	"io"
 	"log"
 	"mime"
@@ -44,39 +43,25 @@ type task struct {
 
 // Crawler holds crawling process config and state.
 type Crawler struct {
-	UserAgent string
-	Delay     time.Duration
-	Workers   int
-	Depth     int
-	SkipSSL   bool
-	Brute     bool
-	wg        sync.WaitGroup
-	handleCh  chan string
-	crawlCh   chan *url.URL
-	taskCh    chan task
-	robotsAct RobotsAction
-	robots    *robots.TXT
+	cfg      *config
+	wg       sync.WaitGroup
+	handleCh chan string
+	crawlCh  chan *url.URL
+	taskCh   chan task
+	robots   *robots.TXT
 }
 
 // New creates Crawler instance.
-func New(
-	ua string,
-	workers, depth int,
-	delay time.Duration,
-	skipSSL, brute bool,
-	robotsAction RobotsAction,
-) (c *Crawler) {
-	c = &Crawler{
-		UserAgent: ua,
-		Workers:   workers,
-		Depth:     depth,
-		Delay:     delay,
-		SkipSSL:   skipSSL,
-		Brute:     brute,
-		robotsAct: robotsAction,
+func New(opts ...Option) (c *Crawler) {
+	cfg := &config{}
+
+	for _, o := range opts {
+		o(cfg)
 	}
 
-	return c
+	cfg.validate()
+
+	return &Crawler{cfg: cfg}
 }
 
 // Run starts crawling process for given base uri.
@@ -87,22 +72,24 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 		return fmt.Errorf("parse url: %w", err)
 	}
 
-	cop := (c.Workers + c.Depth + 1)
-	c.handleCh = make(chan string, cop*nMID)
-	c.crawlCh = make(chan *url.URL, cop*nMID)
-	c.taskCh = make(chan task, cop*nBIG)
+	n := (c.cfg.Workers + c.cfg.Depth + 1)
+	c.handleCh = make(chan string, n*nMID)
+	c.crawlCh = make(chan *url.URL, n*nMID)
+	c.taskCh = make(chan task, n*nBIG)
 
 	defer c.close()
 
 	seen := make(set.U64)
 	seen.Add(urlHash(base))
 
-	web := client.New(c.UserAgent, c.Workers, c.SkipSSL)
+	web := client.New(c.cfg.UserAgent, c.cfg.Workers, c.cfg.SkipSSL)
 	c.initRobots(base, web)
 
-	for i := 0; i < c.Workers; i++ {
+	for i := 0; i < c.cfg.Workers; i++ {
 		go c.crawler(web)
 	}
+
+	c.wg.Add(c.cfg.Workers)
 
 	go c.handler(fn)
 
@@ -121,11 +108,17 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 				w++
 			}
 
-			c.handleCh <- t.URI.String()
+			if !c.cfg.SkipDirs || isResorce(t.URI.Path) {
+				c.handleCh <- t.URI.String()
+			}
 		}
 	}
 
 	return nil
+}
+
+func (c *Crawler) DumpConfig() string {
+	return c.cfg.String()
 }
 
 func (c *Crawler) crawl(b *url.URL, t *task) (yes bool) {
@@ -133,11 +126,11 @@ func (c *Crawler) crawl(b *url.URL, t *task) (yes bool) {
 		return
 	}
 
-	if !canCrawl(b, t.URI, c.Depth) {
+	if !canCrawl(b, t.URI, c.cfg.Depth) {
 		return
 	}
 
-	if c.robotsAct == RobotsRespect && c.robots.Forbidden(t.URI.Path) {
+	if c.cfg.Robots == RobotsRespect && c.robots.Forbidden(t.URI.Path) {
 		return
 	}
 
@@ -147,7 +140,6 @@ func (c *Crawler) crawl(b *url.URL, t *task) (yes bool) {
 }
 
 func (c *Crawler) close() {
-	c.wg.Add(c.Workers)
 	close(c.crawlCh)
 	c.wg.Wait() // wait for crawlers
 
@@ -161,7 +153,7 @@ func (c *Crawler) close() {
 func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
 	c.robots = robots.AllowALL()
 
-	if c.robotsAct == RobotsIgnore {
+	if c.cfg.Robots == RobotsIgnore {
 		return
 	}
 
@@ -187,7 +179,7 @@ func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
 
 	defer body.Close()
 
-	rbt, err := robots.FromReader(c.UserAgent, body)
+	rbt, err := robots.FromReader(c.cfg.UserAgent, body)
 	if err != nil {
 		log.Println("[-] parse robots.txt:", err)
 
@@ -233,7 +225,9 @@ func (c *Crawler) crawler(web crawlClient) {
 	defer c.wg.Done()
 
 	for uri := range c.crawlCh {
-		time.Sleep(c.Delay)
+		if c.cfg.Delay > 0 {
+			time.Sleep(c.cfg.Delay)
+		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), crawlTimeout)
 		us := uri.String()
@@ -247,12 +241,10 @@ func (c *Crawler) crawler(web crawlClient) {
 		}
 
 		if parse {
-			time.Sleep(c.Delay)
-
 			if body, err := web.Get(ctx, us); err != nil {
 				log.Printf("[-] GET %s: %v", us, err)
 			} else {
-				links.Extract(uri, body, c.Brute, c.linkHandler)
+				links.Extract(uri, body, c.cfg.Brute, c.linkHandler)
 			}
 		}
 
@@ -268,14 +260,4 @@ func (c *Crawler) handler(fn func(string)) {
 	}
 
 	c.wg.Done()
-}
-
-func urlHash(u *url.URL) (sum uint64) {
-	c := *u         // copy original
-	c.RawQuery = "" // remove any query parameters
-
-	hash := fnv.New64()
-	_, _ = io.WriteString(hash, c.String())
-
-	return hash.Sum64()
 }

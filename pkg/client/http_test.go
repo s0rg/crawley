@@ -12,7 +12,7 @@ const (
 	ua = "test-ua"
 )
 
-func TestHTTP_GetOK(t *testing.T) {
+func TestHTTPGetOK(t *testing.T) {
 	t.Parallel()
 
 	c := New(ua, 1, false)
@@ -50,7 +50,7 @@ func TestHTTP_GetOK(t *testing.T) {
 	}
 }
 
-func TestHTTP_GetERR(t *testing.T) {
+func TestHTTPGetERR(t *testing.T) {
 	t.Parallel()
 
 	c := New("", 1, false)
@@ -76,7 +76,7 @@ func TestHTTP_GetERR(t *testing.T) {
 	}
 }
 
-func TestHTTP_HeadOK(t *testing.T) {
+func TestHTTPHeadOK(t *testing.T) {
 	t.Parallel()
 
 	c := New(ua, 1, false)
@@ -111,7 +111,7 @@ func TestHTTP_HeadOK(t *testing.T) {
 	}
 }
 
-func TestHTTP_HeadERR(t *testing.T) {
+func TestHTTPHeadERR(t *testing.T) {
 	t.Parallel()
 
 	c := New("", 1, false)

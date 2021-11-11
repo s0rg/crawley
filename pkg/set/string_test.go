@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test_String(t *testing.T) {
+func TestString(t *testing.T) {
 	t.Parallel()
 
 	s := make(String)

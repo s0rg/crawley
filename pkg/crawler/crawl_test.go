@@ -16,29 +16,11 @@ import (
 
 const robotsEP = "/robots.txt"
 
-func Test_urlHash(t *testing.T) {
-	t.Parallel()
-
-	one, _ := url.Parse("http://test/some/path?foo=bar")
-	two, _ := url.Parse("http://test/some/path?other")
-
-	h1 := urlHash(one)
-	h2 := urlHash(two)
-
-	if one.RawQuery == "" {
-		t.Error("one: modified")
-	}
-
-	if two.RawQuery == "" {
-		t.Error("two: modified")
-	}
-
-	if h1 != h2 {
-		t.Error("hashes mismatch")
-	}
+var testOptions = []Option{
+	WithMaxCrawlDepth(1),
 }
 
-func Test_Crawler(t *testing.T) {
+func TestCrawler(t *testing.T) {
 	t.Parallel()
 
 	var (
@@ -75,7 +57,7 @@ func Test_Crawler(t *testing.T) {
 		results = append(results, s)
 	}
 
-	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsIgnore)
+	c := New(testOptions...)
 
 	if err := c.Run(ts.URL, handler); err != nil {
 		t.Errorf("run: %v", err)
@@ -107,17 +89,17 @@ func Test_Crawler(t *testing.T) {
 	}
 }
 
-func Test_CrawlerBadLink(t *testing.T) {
+func TestBadLink(t *testing.T) {
 	t.Parallel()
 
-	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsIgnore)
+	c := New(testOptions...)
 
 	if err := c.Run("%", nil); err == nil {
 		t.Error("run - no error")
 	}
 }
 
-func Test_CrawlerBadHead(t *testing.T) {
+func TestBadHead(t *testing.T) {
 	t.Parallel()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -126,14 +108,14 @@ func Test_CrawlerBadHead(t *testing.T) {
 
 	defer ts.Close()
 
-	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsIgnore)
+	c := New(testOptions...)
 
 	if err := c.Run(ts.URL, nil); err != nil {
 		t.Error("run - error")
 	}
 }
 
-func Test_CrawlerBadGet(t *testing.T) {
+func TestBadGet(t *testing.T) {
 	t.Parallel()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -148,14 +130,14 @@ func Test_CrawlerBadGet(t *testing.T) {
 
 	defer ts.Close()
 
-	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsIgnore)
+	c := New(testOptions...)
 
 	if err := c.Run(ts.URL, nil); err != nil {
 		t.Error("run - error")
 	}
 }
 
-func Test_CrawlerRobots(t *testing.T) {
+func TestRobots(t *testing.T) {
 	t.Parallel()
 
 	const (
@@ -223,7 +205,12 @@ sitemap: http://other.host/sitemap.xml`
 		resA.Add(s)
 	}
 
-	cA := New("a", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
+	cA := New(
+		WithUserAgent("a"),
+		WithRobotsPolicy(RobotsRespect),
+		WithMaxCrawlDepth(1),
+		WithDelay(time.Millisecond*10),
+	)
 
 	if err := cA.Run(ts.URL, handlerA); err != nil {
 		t.Error("run A - error:", err)
@@ -250,7 +237,11 @@ sitemap: http://other.host/sitemap.xml`
 		resB.Add(s)
 	}
 
-	cB := New("b", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
+	cB := New(
+		WithUserAgent("b"),
+		WithRobotsPolicy(RobotsRespect),
+		WithMaxCrawlDepth(1),
+	)
 
 	if err := cB.Run(ts.URL, handlerB); err != nil {
 		t.Error("run B - error:", err)
@@ -269,7 +260,7 @@ sitemap: http://other.host/sitemap.xml`
 	}
 }
 
-func Test_CrawlerRobots500(t *testing.T) {
+func TestRobotsErr500(t *testing.T) {
 	t.Parallel()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -290,7 +281,10 @@ func Test_CrawlerRobots500(t *testing.T) {
 		res = append(res, s)
 	}
 
-	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
+	c := New(
+		WithMaxCrawlDepth(1),
+		WithRobotsPolicy(RobotsRespect),
+	)
 
 	if err := c.Run(ts.URL, handler); err != nil {
 		t.Error("run error:", err)
@@ -305,7 +299,7 @@ func Test_CrawlerRobots500(t *testing.T) {
 	}
 }
 
-func Test_CrawlerRobots400(t *testing.T) {
+func TestRobotsErr400(t *testing.T) {
 	t.Parallel()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -326,7 +320,11 @@ func Test_CrawlerRobots400(t *testing.T) {
 		res = append(res, s)
 	}
 
-	c := New("", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
+	c := New(
+		WithMaxCrawlDepth(1),
+		WithRobotsPolicy(RobotsRespect),
+	)
+	//"", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
 
 	if err := c.Run(ts.URL, handler); err != nil {
 		t.Error("run error:", err)
@@ -362,14 +360,17 @@ func (er *errReader) Read(_ []byte) (n int, err error) {
 	return 0, er.err
 }
 
-func Test_CrawlerRobotsRequestErr(t *testing.T) {
+func TestRobotsRequestErr(t *testing.T) {
 	t.Parallel()
 
 	var (
 		base, _ = url.Parse("http://test/")
 		genErr  = errors.New("generic error")
 		tc      = testClient{err: genErr}
-		c       = New("", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
+		c       = New(
+			WithMaxCrawlDepth(1),
+			WithRobotsPolicy(RobotsRespect),
+		)
 	)
 
 	c.initRobots(base, &tc)
@@ -379,19 +380,36 @@ func Test_CrawlerRobotsRequestErr(t *testing.T) {
 	}
 }
 
-func Test_CrawlerRobotsBodytErr(t *testing.T) {
+func TestRobotsBodytErr(t *testing.T) {
 	t.Parallel()
 
 	var (
 		base, _ = url.Parse("http://test/")
 		genErr  = errors.New("generic error")
 		tc      = testClient{err: nil, bodyIO: io.NopCloser(&errReader{err: genErr})}
-		c       = New("", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
+		c       = New(
+			WithMaxCrawlDepth(1),
+			WithRobotsPolicy(RobotsRespect),
+		)
 	)
 
 	c.initRobots(base, &tc)
 
 	if c.robots.Forbidden("/some") {
 		t.Error("forbidden")
+	}
+}
+
+func TestDumpConfig(t *testing.T) {
+	t.Parallel()
+
+	c := New(
+		WithWorkersCount(32),
+	)
+
+	v := c.DumpConfig()
+
+	if !strings.Contains(v, "32") {
+		t.Error("bad workers")
 	}
 }

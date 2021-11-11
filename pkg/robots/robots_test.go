@@ -32,7 +32,7 @@ func (er *errReader) Read(_ []byte) (n int, err error) {
 	return 0, er.err
 }
 
-func Benchmark_FromReader(b *testing.B) {
+func BenchmarkFromReader(b *testing.B) {
 	buf := bytes.NewBufferString(rawRobots)
 
 	b.ResetTimer()
@@ -42,7 +42,7 @@ func Benchmark_FromReader(b *testing.B) {
 	}
 }
 
-func Test_FromReader(t *testing.T) {
+func TestFromReader(t *testing.T) {
 	t.Parallel()
 
 	buf := bytes.NewBufferString(rawRobots)
@@ -71,7 +71,7 @@ func Test_FromReader(t *testing.T) {
 	}
 }
 
-func Test_NewAllowAll(t *testing.T) {
+func TestNewAllowAll(t *testing.T) {
 	t.Parallel()
 
 	txt := AllowALL()
@@ -81,7 +81,7 @@ func Test_NewAllowAll(t *testing.T) {
 	}
 }
 
-func Test_NewDenyAll(t *testing.T) {
+func TestNewDenyAll(t *testing.T) {
 	t.Parallel()
 
 	txt := DenyALL()
@@ -91,7 +91,7 @@ func Test_NewDenyAll(t *testing.T) {
 	}
 }
 
-func Test_ErrReader(t *testing.T) {
+func TestErrReader(t *testing.T) {
 	var (
 		genErr = errors.New("generic error")
 		errIO  = errReader{err: genErr}
@@ -109,7 +109,7 @@ func Test_ErrReader(t *testing.T) {
 	}
 }
 
-func Test_URL(t *testing.T) {
+func TestURL(t *testing.T) {
 	testCases := []string{
 		"http://example.com/",
 		"http://example.com/some/path",

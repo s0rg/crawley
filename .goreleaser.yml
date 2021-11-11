@@ -16,6 +16,7 @@ builds:
       - linux
       - darwin
       - windows
+      - freebsd
     goarch:
       - amd64
       - arm64
@@ -25,8 +26,6 @@ builds:
     id: "crawley"
     dir: .
     main: ./cmd/crawley
-    hooks:
-      post: 'upx --brute {{ .Path }}'
 
 archives:
   - format: tar.gz
