@@ -10,7 +10,7 @@ func TestParseAction(t *testing.T) {
 
 	type testCase struct {
 		Have string
-		Want RobotsAction
+		Want RobotsPolicy
 	}
 
 	cases := []testCase{
@@ -20,7 +20,7 @@ func TestParseAction(t *testing.T) {
 	}
 
 	for i, tc := range cases {
-		got, err := ParseAction(tc.Have)
+		got, err := ParseRobotsPolicy(tc.Have)
 		if err != nil {
 			t.Errorf("case[%d]: got error: %v", i+1, err)
 		}
@@ -34,12 +34,12 @@ func TestParseAction(t *testing.T) {
 func TestParseActionErr(t *testing.T) {
 	t.Parallel()
 
-	_, err := ParseAction("dsf")
+	_, err := ParseRobotsPolicy("dsf")
 	if err == nil {
 		t.Error("no error")
 	}
 
-	if !errors.Is(err, ErrActionUnknown) {
+	if !errors.Is(err, ErrUnknownPolicy) {
 		t.Error("unexpected error")
 	}
 }

@@ -1,25 +1,28 @@
 package crawler
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
-// ErrActionUnknown is returned when requested name unknown.
-var ErrActionUnknown = errors.New("unknown action")
+// ErrUnknownPolicy is returned when requested name unknown.
+var ErrUnknownPolicy = errors.New("unknown policy")
 
-// RobotsAction is a action for robots.txt.
-type RobotsAction byte
+// RobotsPolicy is a action for robots.txt.
+type RobotsPolicy byte
 
 const (
 	// RobotsIgnore ignores robots.txt completly.
-	RobotsIgnore RobotsAction = 0
+	RobotsIgnore RobotsPolicy = 0
 	// RobotsCrawl crawls urls from robots.txt, ignoring its rules.
-	RobotsCrawl RobotsAction = 1
+	RobotsCrawl RobotsPolicy = 1
 	// RobotsRespect same as above, but respects given rules.
-	RobotsRespect RobotsAction = 2
+	RobotsRespect RobotsPolicy = 2
 )
 
-// ParseAction parses robots action from string.
-func ParseAction(s string) (a RobotsAction, err error) {
-	switch s {
+// ParseRobotsPolicy parses robots policy from string.
+func ParseRobotsPolicy(s string) (a RobotsPolicy, err error) {
+	switch strings.ToLower(s) {
 	case "ignore":
 		a = RobotsIgnore
 	case "crawl":
@@ -27,7 +30,7 @@ func ParseAction(s string) (a RobotsAction, err error) {
 	case "respect":
 		a = RobotsRespect
 	default:
-		err = ErrActionUnknown
+		err = ErrUnknownPolicy
 
 		return
 	}

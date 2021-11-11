@@ -63,3 +63,16 @@ func relativeDepth(base, sub string) (n int, ok bool) {
 
 	return n, true
 }
+
+func isResorce(v string) (yes bool) {
+	_, tmp := path.Split(v)
+	if tmp == "" {
+		return
+	}
+
+	if tmp = path.Ext(tmp); tmp == "" {
+		return
+	}
+
+	return true
+}

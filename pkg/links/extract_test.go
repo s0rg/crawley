@@ -16,7 +16,7 @@ var (
 	testRes1, _ = url.Parse("http://test/result")
 )
 
-func Test_clean(t *testing.T) {
+func TestClean(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
@@ -61,7 +61,7 @@ func Test_clean(t *testing.T) {
 	}
 }
 
-func Test_extractTag(t *testing.T) {
+func TestExtractTag(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
@@ -108,7 +108,7 @@ func Test_extractTag(t *testing.T) {
 	}
 }
 
-func Test_extractToken(t *testing.T) {
+func TestExtractToken(t *testing.T) {
 	t.Parallel()
 
 	tbad := html.Token{}
@@ -172,7 +172,7 @@ func Test_extractToken(t *testing.T) {
 	}
 }
 
-func Test_extractURLS(t *testing.T) {
+func TestExtractURLS(t *testing.T) {
 	t.Parallel()
 
 	const (
@@ -217,7 +217,7 @@ func Test_extractURLS(t *testing.T) {
 	}
 }
 
-func Test_extractComment(t *testing.T) {
+func TestExtractComment(t *testing.T) {
 	const comment = `
 loremipsumhTTp://foo fdfdfs HttPs://bar
        http://

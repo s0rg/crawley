@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test_U64(t *testing.T) {
+func TestU64(t *testing.T) {
 	t.Parallel()
 
 	s := make(U64)
