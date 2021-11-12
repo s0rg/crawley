@@ -27,13 +27,13 @@ var (
 	fVersion      = flag.Bool("version", false, "show version")
 	fBrute        = flag.Bool("brute", false, "scan html comments")
 	fSkipSSL      = flag.Bool("skip-ssl", false, "skip ssl verification")
-	fSkipDirs     = flag.Bool("skip-dirs", false, "skip non-resource urls in output")
 	fSilent       = flag.Bool("silent", false, "suppress info and error messages in stderr")
 	fDepth        = flag.Int("depth", 0, "scan depth (-1 - unlimited)")
 	fWorkers      = flag.Int("workers", runtime.NumCPU(), "number of workers")
 	fDelay        = flag.Duration("delay", defaultDelay, "per-request delay (0 - disable)")
 	fUA           = flag.String("user-agent", defaultAgent, "user-agent string")
 	fRobotsPolicy = flag.String("robots", "ignore", "policy for robots.txt: ignore / crawl / respect")
+	fDirsPolicy   = flag.String("dirs", "show", "policy for non-resource urls: show / hide / only")
 	defaultAgent  = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + gitVersion + "-" + gitHash
 )
 
@@ -71,9 +71,14 @@ func main() {
 		return
 	}
 
-	policy, err := crawler.ParseRobotsPolicy(*fRobotsPolicy)
+	robots, err := crawler.ParseRobotsPolicy(*fRobotsPolicy)
 	if err != nil {
-		log.Fatal("crawler:", err)
+		log.Fatal("robots policy:", err)
+	}
+
+	dirs, err := crawler.ParseDirsPolicy(*fDirsPolicy)
+	if err != nil {
+		log.Fatal("dirs policy:", err)
 	}
 
 	if *fSilent {
@@ -83,13 +88,13 @@ func main() {
 	if err := crawl(
 		flag.Arg(0),
 		crawler.WithUserAgent(*fUA),
-		crawler.WithRobotsPolicy(policy),
 		crawler.WithDelay(*fDelay),
 		crawler.WithMaxCrawlDepth(*fDepth),
 		crawler.WithWorkersCount(*fWorkers),
-		crawler.WithBruteMode(*fBrute),
 		crawler.WithSkipSSL(*fSkipSSL),
-		crawler.WithSkipDirs(*fSkipDirs),
+		crawler.WithBruteMode(*fBrute),
+		crawler.WithDirsPolicy(dirs),
+		crawler.WithRobotsPolicy(robots),
 	); err != nil {
 		// forcing back stderr in case of errors, otherwise if 'silent' is on -
 		// no one will know what happened.

@@ -18,8 +18,8 @@ type config struct {
 	Workers   int
 	Depth     int
 	Robots    RobotsPolicy
+	Dirs      DirsPolicy
 	SkipSSL   bool
-	SkipDirs  bool
 	Brute     bool
 }
 

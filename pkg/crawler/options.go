@@ -40,17 +40,17 @@ func WithRobotsPolicy(v RobotsPolicy) Option {
 	}
 }
 
+// WithDirsPolicy sets DirsPolicy for crawler.
+func WithDirsPolicy(v DirsPolicy) Option {
+	return func(c *config) {
+		c.Dirs = v
+	}
+}
+
 // WithSkipSSL tells crawley to skip any ssl handshake errors.
 func WithSkipSSL(v bool) Option {
 	return func(c *config) {
 		c.SkipSSL = v
-	}
-}
-
-// WithSkipDirs disables directories in output.
-func WithSkipDirs(v bool) Option {
-	return func(c *config) {
-		c.SkipDirs = v
 	}
 }
 
