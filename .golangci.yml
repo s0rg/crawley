@@ -44,3 +44,4 @@ issues:
         - funlen
         - ifshort
         - cyclop
+        - dupl

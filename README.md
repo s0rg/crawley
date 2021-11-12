@@ -22,6 +22,7 @@ Crawls web pages and prints any link it can find.
 - can crawl `robots.txt` rules and sitemaps
 - `brute` mode - scan html comments for urls (this can lead to bogus results)
 - make use of `HTTP_PROXY` / `HTTPS_PROXY` environment values
+- directory-only scan mode (aka `fast-scan`)
 
 # installation
 
@@ -45,6 +46,8 @@ possible flags:
     per-request delay (0 - disable) (default 150ms)
 -depth int
     scan depth (-1 - unlimited)
+-dirs
+    policy for non-resource urls: show / hide / only (default "show")
 -help
     this flags (and their defaults) description
 -robots string
@@ -53,8 +56,6 @@ possible flags:
     suppress info and error messages in stderr
 -skip-ssl
     skip ssl verification
--skip-dirs
-    skip non-resource urls in output
 -user-agent string
     user-agent string
 -version

@@ -39,6 +39,7 @@ func TestOptions(t *testing.T) {
 	const (
 		ua      = "foo"
 		rp      = RobotsRespect
+		dp      = DirsOnly
 		delay   = time.Hour
 		workers = 13
 		depth   = 666
@@ -50,12 +51,12 @@ func TestOptions(t *testing.T) {
 	opts := []Option{
 		WithUserAgent(ua),
 		WithRobotsPolicy(rp),
+		WithDirsPolicy(dp),
 		WithDelay(delay),
 		WithMaxCrawlDepth(depth),
 		WithWorkersCount(workers),
 		WithBruteMode(fbool),
 		WithSkipSSL(fbool),
-		WithSkipDirs(fbool),
 	}
 
 	c := &config{}
@@ -94,8 +95,8 @@ func TestOptions(t *testing.T) {
 		t.Error("bad skip-ssl")
 	}
 
-	if c.SkipDirs != fbool {
-		t.Error("bad skip-dirs")
+	if c.Dirs != dp {
+		t.Error("bad dirs policy")
 	}
 }
 

@@ -108,25 +108,41 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 				w++
 			}
 
-			if !c.cfg.SkipDirs || isResorce(t.URI.Path) {
-				c.handleCh <- t.URI.String()
-			}
+			c.emit(t.URI)
 		}
 	}
 
 	return nil
 }
 
+// DumpConfig returns internal config representation.
 func (c *Crawler) DumpConfig() string {
 	return c.cfg.String()
 }
 
-func (c *Crawler) crawl(b *url.URL, t *task) (yes bool) {
+func (c *Crawler) emit(u *url.URL) {
+	show := true
+
+	switch c.cfg.Dirs {
+	case DirsHide:
+		show = isResorce(u.Path)
+	case DirsOnly:
+		show = !isResorce(u.Path)
+	}
+
+	if !show {
+		return
+	}
+
+	c.handleCh <- u.String()
+}
+
+func (c *Crawler) crawl(u *url.URL, t *task) (yes bool) {
 	if !t.Crawl {
 		return
 	}
 
-	if !canCrawl(b, t.URI, c.cfg.Depth) {
+	if !canCrawl(u, t.URI, c.cfg.Depth) {
 		return
 	}
 
@@ -134,7 +150,11 @@ func (c *Crawler) crawl(b *url.URL, t *task) (yes bool) {
 		return
 	}
 
-	go func(u *url.URL) { c.crawlCh <- u }(t.URI)
+	if c.cfg.Dirs == DirsOnly && isResorce(t.URI.Path) {
+		return
+	}
+
+	go func(r *url.URL) { c.crawlCh <- r }(t.URI)
 
 	return true
 }

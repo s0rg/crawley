@@ -324,7 +324,6 @@ func TestRobotsErr400(t *testing.T) {
 		WithMaxCrawlDepth(1),
 		WithRobotsPolicy(RobotsRespect),
 	)
-	//"", 1, 1, time.Millisecond*50, false, false, RobotsRespect)
 
 	if err := c.Run(ts.URL, handler); err != nil {
 		t.Error("run error:", err)
@@ -411,5 +410,86 @@ func TestDumpConfig(t *testing.T) {
 
 	if !strings.Contains(v, "32") {
 		t.Error("bad workers")
+	}
+}
+
+func TestDirsHide(t *testing.T) {
+	t.Parallel()
+
+	const body = `<html><a href="/a">a</a><a href="/b">b</a><a href="/c.jpg"/>c.jpg</a></html>`
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodHead:
+			w.Header().Add(contentType, contentHTML)
+
+		case http.MethodGet:
+			_, _ = io.WriteString(w, body)
+		}
+	}))
+
+	defer ts.Close()
+
+	results := make([]string, 0, 3)
+
+	handler := func(s string) {
+		results = append(results, s)
+	}
+
+	c := New(
+		WithDirsPolicy(DirsHide),
+	)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Errorf("run: %v", err)
+	}
+
+	if len(results) != 1 {
+		t.Fatal("unexpected results count")
+	}
+
+	if !strings.HasSuffix(results[0], "c.jpg") {
+		t.Error("unexpected result")
+	}
+}
+
+func TestDirsOnly(t *testing.T) {
+	t.Parallel()
+
+	const body = `<html><a href="/a">a</a><a href="/b.gif">b.gif</a><a href="/c.jpg">c.jpg</a></html>`
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodHead:
+			w.Header().Add(contentType, contentHTML)
+
+		case http.MethodGet:
+			_, _ = io.WriteString(w, body)
+		}
+	}))
+
+	defer ts.Close()
+
+	results := make([]string, 0, 3)
+
+	handler := func(s string) {
+		results = append(results, s)
+	}
+
+	c := New(
+		WithDirsPolicy(DirsOnly),
+		WithMaxCrawlDepth(2),
+	)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Errorf("run: %v", err)
+	}
+
+	if len(results) != 1 {
+		t.Fatal("unexpected results count")
+	}
+
+	if !strings.HasSuffix(results[0], "a") {
+		t.Error("unexpected result")
 	}
 }
