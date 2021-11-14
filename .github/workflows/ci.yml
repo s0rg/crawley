@@ -13,7 +13,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: checkout
+        uses: actions/checkout@v2
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
   test:
@@ -21,18 +22,32 @@ jobs:
     environment:
       name: ci
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: setup golang
+        uses: actions/setup-go@v2
         with:
           go-version: ^1.17
-      - name: test-cover
-        run: make test
-      - name: send-report
+      - name: test-coverage
+        uses: paambaati/codeclimate-action@v3.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-        run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > cc-test-reporter
-          chmod u+x cc-test-reporter
-          ./cc-test-reporter before-build
-          ./cc-test-reporter format-coverage test.coverage --input-type gocov --prefix github.com/${{ github.repository }}
-          ./cc-test-reporter upload-coverage
+        with:
+          coverageCommand: make test
+          coverageLocations: ${{github.workspace}}/test.coverage:gocov
+          prefix: github.com/${{ github.repository }}
+    codeql:
+      runs-on: ubuntu-latest
+      steps:
+        - name: checkout
+          uses: actions/checkout@v2
+        - name: setup golang
+          uses: actions/setup-go@v2
+          with:
+            go-version: ^1.17
+        - name: init CodeQL
+          uses: github/codeql-action/init@v1
+          with:
+            language: 'go'
+        - name: run analysis
+          uses: github/codeql-action/analyze@v1
