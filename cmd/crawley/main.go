@@ -59,8 +59,19 @@ func crawl(uri string, opts ...crawler.Option) error {
 }
 
 func main() {
-	// defer profile.Start().Stop()
-	defer profile.Start(profile.MemProfile).Stop()
+	profiler := profile.Start(
+		profile.ProfilePath("."),
+		// profile.MemProfile,
+		// profile.MemProfileHeap,
+		// profile.MemProfileAllocs,
+		// profile.BlockProfile,
+		// profile.GoroutineProfile,
+		// profile.MutexProfile,
+		// profile.ThreadcreationProfile,
+		profile.TraceProfile,
+	)
+
+	defer profiler.Stop()
 
 	flag.Parse()
 
