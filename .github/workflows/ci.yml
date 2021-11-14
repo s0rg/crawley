@@ -36,18 +36,18 @@ jobs:
           coverageCommand: make test
           coverageLocations: ${{github.workspace}}/test.coverage:gocov
           prefix: github.com/${{ github.repository }}
-    codeql:
-      runs-on: ubuntu-latest
-      steps:
-        - name: checkout
-          uses: actions/checkout@v2
-        - name: setup golang
-          uses: actions/setup-go@v2
-          with:
-            go-version: ^1.17
-        - name: init CodeQL
-          uses: github/codeql-action/init@v1
-          with:
-            language: 'go'
-        - name: run analysis
-          uses: github/codeql-action/analyze@v1
+  codeql:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: setup golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.17
+      - name: init CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          language: 'go'
+      - name: run analysis
+        uses: github/codeql-action/analyze@v1
