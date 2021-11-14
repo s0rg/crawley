@@ -11,6 +11,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/pkg/profile"
+
 	"github.com/s0rg/crawley/pkg/crawler"
 )
 
@@ -57,6 +59,9 @@ func crawl(uri string, opts ...crawler.Option) error {
 }
 
 func main() {
+	// defer profile.Start().Stop()
+	defer profile.Start(profile.MemProfile).Stop()
+
 	flag.Parse()
 
 	if *fVersion {
