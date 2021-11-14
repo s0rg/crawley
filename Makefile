@@ -19,6 +19,9 @@ build: build-linux
 build-linux: vet
 	GOOS=linux go build -ldflags "${LDFLAGS}" -o "${BIN}" "${SRC}"
 
+build-freebsd: vet
+	GOOS=freebsd go build -ldflags "${LDFLAGS}" -o "${BIN}".bin "${SRC}"
+
 build-windows: vet
 	GOOS=windows go build -ldflags "${LDFLAGS}" -o "${BIN}".exe "${SRC}"
 
@@ -40,5 +43,6 @@ test-cover: test
 clean:
 	[ -f "${COP}" ] && rm "${COP}"
 	[ -f "${BIN}" ] && rm "${BIN}"
+	[ -f "${BIN}".bin ] && rm "${BIN}".bin
 	[ -f "${BIN}".exe ] && rm "${BIN}".exe
 	[ -f "${BIN}".osx ] && rm "${BIN}".osx
