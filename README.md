@@ -16,8 +16,8 @@ Crawls web pages and prints any link it can find.
 
 - fast html SAX-parser (powered by `golang.org/x/net/html`)
 - small (<1000 SLOC), idiomatic, 100% test covered codebase
-- grabs most of useful resources urls (pics, videos, audios, etc...)
-- found urls are streamed to stdout and guranteed to be unique
+- grabs most of useful resources urls (pics, videos, audios, forms, etc...)
+- found urls are streamed to stdout and guranteed to be unique (with fragments omitted)
 - scan depth (limited by starting host and path, by default - 0) can be configured
 - can crawl rules and sitemaps from `robots.txt`
 - `brute` mode - scan html comments for urls (this can lead to bogus results)
