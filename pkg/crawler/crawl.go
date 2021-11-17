@@ -190,7 +190,7 @@ func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
 			return
 		}
 
-		if herr.Code() == 500 {
+		if herr.Code() == http.StatusInternalServerError {
 			c.robots = robots.DenyALL()
 		}
 

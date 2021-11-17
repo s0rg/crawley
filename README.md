@@ -19,7 +19,7 @@ Crawls web pages and prints any link it can find.
 - grabs most of useful resources urls (pics, videos, audios, etc...)
 - found urls are streamed to stdout and guranteed to be unique
 - scan depth (limited by starting host and path, by default - 0) can be configured
-- can crawl `robots.txt` rules and sitemaps
+- can crawl rules and sitemaps from `robots.txt`
 - `brute` mode - scan html comments for urls (this can lead to bogus results)
 - make use of `HTTP_PROXY` / `HTTPS_PROXY` environment values
 - directory-only scan mode (aka `fast-scan`)
@@ -48,6 +48,8 @@ possible flags:
     scan depth (-1 - unlimited)
 -dirs
     policy for non-resource urls: show / hide / only (default "show")
+-headless
+    disable pre-flight HEAD requests
 -help
     this flags (and their defaults) description
 -robots string
@@ -61,5 +63,5 @@ possible flags:
 -version
     show version
 -workers int
-    number of workers
+    number of workers (default - number of CPU cores)
 ```
