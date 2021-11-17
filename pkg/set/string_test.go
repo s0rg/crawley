@@ -17,8 +17,7 @@ func TestString(t *testing.T) {
 
 	s.Add(val1)
 	s.Add(val2)
-	s.Add(val1)
-	s.Add(val2)
+	s.Load(val1, val2)
 
 	if len(s.List()) != 2 {
 		t.Error("unexpected length")
