@@ -25,3 +25,12 @@ func (ss String) List() (rv []string) {
 
 	return rv
 }
+
+// Load populates set with given values.
+func (ss String) Load(vals ...string) String {
+	for _, v := range vals {
+		ss.Add(v)
+	}
+
+	return ss
+}

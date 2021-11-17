@@ -60,3 +60,10 @@ func WithBruteMode(v bool) Option {
 		c.Brute = v
 	}
 }
+
+// WithoutHeads disables pre-flight HEAD requests.
+func WithoutHeads(v bool) Option {
+	return func(c *config) {
+		c.NoHEAD = v
+	}
+}

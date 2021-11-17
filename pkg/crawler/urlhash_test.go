@@ -8,8 +8,8 @@ import (
 func TestUrlHash(t *testing.T) {
 	t.Parallel()
 
-	one, _ := url.Parse("http://test/some/path?foo=bar")
-	two, _ := url.Parse("http://test/some/path?other")
+	one, _ := url.Parse("http://test/some/path?foo")
+	two, _ := url.Parse("http://test/some/path?foo#bar")
 
 	h1 := urlHash(one)
 	h2 := urlHash(two)

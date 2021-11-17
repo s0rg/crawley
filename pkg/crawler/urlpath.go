@@ -4,6 +4,19 @@ import (
 	"net/url"
 	"path"
 	"strings"
+
+	"github.com/s0rg/crawley/pkg/set"
+)
+
+var parsableExts = make(set.String).Load(
+	"asp",
+	"aspx",
+	"cgi",
+	"jsp",
+	"html",
+	"pl",
+	"php",
+	"xhtml",
 )
 
 func isPathSep(r rune) (yes bool) {
@@ -75,4 +88,19 @@ func isResorce(v string) (yes bool) {
 	}
 
 	return true
+}
+
+func canParse(v string) (yes bool) {
+	_, tmp := path.Split(v)
+	if tmp == "" {
+		return true
+	}
+
+	if tmp = path.Ext(tmp); tmp == "" {
+		return true
+	}
+
+	tmp = strings.ToLower(tmp[1:])
+
+	return parsableExts.Has(tmp)
 }

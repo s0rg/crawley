@@ -28,6 +28,7 @@ var (
 	fBrute        = flag.Bool("brute", false, "scan html comments")
 	fSkipSSL      = flag.Bool("skip-ssl", false, "skip ssl verification")
 	fSilent       = flag.Bool("silent", false, "suppress info and error messages in stderr")
+	fNoHeads      = flag.Bool("headless", false, "disable pre-flight HEAD requests")
 	fDepth        = flag.Int("depth", 0, "scan depth (-1 - unlimited)")
 	fWorkers      = flag.Int("workers", runtime.NumCPU(), "number of workers")
 	fDelay        = flag.Duration("delay", defaultDelay, "per-request delay (0 - disable)")
@@ -60,7 +61,7 @@ func main() {
 	flag.Parse()
 
 	if *fVersion {
-		fmt.Printf("%s %s git: %s build: %s site: %s\n", appName, gitVersion, gitHash, buildDate, appURL)
+		fmt.Printf("%s %s-%s build at: %s site: %s\n", appName, gitVersion, gitHash, buildDate, appURL)
 
 		return
 	}
@@ -95,6 +96,7 @@ func main() {
 		crawler.WithBruteMode(*fBrute),
 		crawler.WithDirsPolicy(dirs),
 		crawler.WithRobotsPolicy(robots),
+		crawler.WithoutHeads(*fNoHeads),
 	); err != nil {
 		// forcing back stderr in case of errors, otherwise if 'silent' is on -
 		// no one will know what happened.

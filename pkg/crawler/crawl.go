@@ -21,7 +21,7 @@ import (
 )
 
 type crawlClient interface {
-	Get(context.Context, string) (io.ReadCloser, error)
+	Get(context.Context, string) (io.ReadCloser, http.Header, error)
 	Head(context.Context, string) (http.Header, error)
 }
 
@@ -180,7 +180,7 @@ func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
 	ctx, cancel := context.WithTimeout(context.Background(), robotsTimeout)
 	defer cancel()
 
-	body, err := web.Get(ctx, robots.URL(host))
+	body, _, err := web.Get(ctx, robots.URL(host))
 	if err != nil {
 		var herr client.HTTPError
 
@@ -241,6 +241,36 @@ func (c *Crawler) linkHandler(a atom.Atom, u *url.URL) {
 	c.taskCh <- t
 }
 
+func isHTML(v string) (yes bool) {
+	typ, _, err := mime.ParseMediaType(v)
+	if err != nil {
+		return
+	}
+
+	return typ == contentHTML
+}
+
+func (c *Crawler) fetch(ctx context.Context, web crawlClient, base *url.URL, uri string) {
+	body, hdrs, err := web.Get(ctx, uri)
+	if err != nil {
+		var herr client.HTTPError
+
+		if !errors.As(err, &herr) {
+			log.Printf("[-] GET %s: %v", uri, err)
+
+			return
+		}
+	}
+
+	defer client.Discard(body)
+
+	if !isHTML(hdrs.Get(contentType)) {
+		return
+	}
+
+	links.Extract(base, body, c.cfg.Brute, c.linkHandler)
+}
+
 func (c *Crawler) crawler(web crawlClient) {
 	defer c.wg.Done()
 
@@ -254,18 +284,18 @@ func (c *Crawler) crawler(web crawlClient) {
 
 		var parse bool
 
-		if hdrs, err := web.Head(ctx, us); err != nil {
-			log.Printf("[-] HEAD %s: %v", us, err)
-		} else if typ, _, perr := mime.ParseMediaType(hdrs.Get(contentType)); perr == nil {
-			parse = typ == contentHTML
+		if c.cfg.NoHEAD {
+			parse = canParse(uri.Path)
+		} else {
+			if hdrs, err := web.Head(ctx, us); err != nil {
+				log.Printf("[-] HEAD %s: %v", us, err)
+			} else {
+				parse = isHTML(hdrs.Get(contentType))
+			}
 		}
 
 		if parse {
-			if body, err := web.Get(ctx, us); err != nil {
-				log.Printf("[-] GET %s: %v", us, err)
-			} else {
-				links.Extract(uri, body, c.cfg.Brute, c.linkHandler)
-			}
+			c.fetch(ctx, web, uri, us)
 		}
 
 		cancel()

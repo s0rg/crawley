@@ -50,18 +50,18 @@ func New(ua string, conns int, skipSSL bool) (h *HTTP) {
 }
 
 // Get sends http GET request, returns non-closed body or error.
-func (h *HTTP) Get(ctx context.Context, url string) (body io.ReadCloser, err error) {
+func (h *HTTP) Get(ctx context.Context, url string) (body io.ReadCloser, hdrs http.Header, err error) {
 	var req *http.Request
 
 	if req, err = http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody); err != nil {
 		return
 	}
 
-	if body, _, err = h.request(req); err != nil {
+	if body, hdrs, err = h.request(req); err != nil {
 		return
 	}
 
-	return body, nil
+	return body, hdrs, nil
 }
 
 // Head sends http HEAD request, return response headers or error.
@@ -78,7 +78,7 @@ func (h *HTTP) Head(ctx context.Context, url string) (hdrs http.Header, err erro
 		return
 	}
 
-	dropContents(body)
+	Discard(body)
 
 	return hdrs, nil
 }
@@ -95,18 +95,14 @@ func (h *HTTP) request(req *http.Request) (body io.ReadCloser, hdrs http.Header,
 		return
 	}
 
-	if resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices {
-		return resp.Body, resp.Header, nil
+	if http.StatusOK < resp.StatusCode && resp.StatusCode >= http.StatusMultipleChoices {
+		err = ErrFromResp(resp)
 	}
 
-	dropContents(resp.Body)
-
-	err = ErrFromResp(resp)
-
-	return
+	return resp.Body, resp.Header, err
 }
 
-func dropContents(rc io.ReadCloser) {
+func Discard(rc io.ReadCloser) {
 	_, _ = io.Copy(io.Discard, rc)
 	_ = rc.Close()
 }
