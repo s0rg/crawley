@@ -3,15 +3,12 @@ package crawler
 import (
 	"hash/fnv"
 	"io"
-	"net/url"
+	"strings"
 )
 
-func urlHash(u *url.URL) (sum uint64) {
-	c := *u         // copy original
-	c.Fragment = "" // remove any fragments
-
+func urlHash(s string) (sum uint64) {
 	hash := fnv.New64()
-	_, _ = io.WriteString(hash, c.String())
+	_, _ = io.WriteString(hash, strings.ToLower(s))
 
 	return hash.Sum64()
 }

@@ -19,7 +19,7 @@ func ExtractSitemap(b *url.URL, r io.ReadCloser, handler SitemapHandler) {
 		t   xml.Token
 		e   entry
 		se  xml.StartElement
-		uri *url.URL
+		uri string
 		err error
 		ok  bool
 	)
@@ -47,6 +47,6 @@ func ExtractSitemap(b *url.URL, r io.ReadCloser, handler SitemapHandler) {
 			continue
 		}
 
-		handler(uri.String())
+		handler(uri)
 	}
 }

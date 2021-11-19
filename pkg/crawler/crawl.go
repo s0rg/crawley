@@ -9,6 +9,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -36,7 +37,7 @@ const (
 )
 
 type task struct {
-	URI   *url.URL
+	URI   string //*url.URL
 	Crawl bool
 	Done  bool
 }
@@ -80,7 +81,7 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 	defer c.close()
 
 	seen := make(set.U64)
-	seen.Add(urlHash(base))
+	seen.Add(urlHash(uri))
 
 	web := client.New(c.cfg.UserAgent, c.cfg.Workers, c.cfg.SkipSSL)
 	c.initRobots(base, web)
@@ -104,7 +105,7 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 		case t.Done:
 			w--
 		case seen.Add(urlHash(t.URI)):
-			if c.crawl(base, &t) {
+			if t.Crawl && c.crawl(base, &t) {
 				w++
 			}
 
@@ -120,41 +121,47 @@ func (c *Crawler) DumpConfig() string {
 	return c.cfg.String()
 }
 
-func (c *Crawler) emit(u *url.URL) {
+func (c *Crawler) emit(u string) {
 	show := true
+
+	idx := strings.LastIndexByte(u, '/')
+	if idx == -1 {
+		return
+	}
 
 	switch c.cfg.Dirs {
 	case DirsHide:
-		show = isResorce(u.Path)
+		show = isResorce(u[idx:])
 	case DirsOnly:
-		show = !isResorce(u.Path)
+		show = !isResorce(u[idx:])
 	}
 
 	if !show {
 		return
 	}
 
-	c.handleCh <- u.String()
+	c.handleCh <- u
 }
 
-func (c *Crawler) crawl(u *url.URL, t *task) (yes bool) {
-	if !t.Crawl {
+func (c *Crawler) crawl(base *url.URL, t *task) (yes bool) {
+	u, err := url.Parse(t.URI)
+	if err != nil {
 		return
 	}
 
-	if !canCrawl(u, t.URI, c.cfg.Depth) {
+	if !canCrawl(base, u, c.cfg.Depth) {
 		return
 	}
 
-	if c.cfg.Robots == RobotsRespect && c.robots.Forbidden(t.URI.Path) {
+	if c.cfg.Robots == RobotsRespect && c.robots.Forbidden(u.Path) {
 		return
 	}
 
-	if c.cfg.Dirs == DirsOnly && isResorce(t.URI.Path) {
+	if c.cfg.Dirs == DirsOnly && isResorce(u.Path) {
 		return
 	}
 
-	go func(r *url.URL) { c.crawlCh <- r }(t.URI)
+	go func(r *url.URL) { c.crawlCh <- r }(u)
 
 	return true
 }
@@ -220,18 +227,18 @@ func (c *Crawler) crawlRobots(host *url.URL) {
 		t := base
 		t.Path = u
 
-		c.linkHandler(atom.A, &t)
+		c.linkHandler(atom.A, t.String())
 	}
 
 	for _, u := range c.robots.Sitemaps() {
-		if t, e := url.Parse(u); e == nil {
-			c.linkHandler(atom.A, t)
+		if _, e := url.Parse(u); e == nil {
+			c.linkHandler(atom.A, u)
 		}
 	}
 }
 
-func (c *Crawler) linkHandler(a atom.Atom, u *url.URL) {
-	t := task{URI: u}
+func (c *Crawler) linkHandler(a atom.Atom, s string) {
+	t := task{URI: s}
 
 	switch a {
 	case atom.A, atom.Iframe:
