@@ -268,7 +268,7 @@ func (c *Crawler) fetch(ctx context.Context, web crawlClient, base *url.URL, uri
 		return
 	}
 
-	links.Extract(base, body, c.cfg.Brute, c.linkHandler)
+	links.ExtractHTML(base, body, c.cfg.Brute, c.linkHandler)
 }
 
 func (c *Crawler) crawler(web crawlClient) {

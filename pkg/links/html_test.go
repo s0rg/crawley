@@ -204,7 +204,7 @@ func TestExtractURLS(t *testing.T) {
 
 			var res *url.URL
 
-			Extract(testBase, io.NopCloser(buf), true, func(_ atom.Atom, u *url.URL) {
+			ExtractHTML(testBase, io.NopCloser(buf), true, func(_ atom.Atom, u *url.URL) {
 				res = u
 			})
 
