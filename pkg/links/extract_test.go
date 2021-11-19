@@ -5,15 +5,17 @@ import (
 	"io"
 	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 )
 
+const testRes1 = "http://test/result"
+
 var (
 	testBase, _ = url.Parse("http://test/")
-	testRes1, _ = url.Parse("http://test/result")
 )
 
 func TestClean(t *testing.T) {
@@ -24,18 +26,18 @@ func TestClean(t *testing.T) {
 		r string
 	}
 
-	testRes2, _ := url.Parse("http://result/")
-	testRes3, _ := url.Parse("http://test/?foo=bar")
+	testRes2 := "http://result/"
+	testRes3 := "http://test/?foo=bar"
 
 	tests := []struct {
 		name   string
 		args   args
-		wantU  *url.URL
+		wantU  string
 		wantOk bool
 	}{
-		{"bad-uri", args{b: testBase, r: "[%]"}, nil, false},
-		{"empty-uri", args{b: testBase, r: "http://"}, nil, false},
-		{"js-scheme", args{b: testBase, r: "javascript://result"}, nil, false},
+		{"bad-uri", args{b: testBase, r: "[%]"}, "", false},
+		{"empty-uri", args{b: testBase, r: "http://"}, "", false},
+		{"js-scheme", args{b: testBase, r: "javascript://result"}, "", false},
 		{"result-ok", args{b: testBase, r: "result"}, testRes1, true},
 		{"result-no-scheme", args{b: testBase, r: "//result"}, testRes2, true},
 		{"result-params", args{b: testBase, r: "/?foo=bar"}, testRes3, true},
@@ -81,11 +83,11 @@ func TestExtractTag(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   args
-		wantU  *url.URL
+		wantU  string
 		wantOk bool
 	}{
 		{"ok", args{b: testBase, t: &tOK, k: "b"}, testRes1, true},
-		{"bad", args{b: testBase, t: &tBAD, k: "a"}, nil, false},
+		{"bad", args{b: testBase, t: &tBAD, k: "a"}, "", false},
 	}
 
 	for _, tt := range tests {
@@ -126,9 +128,9 @@ func TestExtractToken(t *testing.T) {
 		keyStart string
 		keyWant  string
 		hasURL   bool
-		wantURL  *url.URL
+		wantURL  string
 	}{
-		{"no-link", tbad, "", "", false, nil},
+		{"no-link", tbad, "", "", false, ""},
 		{"img-ok", html.Token{DataAtom: atom.Img, Attr: attrs}, "", "", true, testRes1},
 		{"image-ok", html.Token{DataAtom: atom.Image, Attr: attrs}, "", "", true, testRes1},
 		{"video-ok", html.Token{DataAtom: atom.Video, Attr: attrs}, "", keySRC, true, testRes1},
@@ -153,10 +155,10 @@ func TestExtractToken(t *testing.T) {
 
 			key := tc.keyStart
 
-			var res *url.URL
+			var res string
 
-			extractToken(testBase, tc.token, &key, func(_ atom.Atom, u *url.URL) {
-				res = u
+			base(testBase, tc.token, &key, func(_ atom.Atom, s string) {
+				res = s
 			})
 
 			if key != tc.keyWant {
@@ -186,12 +188,12 @@ func TestExtractURLS(t *testing.T) {
 		name    string
 		raw     string
 		hasLink bool
-		lnk     *url.URL
+		lnk     string
 	}{
 		{"ok-1", raw1, true, testRes1},
 		{"ok-4", raw4, true, testRes1},
 		{"comment", raw3, true, testRes1},
-		{"bad", raw2, false, nil},
+		{"bad", raw2, false, ""},
 	}
 
 	for _, tt := range tests {
@@ -202,10 +204,10 @@ func TestExtractURLS(t *testing.T) {
 
 			buf := bytes.NewBufferString(tc.raw)
 
-			var res *url.URL
+			var res string
 
-			Extract(testBase, io.NopCloser(buf), true, func(_ atom.Atom, u *url.URL) {
-				res = u
+			Extract(testBase, io.NopCloser(buf), true, func(_ atom.Atom, s string) {
+				res = s
 			})
 
 			if tc.hasLink {
@@ -226,10 +228,10 @@ loremipsumhTTp://foo fdfdfs HttPs://bar
 	t.Parallel()
 
 	res := []string{}
-	want := []string{"foo", "bar", "baz", "boo"}
+	want := []string{"http://foo", "https://bar", "https://baz", "http://boo"}
 
-	handler := func(_ atom.Atom, u *url.URL) {
-		res = append(res, u.Host)
+	handler := func(_ atom.Atom, s string) {
+		res = append(res, strings.ToLower(s))
 	}
 
 	extractComment(comment, handler)

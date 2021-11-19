@@ -17,11 +17,12 @@ const (
 	keyHREF   = "href"
 	keyDATA   = "data"
 	keyACTION = "action"
+	keyPOSTER = "poster"
 	jsScheme  = "javascript"
 )
 
 // Handler is a callback for found links.
-type Handler func(a atom.Atom, u *url.URL)
+type Handler func(atom.Atom, string)
 
 // Extract run `handler` for every link found inside html from `r`, rebasing them to `b` (if need).
 func Extract(b *url.URL, r io.ReadCloser, brute bool, handler Handler) {
@@ -37,7 +38,7 @@ func Extract(b *url.URL, r io.ReadCloser, brute bool, handler Handler) {
 		case html.ErrorToken:
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
-			extractToken(b, tkns.Token(), &key, handler)
+			base(b, tkns.Token(), &key, handler)
 		case html.CommentToken:
 			if brute {
 				extractComment(tkns.Token().Data, handler)
@@ -78,66 +79,79 @@ func extractComment(s string, h Handler) {
 		}
 
 		if uri := bytes.TrimSpace(buf[pos:]); len(uri) > 0 {
-			if u, err := url.Parse(string(uri)); err == nil && u.Host != "" {
-				h(atom.A, u)
+			suri := string(uri)
+			if u, err := url.Parse(suri); err == nil && u.Host != "" {
+				h(atom.A, suri)
 			}
 		}
 	}
 }
 
-func extractToken(b *url.URL, t html.Token, k *string, h Handler) {
+func base(b *url.URL, t html.Token, k *string, h Handler) {
 	var (
-		u  *url.URL
-		ok bool
+		res = make([]string, 0, 2)
+		uri string
+		ok  bool
 	)
 
 	switch t.DataAtom {
 	case atom.A:
-		u, ok = extractTag(b, &t, keyHREF)
+		uri, ok = extractTag(b, &t, keyHREF)
 
 	case atom.Img, atom.Image, atom.Iframe, atom.Script, atom.Track:
-		u, ok = extractTag(b, &t, keySRC)
+		uri, ok = extractTag(b, &t, keySRC)
 
 	case atom.Form:
-		u, ok = extractTag(b, &t, keyACTION)
+		uri, ok = extractTag(b, &t, keyACTION)
 
 	case atom.Object:
-		u, ok = extractTag(b, &t, keyDATA)
+		uri, ok = extractTag(b, &t, keyDATA)
 
-	case atom.Video, atom.Audio:
+	case atom.Video:
+		if uri, ok = extractTag(b, &t, keyPOSTER); ok {
+			res = append(res, uri)
+		}
+
+		fallthrough
+
+	case atom.Audio:
 		*k = keySRC
-		u, ok = extractTag(b, &t, keySRC)
+		uri, ok = extractTag(b, &t, keySRC)
 
 	case atom.Picture:
 		*k = keySRCS
 
 	case atom.Source:
-		u, ok = extractTag(b, &t, *k)
+		uri, ok = extractTag(b, &t, *k)
 	}
 
 	if ok {
-		h(t.DataAtom, u)
+		res = append(res, uri)
+	}
+
+	for i := 0; i < len(res); i++ {
+		h(t.DataAtom, res[i])
 	}
 }
 
-func extractTag(b *url.URL, t *html.Token, k string) (u *url.URL, ok bool) {
-	for i := 0; i < len(t.Attr); i++ {
-		if a := &t.Attr[i]; a.Key == k {
-			return clean(b, a.Val)
+func extractTag(base *url.URL, token *html.Token, key string) (rv string, ok bool) {
+	for i := 0; i < len(token.Attr); i++ {
+		if a := &token.Attr[i]; a.Key == key {
+			return clean(base, a.Val)
 		}
 	}
 
-	return nil, false
+	return rv, false
 }
 
-func clean(b *url.URL, r string) (u *url.URL, ok bool) {
-	u, err := url.Parse(r)
+func clean(base *url.URL, link string) (rv string, ok bool) {
+	u, err := url.Parse(link)
 	if err != nil {
 		return
 	}
 
 	if u.Host == "" {
-		if u = b.ResolveReference(u); u.Host == "" {
+		if u = base.ResolveReference(u); u.Host == "" {
 			return
 		}
 	}
@@ -146,7 +160,7 @@ func clean(b *url.URL, r string) (u *url.URL, ok bool) {
 	case jsScheme:
 		return
 	case "":
-		u.Scheme = b.Scheme
+		u.Scheme = base.Scheme
 	}
 
 	if u.Path == "" {
@@ -155,5 +169,5 @@ func clean(b *url.URL, r string) (u *url.URL, ok bool) {
 
 	u.Fragment = ""
 
-	return u, true
+	return u.String(), true
 }

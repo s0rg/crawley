@@ -64,12 +64,12 @@ func main() {
 		profile.ProfilePath("."),
 		// profile.MemProfile,
 		// profile.MemProfileHeap,
-		// profile.MemProfileAllocs,
+		profile.MemProfileAllocs,
 		// profile.BlockProfile,
 		// profile.GoroutineProfile,
 		// profile.MutexProfile,
 		// profile.ThreadcreationProfile,
-		profile.TraceProfile,
+		// profile.TraceProfile,
 	)
 
 	defer profiler.Stop()
