@@ -125,3 +125,25 @@ func TestIsResorce(t *testing.T) {
 		}
 	}
 }
+
+func TestCanParse(t *testing.T) {
+	t.Parallel()
+
+	type testCase struct {
+		Val  string
+		Want bool
+	}
+
+	cases := []testCase{
+		{"/some/path", true},
+		{"/some/other/path/", true},
+		{"/some/resource.html", true},
+		{"/path/to/some/resource.zip", false},
+	}
+
+	for _, tc := range cases {
+		if got := canParse(tc.Val); got != tc.Want {
+			t.Errorf("failed for: '%s' got: %t", tc.Val, got)
+		}
+	}
+}

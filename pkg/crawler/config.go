@@ -21,6 +21,7 @@ type config struct {
 	Dirs      DirsPolicy
 	SkipSSL   bool
 	Brute     bool
+	NoHEAD    bool
 }
 
 func (c *config) validate() {

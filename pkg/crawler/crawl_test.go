@@ -343,8 +343,8 @@ type testClient struct {
 	bodyIO io.ReadCloser
 }
 
-func (tc *testClient) Get(_ context.Context, _ string) (body io.ReadCloser, err error) {
-	return tc.bodyIO, tc.err
+func (tc *testClient) Get(_ context.Context, _ string) (body io.ReadCloser, h http.Header, err error) {
+	return tc.bodyIO, nil, tc.err
 }
 
 func (tc *testClient) Head(_ context.Context, _ string) (h http.Header, err error) {
@@ -491,5 +491,86 @@ func TestDirsOnly(t *testing.T) {
 
 	if !strings.HasSuffix(results[0], "a") {
 		t.Error("unexpected result")
+	}
+}
+
+func TestNoHeads(t *testing.T) {
+	t.Parallel()
+
+	const body = `<html><a href="/a">a</a><a href="/b.gif">b.gif</a></html>`
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodHead:
+			t.Error("caught HEAD!")
+
+		case http.MethodGet:
+			w.Header().Add(contentType, contentHTML)
+			_, _ = io.WriteString(w, body)
+		}
+	}))
+
+	defer ts.Close()
+
+	results := make([]string, 0, 2)
+
+	handler := func(s string) {
+		results = append(results, s)
+	}
+
+	c := New(
+		WithoutHeads(true),
+		WithDirsPolicy(DirsOnly),
+	)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Errorf("run: %v", err)
+	}
+
+	if len(results) != 1 {
+		t.Fatal("unexpected results count")
+	}
+
+	if !strings.HasSuffix(results[0], "a") {
+		t.Error("unexpected result")
+	}
+}
+
+func TestGetNonHTTPErr(t *testing.T) {
+	t.Parallel()
+
+	var (
+		base, _ = url.Parse("http://test/")
+		genErr  = errors.New("generic error")
+		tc      = testClient{err: genErr, bodyIO: nil}
+		c       = New(WithoutHeads(true))
+	)
+
+	c.crawlCh = make(chan *url.URL, 1)
+	c.taskCh = make(chan task, 1)
+
+	c.crawlCh <- base
+	close(c.crawlCh)
+
+	c.wg.Add(1)
+
+	go c.crawler(&tc)
+
+	c.wg.Wait()
+
+	close(c.taskCh)
+
+	flags := make([]bool, 0, 1)
+
+	for t := range c.taskCh {
+		flags = append(flags, t.Done)
+	}
+
+	if len(flags) != 1 {
+		t.Fatal("more results, than expected")
+	}
+
+	if !flags[0] {
+		t.Error("non-done result")
 	}
 }

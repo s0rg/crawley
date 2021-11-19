@@ -57,6 +57,7 @@ func TestOptions(t *testing.T) {
 		WithWorkersCount(workers),
 		WithBruteMode(fbool),
 		WithSkipSSL(fbool),
+		WithoutHeads(fbool),
 	}
 
 	c := &config{}
@@ -93,6 +94,10 @@ func TestOptions(t *testing.T) {
 
 	if c.SkipSSL != fbool {
 		t.Error("bad skip-ssl")
+	}
+
+	if c.NoHEAD != fbool {
+		t.Error("bad no-head")
 	}
 
 	if c.Dirs != dp {

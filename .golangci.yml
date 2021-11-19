@@ -1,7 +1,5 @@
 linters-settings:
   gocritic:
-    disabled-checks:
-      - commentFormatting
     enabled-tags:
       - performance
       - diagnostic
@@ -17,9 +15,6 @@ linters:
     - exhaustive
     - varnamelen
     - forbidigo
-    - goerr113
-    - gofumpt
-    - gomnd
     - gci
     # deprecated :(
     - interfacer
@@ -45,3 +40,4 @@ issues:
         - ifshort
         - cyclop
         - dupl
+        - goerr113
