@@ -147,3 +147,25 @@ func TestCanParse(t *testing.T) {
 		}
 	}
 }
+
+func TestIsSitemap(t *testing.T) {
+	t.Parallel()
+
+	type testCase struct {
+		Val  string
+		Want bool
+	}
+
+	cases := []testCase{
+		{"/some/path", false},
+		{"/some/other/path/sitemap.xml", true},
+		{"/some/resource.html", false},
+		{"/path/to/some/sitemap-index.xml", true},
+	}
+
+	for _, tc := range cases {
+		if got := isSitemap(tc.Val); got != tc.Want {
+			t.Errorf("failed for: '%s' got: %t", tc.Val, got)
+		}
+	}
+}

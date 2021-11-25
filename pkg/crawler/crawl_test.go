@@ -547,7 +547,7 @@ func TestGetNonHTTPErr(t *testing.T) {
 	)
 
 	c.crawlCh = make(chan *url.URL, 1)
-	c.taskCh = make(chan task, 1)
+	c.resultCh = make(chan crawlResult, 1)
 
 	c.crawlCh <- base
 	close(c.crawlCh)
@@ -558,12 +558,12 @@ func TestGetNonHTTPErr(t *testing.T) {
 
 	c.wg.Wait()
 
-	close(c.taskCh)
+	close(c.resultCh)
 
 	flags := make([]bool, 0, 1)
 
-	for t := range c.taskCh {
-		flags = append(flags, t.Done)
+	for t := range c.resultCh {
+		flags = append(flags, t.Flag == TaskDone)
 	}
 
 	if len(flags) != 1 {
@@ -573,4 +573,8 @@ func TestGetNonHTTPErr(t *testing.T) {
 	if !flags[0] {
 		t.Error("non-done result")
 	}
+}
+
+func TestSitemap(t *testing.T) {
+	t.Parallel()
 }

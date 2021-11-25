@@ -16,7 +16,7 @@ import (
 
 const (
 	appName      = "Crawley"
-	appURL       = "https://github.com/s0rg/crawley"
+	appSite      = "https://github.com/s0rg/crawley"
 	defaultDelay = 150 * time.Millisecond
 )
 
@@ -61,7 +61,7 @@ func main() {
 	flag.Parse()
 
 	if *fVersion {
-		fmt.Printf("%s %s-%s build at: %s site: %s\n", appName, gitVersion, gitHash, buildDate, appURL)
+		fmt.Printf("%s %s-%s build at: %s site: %s\n", appName, gitVersion, gitHash, buildDate, appSite)
 
 		return
 	}

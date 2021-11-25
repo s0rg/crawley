@@ -19,6 +19,20 @@ var parsableExts = make(set.String).Load(
 	"xhtml",
 )
 
+func isSitemap(s string) (yes bool) {
+	const (
+		sitemapXML = "sitemap.xml"
+		sitemapIDX = "sitemap-index.xml"
+	)
+
+	switch {
+	case strings.HasSuffix(s, sitemapXML), strings.HasSuffix(s, sitemapIDX):
+		yes = true
+	}
+
+	return
+}
+
 func isPathSep(r rune) (yes bool) {
 	const pathSep = '/'
 

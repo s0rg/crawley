@@ -14,9 +14,7 @@ import (
 
 const testRes1 = "http://test/result"
 
-var (
-	testBase, _ = url.Parse("http://test/")
-)
+var testBase, _ = url.Parse("http://test/")
 
 func TestClean(t *testing.T) {
 	t.Parallel()
@@ -81,13 +79,12 @@ func TestExtractTag(t *testing.T) {
 	}
 
 	tests := []struct {
-		name   string
-		args   args
-		wantU  string
-		wantOk bool
+		name  string
+		args  args
+		wantU string
 	}{
-		{"ok", args{b: testBase, t: &tOK, k: "b"}, testRes1, true},
-		{"bad", args{b: testBase, t: &tBAD, k: "a"}, "", false},
+		{"ok", args{b: testBase, t: &tOK, k: "b"}, testRes1},
+		{"bad", args{b: testBase, t: &tBAD, k: "a"}, ""},
 	}
 
 	for _, tt := range tests {
@@ -96,15 +93,10 @@ func TestExtractTag(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotU, gotOk := extractTag(tc.args.b, tc.args.t, tc.args.k)
-			if gotOk != tc.wantOk {
-				t.Errorf("extractTag() gotOk = %v, want %v", gotOk, tc.wantOk)
-			}
+			gotU := extractTag(tc.args.b, tc.args.t, tc.args.k)
 
-			if gotOk {
-				if !reflect.DeepEqual(gotU, tc.wantU) {
-					t.Errorf("extractTag() gotU = %v, want %v", gotU, tc.wantU)
-				}
+			if !reflect.DeepEqual(gotU, tc.wantU) {
+				t.Errorf("extractTag() gotU = %v, want %v", gotU, tc.wantU)
 			}
 		})
 	}
@@ -127,24 +119,23 @@ func TestExtractToken(t *testing.T) {
 		token    html.Token
 		keyStart string
 		keyWant  string
-		hasURL   bool
 		wantURL  string
 	}{
-		{"no-link", tbad, "", "", false, ""},
-		{"img-ok", html.Token{DataAtom: atom.Img, Attr: attrs}, "", "", true, testRes1},
-		{"image-ok", html.Token{DataAtom: atom.Image, Attr: attrs}, "", "", true, testRes1},
-		{"video-ok", html.Token{DataAtom: atom.Video, Attr: attrs}, "", keySRC, true, testRes1},
-		{"audio-ok", html.Token{DataAtom: atom.Audio, Attr: attrs}, "", keySRC, true, testRes1},
-		{"script-ok", html.Token{DataAtom: atom.Script, Attr: attrs}, "", "", true, testRes1},
-		{"track-ok", html.Token{DataAtom: atom.Track, Attr: attrs}, "", "", true, testRes1},
-		{"object-ok", html.Token{DataAtom: atom.Object, Attr: attrs}, "", "", true, testRes1},
-		{"a-ok", html.Token{DataAtom: atom.A, Attr: attrs}, "", "", true, testRes1},
-		{"iframe-ok", html.Token{DataAtom: atom.Iframe, Attr: attrs}, "", "", true, testRes1},
-		{"video-empty", html.Token{DataAtom: atom.Video}, "", keySRC, false, testRes1},
-		{"audio-empty", html.Token{DataAtom: atom.Audio}, "", keySRC, false, testRes1},
-		{"picture-empty", html.Token{DataAtom: atom.Picture}, "", keySRCS, false, testRes1},
-		{"source-src-ok", html.Token{DataAtom: atom.Source, Attr: attrs}, keySRC, keySRC, true, testRes1},
-		{"form-action-ok", html.Token{DataAtom: atom.Form, Attr: attrs}, "", "", true, testRes1},
+		{"no-link", tbad, "", "", ""},
+		{"img-ok", html.Token{DataAtom: atom.Img, Attr: attrs}, "", "", testRes1},
+		{"image-ok", html.Token{DataAtom: atom.Image, Attr: attrs}, "", "", testRes1},
+		{"video-ok", html.Token{DataAtom: atom.Video, Attr: attrs}, "", keySRC, testRes1},
+		{"audio-ok", html.Token{DataAtom: atom.Audio, Attr: attrs}, "", keySRC, testRes1},
+		{"script-ok", html.Token{DataAtom: atom.Script, Attr: attrs}, "", "", testRes1},
+		{"track-ok", html.Token{DataAtom: atom.Track, Attr: attrs}, "", "", testRes1},
+		{"object-ok", html.Token{DataAtom: atom.Object, Attr: attrs}, "", "", testRes1},
+		{"a-ok", html.Token{DataAtom: atom.A, Attr: attrs}, "", "", testRes1},
+		{"iframe-ok", html.Token{DataAtom: atom.Iframe, Attr: attrs}, "", "", testRes1},
+		{"video-empty", html.Token{DataAtom: atom.Video}, "", keySRC, ""},
+		{"audio-empty", html.Token{DataAtom: atom.Audio}, "", keySRC, ""},
+		{"picture-empty", html.Token{DataAtom: atom.Picture}, "", keySRCS, ""},
+		{"source-src-ok", html.Token{DataAtom: atom.Source, Attr: attrs}, keySRC, keySRC, testRes1},
+		{"form-action-ok", html.Token{DataAtom: atom.Form, Attr: attrs}, "", "", testRes1},
 	}
 
 	for _, tt := range tests {
@@ -157,7 +148,7 @@ func TestExtractToken(t *testing.T) {
 
 			var res string
 
-			base(testBase, tc.token, &key, func(_ atom.Atom, s string) {
+			extractToken(testBase, tc.token, &key, func(_ atom.Atom, s string) {
 				res = s
 			})
 
@@ -165,10 +156,8 @@ func TestExtractToken(t *testing.T) {
 				t.Errorf("extractToken() key gotU = %v, want %v", key, tc.keyWant)
 			}
 
-			if tc.hasURL {
-				if !reflect.DeepEqual(res, tc.wantURL) {
-					t.Errorf("extractToken() link gotU = %v, want %v", res, tc.wantURL)
-				}
+			if !reflect.DeepEqual(res, tc.wantURL) {
+				t.Errorf("extractToken() link gotU = %v, want %v", res, tc.wantURL)
 			}
 		})
 	}

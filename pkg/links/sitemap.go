@@ -6,16 +6,19 @@ import (
 	"net/url"
 )
 
-type SitemapHandler func(string)
+type (
+	// SitemapHandler is a callback for links found in sitemap.
+	SitemapHandler func(string)
 
-type entry struct {
-	Loc string `xml:"loc"`
-}
+	entry struct {
+		Loc string `xml:"loc"`
+	}
+)
 
-func ExtractSitemap(b *url.URL, r io.ReadCloser, handler SitemapHandler) {
-	dec := xml.NewDecoder(r)
-
+// ExtractSitemap run `handler` for every link found inside sitemap from `r`, rebasing them to `b` (if need).
+func ExtractSitemap(base *url.URL, r io.Reader, handler SitemapHandler) {
 	var (
+		dec = xml.NewDecoder(r)
 		t   xml.Token
 		e   entry
 		se  xml.StartElement
@@ -43,7 +46,7 @@ func ExtractSitemap(b *url.URL, r io.ReadCloser, handler SitemapHandler) {
 			continue
 		}
 
-		if uri, ok = clean(b, e.Loc); !ok {
+		if uri, ok = clean(base, e.Loc); !ok {
 			continue
 		}
 

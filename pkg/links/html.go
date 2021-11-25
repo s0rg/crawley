@@ -21,13 +21,11 @@ const (
 	jsScheme  = "javascript"
 )
 
-// Handler is a callback for found links.
-type Handler func(atom.Atom, string)
+// HTMLHandler is a callback for found links.
+type HTMLHandler func(atom.Atom, string)
 
 // ExtractHTML run `handler` for every link found inside html from `r`, rebasing them to `b` (if need).
-func ExtractHTML(b *url.URL, r io.ReadCloser, brute bool, handler Handler) {
-	defer r.Close()
-
+func ExtractHTML(b *url.URL, r io.Reader, brute bool, handler HTMLHandler) {
 	var (
 		tkns = html.NewTokenizer(r)
 		key  = keySRC
@@ -38,7 +36,7 @@ func ExtractHTML(b *url.URL, r io.ReadCloser, brute bool, handler Handler) {
 		case html.ErrorToken:
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
-			base(b, tkns.Token(), &key, handler)
+			extractToken(b, tkns.Token(), &key, handler)
 		case html.CommentToken:
 			if brute {
 				extractComment(tkns.Token().Data, handler)
@@ -47,7 +45,7 @@ func ExtractHTML(b *url.URL, r io.ReadCloser, brute bool, handler Handler) {
 	}
 }
 
-func extractComment(s string, h Handler) {
+func extractComment(s string, h HTMLHandler) {
 	ss := bufio.NewScanner(strings.NewReader(s))
 	ss.Split(bufio.ScanWords)
 
@@ -87,61 +85,61 @@ func extractComment(s string, h Handler) {
 	}
 }
 
-func base(b *url.URL, t html.Token, k *string, h Handler) {
+func extractToken(b *url.URL, t html.Token, k *string, h HTMLHandler) {
 	var (
-		res = make([]string, 0, 2)
-		uri string
-		ok  bool
+		poster string
+		uri    string
 	)
 
 	switch t.DataAtom {
 	case atom.A:
-		uri, ok = extractTag(b, &t, keyHREF)
+		uri = extractTag(b, &t, keyHREF)
 
 	case atom.Img, atom.Image, atom.Iframe, atom.Script, atom.Track:
-		uri, ok = extractTag(b, &t, keySRC)
+		uri = extractTag(b, &t, keySRC)
 
 	case atom.Form:
-		uri, ok = extractTag(b, &t, keyACTION)
+		uri = extractTag(b, &t, keyACTION)
 
 	case atom.Object:
-		uri, ok = extractTag(b, &t, keyDATA)
+		uri = extractTag(b, &t, keyDATA)
 
 	case atom.Video:
-		if uri, ok = extractTag(b, &t, keyPOSTER); ok {
-			res = append(res, uri)
-		}
+		poster = extractTag(b, &t, keyPOSTER)
 
 		fallthrough
 
 	case atom.Audio:
 		*k = keySRC
-		uri, ok = extractTag(b, &t, keySRC)
+		uri = extractTag(b, &t, keySRC)
 
 	case atom.Picture:
 		*k = keySRCS
 
 	case atom.Source:
-		uri, ok = extractTag(b, &t, *k)
+		uri = extractTag(b, &t, *k)
 	}
 
-	if ok {
-		res = append(res, uri)
-	}
+	callHandler(h, t.DataAtom, uri)
+	callHandler(h, t.DataAtom, poster)
+}
 
-	for i := 0; i < len(res); i++ {
-		h(t.DataAtom, res[i])
+func callHandler(h HTMLHandler, a atom.Atom, s string) {
+	if s != "" {
+		h(a, s)
 	}
 }
 
-func extractTag(base *url.URL, token *html.Token, key string) (rv string, ok bool) {
+func extractTag(base *url.URL, token *html.Token, key string) (rv string) {
 	for i := 0; i < len(token.Attr); i++ {
 		if a := &token.Attr[i]; a.Key == key {
-			return clean(base, a.Val)
+			if res, ok := clean(base, a.Val); ok {
+				return res
+			}
 		}
 	}
 
-	return rv, false
+	return rv
 }
 
 func clean(base *url.URL, link string) (rv string, ok bool) {
