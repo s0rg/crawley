@@ -1,3 +1,5 @@
 dist/
 vendor/
-test.coverage
+*.out
+*.pprof
+*_profile.pdf

@@ -2,7 +2,7 @@ SHELL=/bin/bash
 
 BIN=bin/crawley
 SRC=./cmd/crawley
-COP=test.coverage
+COP=cover.out
 
 GIT_TAG=`git describe --abbrev=0 2>/dev/null || echo -n "no-tag"`
 GIT_HASH=`git rev-parse --short HEAD 2>/dev/null || echo -n "no-git"`

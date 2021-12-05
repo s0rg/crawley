@@ -9,6 +9,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -35,10 +36,17 @@ const (
 	contentHTML   = "text/html"
 )
 
-type task struct {
-	URI   *url.URL
-	Crawl bool
-	Done  bool
+type taskFlag byte
+
+const (
+	TaskDefault taskFlag = iota
+	TaskCrawl
+	TaskDone
+)
+
+type crawlResult struct {
+	URI  string
+	Flag taskFlag
 }
 
 // Crawler holds crawling process config and state.
@@ -47,7 +55,7 @@ type Crawler struct {
 	wg       sync.WaitGroup
 	handleCh chan string
 	crawlCh  chan *url.URL
-	taskCh   chan task
+	resultCh chan crawlResult
 	robots   *robots.TXT
 }
 
@@ -75,12 +83,12 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 	n := (c.cfg.Workers + c.cfg.Depth + 1)
 	c.handleCh = make(chan string, n*nMID)
 	c.crawlCh = make(chan *url.URL, n*nMID)
-	c.taskCh = make(chan task, n*nBIG)
+	c.resultCh = make(chan crawlResult, n*nBIG)
 
 	defer c.close()
 
 	seen := make(set.U64)
-	seen.Add(urlHash(base))
+	seen.Add(urlHash(uri))
 
 	web := client.New(c.cfg.UserAgent, c.cfg.Workers, c.cfg.SkipSSL)
 	c.initRobots(base, web)
@@ -95,16 +103,16 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 
 	c.crawlCh <- base
 
-	var t task
+	var t crawlResult
 
 	for w := 1; w > 0; {
-		t = <-c.taskCh
+		t = <-c.resultCh
 
 		switch {
-		case t.Done:
+		case t.Flag == TaskDone:
 			w--
 		case seen.Add(urlHash(t.URI)):
-			if c.crawl(base, &t) {
+			if t.Flag == TaskCrawl && c.crawl(base, &t) {
 				w++
 			}
 
@@ -120,41 +128,47 @@ func (c *Crawler) DumpConfig() string {
 	return c.cfg.String()
 }
 
-func (c *Crawler) emit(u *url.URL) {
+func (c *Crawler) emit(u string) {
 	show := true
+
+	idx := strings.LastIndexByte(u, '/')
+	if idx == -1 {
+		return
+	}
 
 	switch c.cfg.Dirs {
 	case DirsHide:
-		show = isResorce(u.Path)
+		show = isResorce(u[idx:])
 	case DirsOnly:
-		show = !isResorce(u.Path)
+		show = !isResorce(u[idx:])
 	}
 
 	if !show {
 		return
 	}
 
-	c.handleCh <- u.String()
+	c.handleCh <- u
 }
 
-func (c *Crawler) crawl(u *url.URL, t *task) (yes bool) {
-	if !t.Crawl {
+func (c *Crawler) crawl(base *url.URL, t *crawlResult) (yes bool) {
+	u, err := url.Parse(t.URI)
+	if err != nil {
 		return
 	}
 
-	if !canCrawl(u, t.URI, c.cfg.Depth) {
+	if !canCrawl(base, u, c.cfg.Depth) {
 		return
 	}
 
-	if c.cfg.Robots == RobotsRespect && c.robots.Forbidden(t.URI.Path) {
+	if c.robots.Forbidden(u.Path) {
 		return
 	}
 
-	if c.cfg.Dirs == DirsOnly && isResorce(t.URI.Path) {
+	if c.cfg.Dirs == DirsOnly && isResorce(u.Path) {
 		return
 	}
 
-	go func(r *url.URL) { c.crawlCh <- r }(t.URI)
+	go func(r *url.URL) { c.crawlCh <- r }(u)
 
 	return true
 }
@@ -167,7 +181,7 @@ func (c *Crawler) close() {
 	close(c.handleCh)
 	c.wg.Wait() // wait for handler
 
-	close(c.taskCh)
+	close(c.resultCh)
 }
 
 func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
@@ -220,25 +234,29 @@ func (c *Crawler) crawlRobots(host *url.URL) {
 		t := base
 		t.Path = u
 
-		c.linkHandler(atom.A, &t)
+		c.linkHandler(atom.A, t.String())
 	}
 
 	for _, u := range c.robots.Sitemaps() {
-		if t, e := url.Parse(u); e == nil {
-			c.linkHandler(atom.A, t)
+		if _, e := url.Parse(u); e == nil {
+			c.linkHandler(atom.A, u)
 		}
 	}
 }
 
-func (c *Crawler) linkHandler(a atom.Atom, u *url.URL) {
-	t := task{URI: u}
+func (c *Crawler) sitemapHandler(s string) {
+	c.linkHandler(atom.A, s)
+}
+
+func (c *Crawler) linkHandler(a atom.Atom, s string) {
+	t := crawlResult{URI: s}
 
 	switch a {
 	case atom.A, atom.Iframe:
-		t.Crawl = true
+		t.Flag = TaskCrawl
 	}
 
-	c.taskCh <- t
+	c.resultCh <- t
 }
 
 func isHTML(v string) (yes bool) {
@@ -250,7 +268,12 @@ func isHTML(v string) (yes bool) {
 	return typ == contentHTML
 }
 
-func (c *Crawler) fetch(ctx context.Context, web crawlClient, base *url.URL, uri string) {
+func (c *Crawler) fetch(
+	ctx context.Context,
+	web crawlClient,
+	base *url.URL,
+	uri string,
+) {
 	body, hdrs, err := web.Get(ctx, uri)
 	if err != nil {
 		var herr client.HTTPError
@@ -262,13 +285,14 @@ func (c *Crawler) fetch(ctx context.Context, web crawlClient, base *url.URL, uri
 		}
 	}
 
-	defer client.Discard(body)
-
-	if !isHTML(hdrs.Get(contentType)) {
-		return
+	switch {
+	case isHTML(hdrs.Get(contentType)):
+		links.ExtractHTML(base, body, c.cfg.Brute, c.linkHandler)
+	case isSitemap(uri):
+		links.ExtractSitemap(base, body, c.sitemapHandler)
 	}
 
-	links.Extract(base, body, c.cfg.Brute, c.linkHandler)
+	client.Discard(body)
 }
 
 func (c *Crawler) crawler(web crawlClient) {
@@ -290,7 +314,7 @@ func (c *Crawler) crawler(web crawlClient) {
 			if hdrs, err := web.Head(ctx, us); err != nil {
 				log.Printf("[-] HEAD %s: %v", us, err)
 			} else {
-				parse = isHTML(hdrs.Get(contentType))
+				parse = isHTML(hdrs.Get(contentType)) || isSitemap(us)
 			}
 		}
 
@@ -300,7 +324,7 @@ func (c *Crawler) crawler(web crawlClient) {
 
 		cancel()
 
-		c.taskCh <- task{Done: true}
+		c.resultCh <- crawlResult{Flag: TaskDone}
 	}
 }
 

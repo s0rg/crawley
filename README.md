@@ -46,7 +46,7 @@ possible flags:
     per-request delay (0 - disable) (default 150ms)
 -depth int
     scan depth (-1 - unlimited)
--dirs
+-dirs string
     policy for non-resource urls: show / hide / only (default "show")
 -headless
     disable pre-flight HEAD requests

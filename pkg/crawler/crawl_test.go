@@ -3,6 +3,7 @@ package crawler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -547,7 +548,7 @@ func TestGetNonHTTPErr(t *testing.T) {
 	)
 
 	c.crawlCh = make(chan *url.URL, 1)
-	c.taskCh = make(chan task, 1)
+	c.resultCh = make(chan crawlResult, 1)
 
 	c.crawlCh <- base
 	close(c.crawlCh)
@@ -558,12 +559,12 @@ func TestGetNonHTTPErr(t *testing.T) {
 
 	c.wg.Wait()
 
-	close(c.taskCh)
+	close(c.resultCh)
 
 	flags := make([]bool, 0, 1)
 
-	for t := range c.taskCh {
-		flags = append(flags, t.Done)
+	for t := range c.resultCh {
+		flags = append(flags, t.Flag == TaskDone)
 	}
 
 	if len(flags) != 1 {
@@ -572,5 +573,98 @@ func TestGetNonHTTPErr(t *testing.T) {
 
 	if !flags[0] {
 		t.Error("non-done result")
+	}
+}
+
+func TestBadEmit(t *testing.T) {
+	t.Parallel()
+
+	c := New(WithoutHeads(true))
+	c.handleCh = make(chan string, 1)
+
+	c.emit("no-slash")
+
+	close(c.handleCh)
+
+	var count int
+
+	for range c.handleCh {
+		count++
+	}
+
+	if count > 0 {
+		t.Error("unexpected count")
+	}
+}
+
+func TestBadCrawl(t *testing.T) {
+	t.Parallel()
+
+	c := New(WithoutHeads(true))
+	base, _ := url.Parse("http://test/")
+
+	if c.crawl(base, &crawlResult{URI: "%"}) {
+		t.Error("can crawl bad uri")
+	}
+}
+
+func TestSitemap(t *testing.T) {
+	t.Parallel()
+
+	const (
+		bodyHTML = `<html><a href="/a">a</a></html>`
+		bodyXML  = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+	<loc>http://hello/foo</loc>
+  </url>
+</urlset>`
+	)
+
+	var robot string
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			switch {
+			case r.RequestURI == robotsEP:
+				_, _ = io.WriteString(w, robot)
+			case strings.HasSuffix(r.RequestURI, ".xml"):
+				_, _ = io.WriteString(w, bodyXML)
+			default:
+				w.Header().Add(contentType, contentHTML)
+				_, _ = io.WriteString(w, bodyHTML)
+			}
+		}
+	}))
+
+	defer ts.Close()
+
+	robot = fmt.Sprintf(`useragent: a
+disallow: /a
+user-agent: b
+disallow: /b
+sitemap: %s/sitemap.xml`, ts.URL)
+
+	c := New(
+		WithUserAgent("a"),
+		WithoutHeads(true),
+		WithMaxCrawlDepth(1),
+		WithRobotsPolicy(RobotsCrawl),
+	)
+
+	var hello bool
+
+	handler := func(s string) {
+		if strings.Contains(s, "hello") {
+			hello = true
+		}
+	}
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Errorf("run: %v", err)
+	}
+
+	if !hello {
+		t.Error("empty sitemap result")
 	}
 }
