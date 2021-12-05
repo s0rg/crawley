@@ -17,6 +17,7 @@ var parsableExts = make(set.String).Load(
 	"pl",
 	"php",
 	"xhtml",
+	"xml",
 )
 
 func isSitemap(s string) (yes bool) {

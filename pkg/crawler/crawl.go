@@ -314,7 +314,7 @@ func (c *Crawler) crawler(web crawlClient) {
 			if hdrs, err := web.Head(ctx, us); err != nil {
 				log.Printf("[-] HEAD %s: %v", us, err)
 			} else {
-				parse = isHTML(hdrs.Get(contentType))
+				parse = isHTML(hdrs.Get(contentType)) || isSitemap(us)
 			}
 		}
 
