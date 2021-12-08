@@ -7,6 +7,7 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/s0rg/crawley)](go.mod)
 [![Release](https://img.shields.io/github/v/release/s0rg/crawley)](https://github.com/s0rg/crawley/releases/latest)
 ![Downloads](https://img.shields.io/github/downloads/s0rg/crawley/total.svg)
+[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)
 
 # crawley
 
