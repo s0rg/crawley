@@ -102,6 +102,7 @@ func (h *HTTP) request(req *http.Request) (body io.ReadCloser, hdrs http.Header,
 	return resp.Body, resp.Header, err
 }
 
+// Discard read all contents from ReaderCloser, closing it afterwards.
 func Discard(rc io.ReadCloser) {
 	_, _ = io.Copy(io.Discard, rc)
 	_ = rc.Close()

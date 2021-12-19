@@ -39,8 +39,11 @@ const (
 type taskFlag byte
 
 const (
+	// TaskDefault marks result for printing only.
 	TaskDefault taskFlag = iota
+	// TaskCrawl marks result as can-be-crawled.
 	TaskCrawl
+	// TaskDone marks result as final - crawling end here.
 	TaskDone
 )
 
@@ -156,19 +159,12 @@ func (c *Crawler) crawl(base *url.URL, t *crawlResult) (yes bool) {
 		return
 	}
 
-	if !canCrawl(base, u, c.cfg.Depth) {
+	switch {
+	case !canCrawl(base, u, c.cfg.Depth), c.robots.Forbidden(u.Path), c.cfg.Dirs == DirsOnly && isResorce(u.Path):
 		return
+	default:
+		go func(r *url.URL) { c.crawlCh <- r }(u)
 	}
-
-	if c.robots.Forbidden(u.Path) {
-		return
-	}
-
-	if c.cfg.Dirs == DirsOnly && isResorce(u.Path) {
-		return
-	}
-
-	go func(r *url.URL) { c.crawlCh <- r }(u)
 
 	return true
 }
