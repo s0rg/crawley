@@ -15,6 +15,7 @@ linters:
     - exhaustive
     - varnamelen
     - forbidigo
+    - typecheck
     - gci
     # deprecated :(
     - interfacer
