@@ -67,3 +67,17 @@ func WithoutHeads(v bool) Option {
 		c.NoHEAD = v
 	}
 }
+
+// WithExtraHeaders add extra HTTP headers to requests.
+func WithExtraHeaders(v []string) Option {
+	return func(c *config) {
+		c.Headers = v
+	}
+}
+
+// WithExtraCookies add cookies to requests.
+func WithExtraCookies(v []string) Option {
+	return func(c *config) {
+		c.Cookies = v
+	}
+}

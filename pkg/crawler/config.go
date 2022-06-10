@@ -13,6 +13,8 @@ const (
 )
 
 type config struct {
+	Headers   []string
+	Cookies   []string
 	UserAgent string
 	Delay     time.Duration
 	Workers   int

@@ -1,6 +1,7 @@
 package crawler
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -46,6 +47,11 @@ func TestOptions(t *testing.T) {
 		fbool   = true
 	)
 
+	var (
+		extHeaders = []string{"foo: bar"}
+		extCookies = []string{"name=val"}
+	)
+
 	t.Parallel()
 
 	opts := []Option{
@@ -58,6 +64,8 @@ func TestOptions(t *testing.T) {
 		WithBruteMode(fbool),
 		WithSkipSSL(fbool),
 		WithoutHeads(fbool),
+		WithExtraHeaders(extHeaders),
+		WithExtraCookies(extCookies),
 	}
 
 	c := &config{}
@@ -102,6 +110,14 @@ func TestOptions(t *testing.T) {
 
 	if c.Dirs != dp {
 		t.Error("bad dirs policy")
+	}
+
+	if !reflect.DeepEqual(c.Headers, extHeaders) {
+		t.Error("bad extra headers")
+	}
+
+	if !reflect.DeepEqual(c.Cookies, extCookies) {
+		t.Error("bad extra cookies")
 	}
 }
 

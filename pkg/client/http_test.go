@@ -15,7 +15,7 @@ const (
 func TestHTTPGetOK(t *testing.T) {
 	t.Parallel()
 
-	c := New(ua, 1, false)
+	c := New(ua, 1, false, []string{"FOO: BAR"}, []string{"NAME=VAL"})
 
 	const body = "test-body"
 
@@ -26,6 +26,19 @@ func TestHTTPGetOK(t *testing.T) {
 
 		if r.UserAgent() != ua {
 			t.Error("agent")
+		}
+
+		if r.Header.Get("FOO") != "BAR" {
+			t.Error("extra headers")
+		}
+
+		c, err := r.Cookie("NAME")
+		if err != nil {
+			t.Error("extra cookies - retrieve")
+		}
+
+		if c.Value != "VAL" {
+			t.Error("extra cookies - value")
 		}
 
 		_, _ = io.WriteString(w, body)
@@ -55,7 +68,7 @@ func TestHTTPGetOK(t *testing.T) {
 func TestHTTPGetERR(t *testing.T) {
 	t.Parallel()
 
-	c := New("", 1, false)
+	c := New("", 1, false, []string{}, []string{})
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -81,7 +94,7 @@ func TestHTTPGetERR(t *testing.T) {
 func TestHTTPHeadOK(t *testing.T) {
 	t.Parallel()
 
-	c := New(ua, 1, false)
+	c := New(ua, 1, false, []string{}, []string{})
 
 	const (
 		key = "x-some-key"
@@ -116,7 +129,7 @@ func TestHTTPHeadOK(t *testing.T) {
 func TestHTTPHeadERR(t *testing.T) {
 	t.Parallel()
 
-	c := New("", 1, false)
+	c := New("", 1, false, []string{}, []string{})
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -93,7 +93,13 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 	seen := make(set.U64)
 	seen.Add(urlHash(uri))
 
-	web := client.New(c.cfg.UserAgent, c.cfg.Workers, c.cfg.SkipSSL)
+	web := client.New(
+		c.cfg.UserAgent,
+		c.cfg.Workers,
+		c.cfg.SkipSSL,
+		c.cfg.Headers,
+		c.cfg.Cookies,
+	)
 	c.initRobots(base, web)
 
 	for i := 0; i < c.cfg.Workers; i++ {

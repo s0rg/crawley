@@ -11,11 +11,14 @@ linters:
   disable:
     - exhaustivestruct
     - gochecknoglobals
+    - nonamedreturns
     - testpackage
     - exhaustive
+    - exhaustruct
     - varnamelen
     - forbidigo
     - typecheck
+    - gofumpt
     - gci
     # deprecated :(
     - interfacer
@@ -42,3 +45,4 @@ issues:
         - cyclop
         - dupl
         - goerr113
+        - errcheck
