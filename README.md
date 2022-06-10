@@ -24,6 +24,8 @@ Crawls web pages and prints any link it can find.
 - `brute` mode - scan html comments for urls (this can lead to bogus results)
 - make use of `HTTP_PROXY` / `HTTPS_PROXY` environment values
 - directory-only scan mode (aka `fast-scan`)
+- user-defined cookies, in curl-compatible format (i.e. `-cookie "ONE=1; TWO=2" -cookie "EXT=3" -cookie @cookie-file`)
+- user-defined headers, same as curl: `-header "ONE: 1" -header "TWO: 2" -header @headers-file`
 
 # installation
 
@@ -43,12 +45,16 @@ possible flags:
 
 -brute
     scan html comments
+-cookie value
+    extra cookies for request, can be used multiple times, accept files with '@'-prefix
 -delay duration
     per-request delay (0 - disable) (default 150ms)
 -depth int
     scan depth (-1 - unlimited)
 -dirs string
     policy for non-resource urls: show / hide / only (default "show")
+-header value
+    extra headers for request, can be used multiple times, accept files with '@'-prefix
 -headless
     disable pre-flight HEAD requests
 -help
