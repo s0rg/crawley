@@ -16,7 +16,7 @@ Crawls web pages and prints any link it can find.
 # features
 
 - fast html SAX-parser (powered by `golang.org/x/net/html`)
-- small (<1000 SLOC), idiomatic, 100% test covered codebase
+- small (<3000 SLOC), idiomatic, 100% test covered codebase
 - grabs most of useful resources urls (pics, videos, audios, forms, etc...)
 - found urls are streamed to stdout and guranteed to be unique (with fragments omitted)
 - scan depth (limited by starting host and path, by default - 0) can be configured
@@ -24,7 +24,7 @@ Crawls web pages and prints any link it can find.
 - `brute` mode - scan html comments for urls (this can lead to bogus results)
 - make use of `HTTP_PROXY` / `HTTPS_PROXY` environment values
 - directory-only scan mode (aka `fast-scan`)
-- user-defined cookies, in curl-compatible format (i.e. `-cookie "ONE=1; TWO=2" -cookie "EXT=3" -cookie @cookie-file`)
+- user-defined cookies, in curl-compatible format (i.e. `-cookie "ONE=1; TWO=2" -cookie "ITS=ME" -cookie @cookie-file`)
 - user-defined headers, same as curl: `-header "ONE: 1" -header "TWO: 2" -header @headers-file`
 
 # installation
