@@ -30,6 +30,8 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ^1.18
+          check-latest: true
+          cache: true
       - name: test-coverage
         uses: paambaati/codeclimate-action@v3.0.0
         env:
@@ -39,6 +41,7 @@ jobs:
           coverageLocations: ${{ github.workspace }}/cover.out:gocov
           prefix: github.com/${{ github.repository }}
   codeql:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     environment:
       name: ci
@@ -49,6 +52,8 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ^1.18
+          check-latest: true
+          cache: true
       - name: init codeql
         uses: github/codeql-action/init@v2
         with:

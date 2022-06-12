@@ -9,22 +9,31 @@ linters-settings:
 linters:
   enable-all: true
   disable:
-    - exhaustivestruct
     - gochecknoglobals
     - nonamedreturns
     - testpackage
-    - exhaustive
     - exhaustruct
+    - exhaustive
     - varnamelen
     - forbidigo
-    - typecheck
     - gofumpt
     - gci
     # deprecated :(
+    - exhaustivestruct
     - interfacer
     - scopelint
     - maligned
     - golint
+    - bodyclose
+    - contextcheck
+    - nilerr
+    - noctx
+    - rowserrcheck
+    - sqlclosecheck
+    - structcheck
+    - tparallel
+    - unparam
+    - wastedassign
   fast: false
 
 output:
