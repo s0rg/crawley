@@ -25,8 +25,7 @@ var (
 	gitHash       string
 	gitVersion    string
 	buildDate     string
-	extCookies    values.List
-	extHeaders    values.List
+	defaultUA     = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + gitVersion + "-" + gitHash
 	fVersion      = flag.Bool("version", false, "show version")
 	fBrute        = flag.Bool("brute", false, "scan html comments")
 	fSkipSSL      = flag.Bool("skip-ssl", false, "skip ssl verification")
@@ -35,13 +34,14 @@ var (
 	fDepth        = flag.Int("depth", 0, "scan depth (-1 - unlimited)")
 	fWorkers      = flag.Int("workers", runtime.NumCPU(), "number of workers")
 	fDelay        = flag.Duration("delay", defaultDelay, "per-request delay (0 - disable)")
-	fUA           = flag.String("user-agent", defaultAgent, "user-agent string")
+	fUA           = flag.String("user-agent", defaultUA, "user-agent string")
 	fRobotsPolicy = flag.String("robots", "ignore", "policy for robots.txt: ignore / crawl / respect")
 	fDirsPolicy   = flag.String("dirs", "show", "policy for non-resource urls: show / hide / only")
-	defaultAgent  = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + gitVersion + "-" + gitHash
+	extCookies    values.List
+	extHeaders    values.List
 )
 
-func callback(s string) {
+func puts(s string) {
 	_, _ = os.Stdout.WriteString(s + "\n")
 }
 
@@ -51,7 +51,7 @@ func crawl(uri string, opts ...crawler.Option) error {
 	log.Printf("[*] config: %s", c.DumpConfig())
 	log.Printf("[*] crawling url: %s", uri)
 
-	if err := c.Run(uri, callback); err != nil {
+	if err := c.Run(uri, puts); err != nil {
 		return fmt.Errorf("run: %w", err)
 	}
 
@@ -60,35 +60,45 @@ func crawl(uri string, opts ...crawler.Option) error {
 	return nil
 }
 
-func options() (rv []crawler.Option) {
+func initOptions() (rv []crawler.Option, err error) {
 	robots, err := crawler.ParseRobotsPolicy(*fRobotsPolicy)
 	if err != nil {
-		log.Fatal("robots policy:", err)
+		err = fmt.Errorf("robots policy: %w", err)
+
+		return
 	}
 
 	dirs, err := crawler.ParseDirsPolicy(*fDirsPolicy)
 	if err != nil {
-		log.Fatal("dirs policy:", err)
+		err = fmt.Errorf("dirs policy: %w", err)
+
+		return
 	}
 
 	workdir, err := os.Getwd()
 	if err != nil {
-		log.Fatal("work dir:", err)
+		err = fmt.Errorf("work dir: %w", err)
+
+		return
 	}
 
 	fs := os.DirFS(workdir)
 
 	headers, err := extHeaders.Load(fs)
 	if err != nil {
-		log.Fatal("headers:", err)
+		err = fmt.Errorf("headers: %w", err)
+
+		return
 	}
 
 	cookies, err := extCookies.Load(fs)
 	if err != nil {
-		log.Fatal("cookies:", err)
+		err = fmt.Errorf("cookies: %w", err)
+
+		return
 	}
 
-	return []crawler.Option{
+	rv = []crawler.Option{
 		crawler.WithUserAgent(*fUA),
 		crawler.WithDelay(*fDelay),
 		crawler.WithMaxCrawlDepth(*fDepth),
@@ -101,6 +111,8 @@ func options() (rv []crawler.Option) {
 		crawler.WithExtraHeaders(headers),
 		crawler.WithExtraCookies(cookies),
 	}
+
+	return rv, nil
 }
 
 func main() {
@@ -128,11 +140,16 @@ func main() {
 		return
 	}
 
+	opts, err := initOptions()
+	if err != nil {
+		log.Fatal("options:", err)
+	}
+
 	if *fSilent {
 		log.SetOutput(io.Discard)
 	}
 
-	if err := crawl(flag.Arg(0), options()...); err != nil {
+	if err := crawl(flag.Arg(0), opts...); err != nil {
 		// forcing back stderr in case of errors, otherwise
 		// if 'silent' is on - no one will know what happened.
 		log.SetOutput(os.Stderr)
