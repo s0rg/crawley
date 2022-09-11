@@ -129,7 +129,14 @@ func main() {
 	flag.Parse()
 
 	if *fVersion {
-		fmt.Printf("%s %s-%s build at: %s site: %s\n", appName, gitVersion, gitHash, buildDate, appSite)
+		fmt.Printf("%s %s-%s build at: %s with %s site: %s\n",
+			appName,
+			gitVersion,
+			gitHash,
+			buildDate,
+			runtime.Version(),
+			appSite,
+		)
 
 		return
 	}
