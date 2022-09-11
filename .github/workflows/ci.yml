@@ -57,6 +57,6 @@ jobs:
       - name: init codeql
         uses: github/codeql-action/init@v2
         with:
-          language: 'go'
+          languages: 'go'
       - name: run analysis
         uses: github/codeql-action/analyze@v2
