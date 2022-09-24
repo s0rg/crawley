@@ -22,10 +22,10 @@ const (
 )
 
 var (
-	gitHash       string
-	gitVersion    string
-	buildDate     string
-	defaultUA     = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + gitVersion + "-" + gitHash
+	GitHash       string
+	GitTag        string
+	BuildDate     string
+	defaultUA     = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + GitTag + "-" + GitHash
 	fVersion      = flag.Bool("version", false, "show version")
 	fBrute        = flag.Bool("brute", false, "scan html comments")
 	fSkipSSL      = flag.Bool("skip-ssl", false, "skip ssl verification")
@@ -60,6 +60,35 @@ func crawl(uri string, opts ...crawler.Option) error {
 	return nil
 }
 
+func initValues() (
+	headers, cookies []string,
+	err error,
+) {
+	var wd string
+
+	if wd, err = os.Getwd(); err != nil {
+		err = fmt.Errorf("work dir: %w", err)
+
+		return
+	}
+
+	fs := os.DirFS(wd)
+
+	if headers, err = extHeaders.Load(fs); err != nil {
+		err = fmt.Errorf("headers: %w", err)
+
+		return
+	}
+
+	if cookies, err = extCookies.Load(fs); err != nil {
+		err = fmt.Errorf("cookies: %w", err)
+
+		return
+	}
+
+	return headers, cookies, nil
+}
+
 func initOptions() (rv []crawler.Option, err error) {
 	robots, err := crawler.ParseRobotsPolicy(*fRobotsPolicy)
 	if err != nil {
@@ -75,25 +104,9 @@ func initOptions() (rv []crawler.Option, err error) {
 		return
 	}
 
-	workdir, err := os.Getwd()
+	headers, cookies, err := initValues()
 	if err != nil {
-		err = fmt.Errorf("work dir: %w", err)
-
-		return
-	}
-
-	fs := os.DirFS(workdir)
-
-	headers, err := extHeaders.Load(fs)
-	if err != nil {
-		err = fmt.Errorf("headers: %w", err)
-
-		return
-	}
-
-	cookies, err := extCookies.Load(fs)
-	if err != nil {
-		err = fmt.Errorf("cookies: %w", err)
+		err = fmt.Errorf("values: %w", err)
 
 		return
 	}
@@ -131,9 +144,9 @@ func main() {
 	if *fVersion {
 		fmt.Printf("%s %s-%s build at: %s with %s site: %s\n",
 			appName,
-			gitVersion,
-			gitHash,
-			buildDate,
+			GitTag,
+			GitHash,
+			BuildDate,
 			runtime.Version(),
 			appSite,
 		)
