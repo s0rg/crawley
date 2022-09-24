@@ -8,11 +8,14 @@ GIT_TAG=`git describe --abbrev=0 2>/dev/null || echo -n "no-tag"`
 GIT_HASH=`git rev-parse --short HEAD 2>/dev/null || echo -n "no-git"`
 BUILD_AT=`date +%FT%T%z`
 
-LDFLAGS=-w -s -X main.gitHash=${GIT_HASH} -X main.buildDate=${BUILD_AT} -X main.gitVersion=${GIT_TAG}
+VER_PKG=main
+
+LDFLAGS=-w -s \
+		-X ${VER_PKG}.GitTag=${GIT_TAG} \
+		-X ${VER_PKG}.GitHash=${GIT_HASH} \
+		-X ${VER_PKG}.BuildDate=${BUILD_AT}
 
 export CGO_ENABLED=0
-
-.PHONY: build
 
 build: build-linux
 
