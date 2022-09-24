@@ -11,9 +11,9 @@ BUILD_AT=`date +%FT%T%z`
 VER_PKG=main
 
 LDFLAGS=-w -s \
-		-X ${VER_PKG}.GitTag=${GIT_TAG} \
-		-X ${VER_PKG}.GitHash=${GIT_HASH} \
-		-X ${VER_PKG}.BuildDate=${BUILD_AT}
+		-X "${VER_PKG}.GitTag=${GIT_TAG}" \
+		-X "${VER_PKG}.GitHash=${GIT_HASH}" \
+		-X "${VER_PKG}.BuildDate=${BUILD_AT}"
 
 export CGO_ENABLED=0
 
