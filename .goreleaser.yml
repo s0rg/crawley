@@ -9,9 +9,9 @@ builds:
   - env: [CGO_ENABLED=0]
     ldflags:
       - -s -w
-      - -X main.buildDate={{.Date}}
-      - -X main.gitVersion={{.Tag}}
-      - -X main.gitHash={{.ShortCommit}}
+      - -X main.BuildDate={{.Date}}
+      - -X main.GitTag={{.Tag}}
+      - -X main.GitHash={{.ShortCommit}}
     goos:
       - linux
       - darwin
