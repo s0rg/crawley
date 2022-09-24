@@ -8,12 +8,10 @@ GIT_TAG=`git describe --abbrev=0 2>/dev/null || echo -n "no-tag"`
 GIT_HASH=`git rev-parse --short HEAD 2>/dev/null || echo -n "no-git"`
 BUILD_AT=`date +%FT%T%z`
 
-VER_PKG=main
-
 LDFLAGS=-w -s \
-		-X "${VER_PKG}.GitTag=${GIT_TAG}" \
-		-X "${VER_PKG}.GitHash=${GIT_HASH}" \
-		-X "${VER_PKG}.BuildDate=${BUILD_AT}"
+		-X main.GitTag=${GIT_TAG} \
+		-X main.GitHash=${GIT_HASH} \
+		-X main.BuildDate=${BUILD_AT}
 
 export CGO_ENABLED=0
 
