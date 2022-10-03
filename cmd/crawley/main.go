@@ -160,7 +160,7 @@ func main() {
 
 	flag.Func(
 		"tag",
-		"tags filter, single and comma-separated tag names allowed",
+		"tags filter, single or comma-separated tag names allowed",
 		func(val string) error {
 			switch {
 			case strings.ContainsRune(val, ','):
