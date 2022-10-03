@@ -281,7 +281,12 @@ func (c *Crawler) fetch(
 
 	switch {
 	case isHTML(hdrs.Get(contentType)):
-		links.ExtractHTML(base, body, c.cfg.Brute, c.filter, c.linkHandler)
+		links.ExtractHTML(body, links.ExtractArgs{
+			Base:    base,
+			Brute:   c.cfg.Brute,
+			Filter:  c.filter,
+			Handler: c.linkHandler,
+		})
 	case isSitemap(uri):
 		links.ExtractSitemap(base, body, c.sitemapHandler)
 	}

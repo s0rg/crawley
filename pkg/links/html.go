@@ -25,16 +25,17 @@ const (
 type HTMLHandler func(atom.Atom, string)
 type TokenFilter func(html.Token) bool
 
+type ExtractArgs struct {
+	Base    *url.URL
+	Brute   bool
+	Filter  TokenFilter
+	Handler HTMLHandler
+}
+
 func AllowALL(_ html.Token) bool { return true }
 
 // ExtractHTML run `handler` for every link found inside html from `r`, rebasing them to `b` (if need).
-func ExtractHTML(
-	b *url.URL,
-	r io.Reader,
-	brute bool,
-	allowed TokenFilter,
-	handler HTMLHandler,
-) {
+func ExtractHTML(r io.Reader, a ExtractArgs) {
 	var (
 		tkns = html.NewTokenizer(r)
 		key  = keySRC
@@ -46,12 +47,12 @@ func ExtractHTML(
 		case html.ErrorToken:
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
-			if t = tkns.Token(); allowed(t) {
-				extractToken(b, t, &key, handler)
+			if t = tkns.Token(); a.Filter(t) {
+				extractToken(a.Base, t, &key, a.Handler)
 			}
 		case html.CommentToken:
-			if brute {
-				extractComment(tkns.Token().Data, handler)
+			if a.Brute {
+				extractComment(tkns.Token().Data, a.Handler)
 			}
 		}
 	}
