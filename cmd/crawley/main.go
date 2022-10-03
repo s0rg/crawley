@@ -28,9 +28,9 @@ var (
 	BuildDate string
 	defaultUA = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + GitTag + "-" + GitHash
 
-	tags       []string
 	extCookies values.List
 	extHeaders values.List
+	tags       []string
 
 	fVersion      = flag.Bool("version", false, "show version")
 	fBrute        = flag.Bool("brute", false, "scan html comments")
@@ -189,7 +189,7 @@ func main() {
 
 	opts, err := initOptions()
 	if err != nil {
-		log.Fatal("options:", err)
+		log.Fatal("[-] options:", err)
 	}
 
 	if *fSilent {
@@ -200,6 +200,6 @@ func main() {
 		// forcing back stderr in case of errors, otherwise
 		// if 'silent' is on - no one will know what happened.
 		log.SetOutput(os.Stderr)
-		log.Fatal("crawler:", err)
+		log.Fatal("[-] crawler:", err)
 	}
 }

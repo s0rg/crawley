@@ -6,14 +6,12 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"mime"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync"
 	"time"
 
-	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 
 	"github.com/s0rg/crawley/pkg/client"
@@ -33,8 +31,6 @@ const (
 
 	crawlTimeout  = 5 * time.Second
 	robotsTimeout = 3 * time.Second
-	contentType   = "Content-Type"
-	contentHTML   = "text/html"
 )
 
 type taskFlag byte
@@ -74,23 +70,10 @@ func New(opts ...Option) (c *Crawler) {
 
 	cfg.validate()
 
-	filter := links.AllowALL
-
-	if len(cfg.AlowedTags) > 0 {
-		atoms := make(set.Set[atom.Atom])
-
-		for _, t := range cfg.AlowedTags {
-			if a := atom.Lookup([]byte(t)); a != 0 {
-				atoms.Add(a)
-			}
-		}
-
-		filter = func(t html.Token) (ok bool) {
-			return atoms.Has(t.DataAtom)
-		}
+	return &Crawler{
+		cfg:    cfg,
+		filter: prepareFilter(cfg.AlowedTags),
 	}
-
-	return &Crawler{cfg: cfg, filter: filter}
 }
 
 // Run starts crawling process for given base uri.
@@ -108,8 +91,8 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 
 	defer c.close()
 
-	seen := make(set.U64)
-	seen.Add(urlHash(uri))
+	seen := make(set.URI)
+	seen.Add(uri)
 
 	web := client.New(
 		c.cfg.UserAgent,
@@ -138,7 +121,7 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 		switch {
 		case t.Flag == TaskDone:
 			w--
-		case seen.Add(urlHash(t.URI)):
+		case seen.Add(t.URI):
 			if t.Flag == TaskCrawl && c.crawl(base, &t) {
 				w++
 			}
@@ -277,15 +260,6 @@ func (c *Crawler) linkHandler(a atom.Atom, s string) {
 	}
 
 	c.resultCh <- t
-}
-
-func isHTML(v string) (yes bool) {
-	typ, _, err := mime.ParseMediaType(v)
-	if err != nil {
-		return
-	}
-
-	return typ == contentHTML
 }
 
 func (c *Crawler) fetch(
