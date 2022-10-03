@@ -195,8 +195,13 @@ func TestExtractURLS(t *testing.T) {
 
 			var res string
 
-			ExtractHTML(testBase, io.NopCloser(buf), true, AllowALL, func(_ atom.Atom, s string) {
-				res = s
+			ExtractHTML(io.NopCloser(buf), ExtractArgs{
+				Base:   testBase,
+				Brute:  true,
+				Filter: AllowALL,
+				Handler: func(_ atom.Atom, s string) {
+					res = s
+				},
 			})
 
 			if tc.hasLink {
@@ -247,8 +252,13 @@ func TestExtractAllowed(t *testing.T) {
 		return tkn.DataAtom == atom.A
 	}
 
-	ExtractHTML(testBase, io.NopCloser(buf), true, filter, func(_ atom.Atom, s string) {
-		res = append(res, s)
+	ExtractHTML(io.NopCloser(buf), ExtractArgs{
+		Base:   testBase,
+		Brute:  true,
+		Filter: filter,
+		Handler: func(_ atom.Atom, s string) {
+			res = append(res, s)
+		},
 	})
 
 	if len(res) != 1 {
