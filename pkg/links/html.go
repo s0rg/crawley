@@ -23,12 +23,22 @@ const (
 
 // HTMLHandler is a callback for found links.
 type HTMLHandler func(atom.Atom, string)
+type TokenFilter func(html.Token) bool
+
+func AllowALL(_ html.Token) bool { return true }
 
 // ExtractHTML run `handler` for every link found inside html from `r`, rebasing them to `b` (if need).
-func ExtractHTML(b *url.URL, r io.Reader, brute bool, handler HTMLHandler) {
+func ExtractHTML(
+	b *url.URL,
+	r io.Reader,
+	brute bool,
+	allowed TokenFilter,
+	handler HTMLHandler,
+) {
 	var (
 		tkns = html.NewTokenizer(r)
 		key  = keySRC
+		t    html.Token
 	)
 
 	for {
@@ -36,7 +46,9 @@ func ExtractHTML(b *url.URL, r io.Reader, brute bool, handler HTMLHandler) {
 		case html.ErrorToken:
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
-			extractToken(b, tkns.Token(), &key, handler)
+			if t = tkns.Token(); allowed(t) {
+				extractToken(b, t, &key, handler)
+			}
 		case html.CommentToken:
 			if brute {
 				extractComment(tkns.Token().Data, handler)

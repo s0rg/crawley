@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 
 	"github.com/s0rg/crawley/pkg/client"
@@ -60,6 +61,7 @@ type Crawler struct {
 	crawlCh  chan *url.URL
 	resultCh chan crawlResult
 	robots   *robots.TXT
+	filter   links.TokenFilter
 }
 
 // New creates Crawler instance.
@@ -72,7 +74,23 @@ func New(opts ...Option) (c *Crawler) {
 
 	cfg.validate()
 
-	return &Crawler{cfg: cfg}
+	filter := links.AllowALL
+
+	if len(cfg.AlowedTags) > 0 {
+		atoms := make(set.Set[atom.Atom])
+
+		for _, t := range cfg.AlowedTags {
+			if a := atom.Lookup([]byte(t)); a != 0 {
+				atoms.Add(a)
+			}
+		}
+
+		filter = func(t html.Token) (ok bool) {
+			return atoms.Has(t.DataAtom)
+		}
+	}
+
+	return &Crawler{cfg: cfg, filter: filter}
 }
 
 // Run starts crawling process for given base uri.
@@ -289,7 +307,7 @@ func (c *Crawler) fetch(
 
 	switch {
 	case isHTML(hdrs.Get(contentType)):
-		links.ExtractHTML(base, body, c.cfg.Brute, c.linkHandler)
+		links.ExtractHTML(base, body, c.cfg.Brute, c.filter, c.linkHandler)
 	case isSitemap(uri):
 		links.ExtractSitemap(base, body, c.sitemapHandler)
 	}

@@ -66,6 +66,7 @@ func TestOptions(t *testing.T) {
 		WithoutHeads(fbool),
 		WithExtraHeaders(extHeaders),
 		WithExtraCookies(extCookies),
+		WithTagsFilter([]string{"a", "form"}),
 	}
 
 	c := &config{}
@@ -118,6 +119,10 @@ func TestOptions(t *testing.T) {
 
 	if !reflect.DeepEqual(c.Cookies, extCookies) {
 		t.Error("bad extra cookies")
+	}
+
+	if len(c.AlowedTags) != 2 {
+		t.Error("unexpected filter size")
 	}
 }
 
