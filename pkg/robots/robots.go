@@ -11,9 +11,9 @@ const path = "/robots.txt"
 
 // TXT holds parsed robots.txt contents and/or access mode.
 type TXT struct {
-	links    set.String
-	deny     set.String
-	sitemaps set.String
+	links    set.Set[string]
+	deny     set.Set[string]
+	sitemaps set.Set[string]
 	mode     accessMode
 }
 
@@ -31,9 +31,9 @@ func DenyALL() *TXT {
 func FromReader(ua string, r io.Reader) (t *TXT, err error) {
 	t = &TXT{
 		mode:     gotRules,
-		links:    make(set.String),
-		deny:     make(set.String),
-		sitemaps: make(set.String),
+		links:    make(set.Set[string]),
+		deny:     make(set.Set[string]),
+		sitemaps: make(set.Set[string]),
 	}
 
 	if err = parseRobots(r, ua, t); err != nil {

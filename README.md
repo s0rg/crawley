@@ -1,15 +1,15 @@
-[![Build](https://github.com/s0rg/crawley/workflows/ci/badge.svg)](https://github.com/s0rg/crawley/actions?query=workflow%3Aci)
+[![License](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/s0rg/crawley/blob/main/LICENSE)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/s0rg/crawley)](go.mod)
+[![Release](https://img.shields.io/github/v/release/s0rg/crawley)](https://github.com/s0rg/crawley/releases/latest)
+[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)
+![Downloads](https://img.shields.io/github/downloads/s0rg/crawley/total.svg)
+
+[![CI](https://github.com/s0rg/crawley/workflows/ci/badge.svg)](https://github.com/s0rg/crawley/actions?query=workflow%3Aci)
 [![Go Report Card](https://goreportcard.com/badge/github.com/s0rg/crawley)](https://goreportcard.com/report/github.com/s0rg/crawley)
 [![Maintainability](https://api.codeclimate.com/v1/badges/6542cd90a6c665e4202e/maintainability)](https://codeclimate.com/github/s0rg/crawley/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/e1c002df2b4571e01537/test_coverage)](https://codeclimate.com/github/s0rg/crawley/test_coverage)
 [![libraries.io](https://img.shields.io/librariesio/github/s0rg/crawley)](https://libraries.io/github/s0rg/crawley)
 ![Issues](https://img.shields.io/github/issues/s0rg/crawley)
-
-[![License](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/s0rg/crawley/blob/main/LICENSE)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/s0rg/crawley)](go.mod)
-[![Release](https://img.shields.io/github/v/release/s0rg/crawley)](https://github.com/s0rg/crawley/releases/latest)
-![Downloads](https://img.shields.io/github/downloads/s0rg/crawley/total.svg)
-[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)
 
 # crawley
 
@@ -18,7 +18,7 @@ Crawls web pages and prints any link it can find.
 # features
 
 - fast html SAX-parser (powered by `golang.org/x/net/html`)
-- small (<1300 SLOC), idiomatic, 100% test covered codebase
+- small (~1300 SLOC), idiomatic, 100% test covered codebase
 - grabs most of useful resources urls (pics, videos, audios, forms, etc...)
 - found urls are streamed to stdout and guranteed to be unique (with fragments omitted)
 - scan depth (limited by starting host and path, by default - 0) can be configured
@@ -28,6 +28,7 @@ Crawls web pages and prints any link it can find.
 - directory-only scan mode (aka `fast-scan`)
 - user-defined cookies, in curl-compatible format (i.e. `-cookie "ONE=1; TWO=2" -cookie "ITS=ME" -cookie @cookie-file`)
 - user-defined headers, same as curl: `-header "ONE: 1" -header "TWO: 2" -header @headers-file`
+- tag filter - allow to specify tags to crawl for (single: `-tag a -tag form`, multiple: `-tag a,form`, or mixed)
 
 # installation
 
@@ -67,6 +68,8 @@ possible flags:
     suppress info and error messages in stderr
 -skip-ssl
     skip ssl verification
+-tag value
+    tags filter, single or comma-separated tag names allowed
 -user-agent string
     user-agent string
 -version

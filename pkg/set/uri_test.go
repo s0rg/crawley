@@ -4,14 +4,14 @@ import (
 	"testing"
 )
 
-func TestU64(t *testing.T) {
+func TestURI(t *testing.T) {
 	t.Parallel()
 
-	s := make(U64)
+	s := make(URI)
 
 	const (
-		val1 = uint64(1)
-		val2 = uint64(2)
+		val1 = "http://test/1"
+		val2 = "http://test/2"
 	)
 
 	if !s.Add(val1) {
@@ -28,5 +28,17 @@ func TestU64(t *testing.T) {
 
 	if s.Add(val2) {
 		t.Errorf("add val2 - step 2 failure")
+	}
+}
+
+func TestHash(t *testing.T) {
+	t.Parallel()
+
+	const val = "http://test/some/path?foo"
+
+	h1, h2 := hash(val), hash(val)
+
+	if h1 != h2 {
+		t.Error("hashes mismatch")
 	}
 }

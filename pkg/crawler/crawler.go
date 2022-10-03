@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"mime"
 	"net/http"
 	"net/url"
 	"strings"
@@ -32,8 +31,6 @@ const (
 
 	crawlTimeout  = 5 * time.Second
 	robotsTimeout = 3 * time.Second
-	contentType   = "Content-Type"
-	contentHTML   = "text/html"
 )
 
 type taskFlag byte
@@ -60,6 +57,7 @@ type Crawler struct {
 	crawlCh  chan *url.URL
 	resultCh chan crawlResult
 	robots   *robots.TXT
+	filter   links.TokenFilter
 }
 
 // New creates Crawler instance.
@@ -72,7 +70,10 @@ func New(opts ...Option) (c *Crawler) {
 
 	cfg.validate()
 
-	return &Crawler{cfg: cfg}
+	return &Crawler{
+		cfg:    cfg,
+		filter: prepareFilter(cfg.AlowedTags),
+	}
 }
 
 // Run starts crawling process for given base uri.
@@ -90,8 +91,8 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 
 	defer c.close()
 
-	seen := make(set.U64)
-	seen.Add(urlHash(uri))
+	seen := make(set.URI)
+	seen.Add(uri)
 
 	web := client.New(
 		c.cfg.UserAgent,
@@ -120,7 +121,7 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 		switch {
 		case t.Flag == TaskDone:
 			w--
-		case seen.Add(urlHash(t.URI)):
+		case seen.Add(t.URI):
 			if t.Flag == TaskCrawl && c.crawl(base, &t) {
 				w++
 			}
@@ -261,15 +262,6 @@ func (c *Crawler) linkHandler(a atom.Atom, s string) {
 	c.resultCh <- t
 }
 
-func isHTML(v string) (yes bool) {
-	typ, _, err := mime.ParseMediaType(v)
-	if err != nil {
-		return
-	}
-
-	return typ == contentHTML
-}
-
 func (c *Crawler) fetch(
 	ctx context.Context,
 	web crawlClient,
@@ -289,7 +281,7 @@ func (c *Crawler) fetch(
 
 	switch {
 	case isHTML(hdrs.Get(contentType)):
-		links.ExtractHTML(base, body, c.cfg.Brute, c.linkHandler)
+		links.ExtractHTML(base, body, c.cfg.Brute, c.filter, c.linkHandler)
 	case isSitemap(uri):
 		links.ExtractSitemap(base, body, c.sitemapHandler)
 	}

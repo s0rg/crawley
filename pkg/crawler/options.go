@@ -1,6 +1,8 @@
 package crawler
 
-import "time"
+import (
+	"time"
+)
 
 // Option is a configuration func.
 type Option func(*config)
@@ -79,5 +81,12 @@ func WithExtraHeaders(v []string) Option {
 func WithExtraCookies(v []string) Option {
 	return func(c *config) {
 		c.Cookies = v
+	}
+}
+
+// WithTagsFilter apply tag filter for crawler.
+func WithTagsFilter(v []string) Option {
+	return func(c *config) {
+		c.AlowedTags = append(c.AlowedTags, v...)
 	}
 }

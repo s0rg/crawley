@@ -195,7 +195,7 @@ func TestExtractURLS(t *testing.T) {
 
 			var res string
 
-			ExtractHTML(testBase, io.NopCloser(buf), true, func(_ atom.Atom, s string) {
+			ExtractHTML(testBase, io.NopCloser(buf), true, AllowALL, func(_ atom.Atom, s string) {
 				res = s
 			})
 
@@ -231,5 +231,31 @@ loremipsumhTTp://foo fdfdfs HttPs://bar
 
 	if !reflect.DeepEqual(res, want) {
 		t.Error("unexpected result")
+	}
+}
+
+func TestExtractAllowed(t *testing.T) {
+	t.Parallel()
+
+	const raw1 = `<html><a href="result-a">here</a><form action="result-form"></form></html>`
+
+	buf := bytes.NewBufferString(raw1)
+
+	var res []string
+
+	filter := func(tkn html.Token) bool {
+		return tkn.DataAtom == atom.A
+	}
+
+	ExtractHTML(testBase, io.NopCloser(buf), true, filter, func(_ atom.Atom, s string) {
+		res = append(res, s)
+	})
+
+	if len(res) != 1 {
+		t.Fatal("unexpected result len")
+	}
+
+	if !strings.HasSuffix(res[0], "result-a") {
+		t.Fatalf("unexpected result: %v", res)
 	}
 }

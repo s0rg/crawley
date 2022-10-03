@@ -200,7 +200,7 @@ sitemap: http://other.host/sitemap.xml`
 
 	// case A
 
-	resA := make(set.String)
+	resA := make(set.Set[string])
 
 	handlerA := func(s string) {
 		resA.Add(s)
@@ -232,7 +232,7 @@ sitemap: http://other.host/sitemap.xml`
 
 	// case B
 
-	resB := make(set.String)
+	resB := make(set.Set[string])
 
 	handlerB := func(s string) {
 		resB.Add(s)
@@ -666,5 +666,36 @@ sitemap: %s/sitemap.xml`, ts.URL)
 
 	if !hello {
 		t.Error("empty sitemap result")
+	}
+}
+
+func TestFilterTags(t *testing.T) {
+	t.Parallel()
+
+	const bodyHTML = `<html><a href="link">ok</a><img src="bad"/><iframe src="ok"/></html>`
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			w.Header().Add(contentType, contentHTML)
+			_, _ = io.WriteString(w, bodyHTML)
+		}
+	}))
+
+	defer ts.Close()
+
+	c := New(
+		WithoutHeads(true),
+		WithMaxCrawlDepth(1),
+		WithTagsFilter([]string{"a", "iframe"}),
+	)
+
+	handler := func(s string) {
+		if strings.Contains(s, "bad") {
+			t.Fail()
+		}
+	}
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Errorf("run: %v", err)
 	}
 }

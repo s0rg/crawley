@@ -8,7 +8,7 @@ import (
 	"github.com/s0rg/crawley/pkg/set"
 )
 
-var parsableExts = make(set.String).Load(
+var parsableExts = make(set.Set[string]).Load(
 	"asp",
 	"aspx",
 	"cgi",

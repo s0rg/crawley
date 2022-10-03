@@ -4,10 +4,10 @@ import (
 	"testing"
 )
 
-func TestString(t *testing.T) {
+func TestSet(t *testing.T) {
 	t.Parallel()
 
-	s := make(String)
+	s := make(Set[string])
 
 	const (
 		val1 = "a"

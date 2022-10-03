@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/s0rg/crawley/pkg/crawler"
@@ -22,10 +23,15 @@ const (
 )
 
 var (
-	GitHash       string
-	GitTag        string
-	BuildDate     string
-	defaultUA     = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + GitTag + "-" + GitHash
+	GitHash   string
+	GitTag    string
+	BuildDate string
+	defaultUA = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + GitTag + "-" + GitHash
+
+	extCookies values.List
+	extHeaders values.List
+	tags       []string
+
 	fVersion      = flag.Bool("version", false, "show version")
 	fBrute        = flag.Bool("brute", false, "scan html comments")
 	fSkipSSL      = flag.Bool("skip-ssl", false, "skip ssl verification")
@@ -37,9 +43,18 @@ var (
 	fUA           = flag.String("user-agent", defaultUA, "user-agent string")
 	fRobotsPolicy = flag.String("robots", "ignore", "policy for robots.txt: ignore / crawl / respect")
 	fDirsPolicy   = flag.String("dirs", "show", "policy for non-resource urls: show / hide / only")
-	extCookies    values.List
-	extHeaders    values.List
 )
+
+func version() string {
+	return fmt.Sprintf("%s %s-%s build at: %s with %s site: %s",
+		appName,
+		GitTag,
+		GitHash,
+		BuildDate,
+		runtime.Version(),
+		appSite,
+	)
+}
 
 func puts(s string) {
 	_, _ = os.Stdout.WriteString(s + "\n")
@@ -123,6 +138,7 @@ func initOptions() (rv []crawler.Option, err error) {
 		crawler.WithoutHeads(*fNoHeads),
 		crawler.WithExtraHeaders(headers),
 		crawler.WithExtraCookies(cookies),
+		crawler.WithTagsFilter(tags),
 	}
 
 	return rv, nil
@@ -139,17 +155,28 @@ func main() {
 		"cookie",
 		"extra cookies for request, can be used multiple times, accept files with '@'-prefix",
 	)
+
+	var tags []string
+
+	flag.Func(
+		"tag",
+		"tags filter, single or comma-separated tag names allowed",
+		func(val string) error {
+			switch {
+			case strings.ContainsRune(val, ','):
+				tags = append(tags, strings.Split(val, ",")...)
+			default:
+				tags = append(tags, val)
+			}
+
+			return nil
+		},
+	)
+
 	flag.Parse()
 
 	if *fVersion {
-		fmt.Printf("%s %s-%s build at: %s with %s site: %s\n",
-			appName,
-			GitTag,
-			GitHash,
-			BuildDate,
-			runtime.Version(),
-			appSite,
-		)
+		fmt.Println(version())
 
 		return
 	}
@@ -162,7 +189,7 @@ func main() {
 
 	opts, err := initOptions()
 	if err != nil {
-		log.Fatal("options:", err)
+		log.Fatal("[-] options:", err)
 	}
 
 	if *fSilent {
@@ -173,6 +200,6 @@ func main() {
 		// forcing back stderr in case of errors, otherwise
 		// if 'silent' is on - no one will know what happened.
 		log.SetOutput(os.Stderr)
-		log.Fatal("crawler:", err)
+		log.Fatal("[-] crawler:", err)
 	}
 }

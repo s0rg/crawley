@@ -13,17 +13,18 @@ const (
 )
 
 type config struct {
-	Headers   []string
-	Cookies   []string
-	UserAgent string
-	Delay     time.Duration
-	Workers   int
-	Depth     int
-	Robots    RobotsPolicy
-	Dirs      DirsPolicy
-	SkipSSL   bool
-	Brute     bool
-	NoHEAD    bool
+	Headers    []string
+	Cookies    []string
+	AlowedTags []string
+	UserAgent  string
+	Delay      time.Duration
+	Workers    int
+	Depth      int
+	Robots     RobotsPolicy
+	Dirs       DirsPolicy
+	SkipSSL    bool
+	Brute      bool
+	NoHEAD     bool
 }
 
 func (c *config) validate() {
