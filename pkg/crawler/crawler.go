@@ -255,13 +255,13 @@ func (c *Crawler) jsHandler(s string) {
 	c.linkHandler(atom.Link, s)
 }
 
-func (c *Crawler) isIgnored(url string) (yes bool) {
+func (c *Crawler) isIgnored(v string) (yes bool) {
 	if len(c.cfg.Ignored) == 0 {
 		return
 	}
 
 	for _, s := range c.cfg.Ignored {
-		if strings.Contains(url, s) {
+		if strings.Contains(v, s) {
 			return true
 		}
 	}
@@ -303,16 +303,15 @@ func (c *Crawler) fetch(
 
 	switch {
 	case isHTML(content):
-		links.ExtractHTML(body, links.ExtractArgs{
-			Base:    base,
+		links.ExtractHTML(body, base, links.HTMLParams{
 			Brute:   c.cfg.Brute,
 			Filter:  c.filter,
 			Handler: c.linkHandler,
 		})
 	case isSitemap(uri):
-		links.ExtractSitemap(base, body, c.sitemapHandler)
+		links.ExtractSitemap(body, base, c.sitemapHandler)
 	case c.cfg.ScanJS && isJS(content, uri):
-		links.ExtractJS(body, c.jsHandler)
+		links.ExtractJS(body, base, c.jsHandler)
 	}
 
 	client.Discard(body)

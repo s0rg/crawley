@@ -29,3 +29,33 @@ func TestPrepareFilter(t *testing.T) {
 		t.Fatalf("allowed: %v", v)
 	}
 }
+
+func TestIsJS(t *testing.T) {
+	t.Parallel()
+
+	type testCase struct {
+		Type string
+		Name string
+		Want bool
+	}
+
+	const (
+		nameHTML = "test.html"
+		nameJS   = "test.js"
+	)
+
+	cases := []testCase{
+		{Type: contentHTML, Name: nameHTML, Want: false},
+		{Type: contentJS, Name: nameJS, Want: true},
+		{Type: contentJS, Name: nameHTML, Want: true},
+		{Type: contentHTML, Name: nameJS, Want: true},
+		{Type: "", Name: nameHTML, Want: false},
+		{Type: "", Name: nameJS, Want: true},
+	}
+
+	for i, tc := range cases {
+		if isJS(tc.Type, tc.Name) != tc.Want {
+			t.Fatalf("case[%d] fail", i)
+		}
+	}
+}

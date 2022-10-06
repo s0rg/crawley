@@ -32,11 +32,7 @@ func isHTML(v string) (yes bool) {
 
 func isJS(v, n string) (yes bool) {
 	typ, _, err := mime.ParseMediaType(v)
-	if err != nil {
-		return
-	}
-
-	if typ == contentJS {
+	if err == nil && typ == contentJS {
 		return true
 	}
 

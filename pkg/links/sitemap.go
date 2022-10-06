@@ -7,16 +7,16 @@ import (
 )
 
 type (
-	// SitemapHandler is a callback for links found in sitemap.
-	SitemapHandler func(string)
+	// URLHandler is a callback for links.
+	URLHandler func(string)
 
 	entry struct {
 		Loc string `xml:"loc"`
 	}
 )
 
-// ExtractSitemap run `handler` for every link found inside sitemap from `r`, rebasing them to `b` (if need).
-func ExtractSitemap(base *url.URL, r io.Reader, handler SitemapHandler) {
+// ExtractSitemap extract urls from sitemap*.xml.
+func ExtractSitemap(r io.Reader, b *url.URL, h URLHandler) {
 	var (
 		dec = xml.NewDecoder(r)
 		t   xml.Token
@@ -46,10 +46,10 @@ func ExtractSitemap(base *url.URL, r io.Reader, handler SitemapHandler) {
 			continue
 		}
 
-		if uri, ok = clean(base, e.Loc); !ok {
+		if uri, ok = clean(b, e.Loc); !ok {
 			continue
 		}
 
-		handler(uri)
+		h(uri)
 	}
 }

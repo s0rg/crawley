@@ -33,15 +33,11 @@ func TestExtractSitemap(t *testing.T) {
 
 	u, _ := url.Parse("http://HOST")
 
-	b := strings.NewReader(xml)
-
 	l := make([]string, 0, 4)
 
-	h := func(s string) {
+	ExtractSitemap(strings.NewReader(xml), u, func(s string) {
 		l = append(l, s)
-	}
-
-	ExtractSitemap(u, b, h)
+	})
 
 	if len(l) != 4 {
 		t.Error("unexpected results count")
@@ -68,15 +64,11 @@ func TestExtractSitemapIndex(t *testing.T) {
 
 	u, _ := url.Parse("http://www.example.com")
 
-	b := strings.NewReader(xml)
-
 	l := make([]string, 0, 3)
 
-	h := func(s string) {
+	ExtractSitemap(strings.NewReader(xml), u, func(s string) {
 		l = append(l, s)
-	}
-
-	ExtractSitemap(u, b, h)
+	})
 
 	if len(l) != 3 {
 		t.Error("unexpected results count")
@@ -95,15 +87,11 @@ func TestExtractSitemapTokenError(t *testing.T) {
 
 	u, _ := url.Parse("http://www.example.com")
 
-	b := strings.NewReader(xml)
-
 	l := make([]string, 0, 1)
 
-	h := func(s string) {
+	ExtractSitemap(strings.NewReader(xml), u, func(s string) {
 		l = append(l, s)
-	}
-
-	ExtractSitemap(u, b, h)
+	})
 
 	if len(l) != 0 {
 		t.Error("unexpected results count")
@@ -122,15 +110,11 @@ func TestExtractSitemapURLError(t *testing.T) {
 
 	u, _ := url.Parse("http://www.example.com")
 
-	b := strings.NewReader(xml)
-
 	l := make([]string, 0, 1)
 
-	h := func(s string) {
+	ExtractSitemap(strings.NewReader(xml), u, func(s string) {
 		l = append(l, s)
-	}
-
-	ExtractSitemap(u, b, h)
+	})
 
 	if len(l) != 0 {
 		t.Log(l)

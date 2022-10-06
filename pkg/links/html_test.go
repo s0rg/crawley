@@ -2,7 +2,6 @@ package links
 
 import (
 	"bytes"
-	"io"
 	"net/url"
 	"reflect"
 	"strings"
@@ -195,8 +194,7 @@ func TestExtractURLS(t *testing.T) {
 
 			var res string
 
-			ExtractHTML(io.NopCloser(buf), ExtractArgs{
-				Base:   testBase,
+			ExtractHTML(buf, testBase, HTMLParams{
 				Brute:  true,
 				Filter: AllowALL,
 				Handler: func(_ atom.Atom, s string) {
@@ -252,8 +250,7 @@ func TestExtractAllowed(t *testing.T) {
 		return tkn.DataAtom == atom.A
 	}
 
-	ExtractHTML(io.NopCloser(buf), ExtractArgs{
-		Base:   testBase,
+	ExtractHTML(buf, testBase, HTMLParams{
 		Brute:  true,
 		Filter: filter,
 		Handler: func(_ atom.Atom, s string) {
