@@ -13,10 +13,12 @@ import (
 )
 
 const (
-	contentType = "Content-Type"
-	contentHTML = "text/html"
-	contentJS   = "application/javascript"
-	fileExtJS   = ".js"
+	proxyAuthHdr = "Proxy-Authorization"
+	proxyAuthTyp = "Basic"
+	contentType  = "Content-Type"
+	contentHTML  = "text/html"
+	contentJS    = "application/javascript"
+	fileExtJS    = ".js"
 )
 
 func isHTML(v string) (yes bool) {

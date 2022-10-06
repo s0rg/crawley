@@ -111,7 +111,7 @@ func WithProxyAuth(v string) Option {
 	return func(c *config) {
 		c.Headers = append(
 			c.Headers,
-			"Proxy-Authorization: Basic "+base64.StdEncoding.EncodeToString([]byte(v)),
+			proxyAuthHdr+": "+proxyAuthTyp+" "+base64.StdEncoding.EncodeToString([]byte(v)),
 		)
 	}
 }
