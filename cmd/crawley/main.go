@@ -154,13 +154,11 @@ func main() {
 		"cookie",
 		"extra cookies for request, can be used multiple times, accept files with '@'-prefix",
 	)
-
 	flag.Var(
 		&tags,
 		"tag",
 		"tags filter, single or comma-separated tag names",
 	)
-
 	flag.Var(
 		&ignored,
 		"ignore",
