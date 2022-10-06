@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/s0rg/crawley/pkg/crawler"
@@ -28,12 +27,12 @@ var (
 	BuildDate string
 	defaultUA = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + GitTag + "-" + GitHash
 
-	extCookies values.List
-	extHeaders values.List
-	tags       []string
+	cookies, headers values.Smart
+	tags, ignored    values.Simple
 
 	fVersion      = flag.Bool("version", false, "show version")
 	fBrute        = flag.Bool("brute", false, "scan html comments")
+	fScanJS       = flag.Bool("js", false, "scan js files")
 	fSkipSSL      = flag.Bool("skip-ssl", false, "skip ssl verification")
 	fSilent       = flag.Bool("silent", false, "suppress info and error messages in stderr")
 	fNoHeads      = flag.Bool("headless", false, "disable pre-flight HEAD requests")
@@ -43,6 +42,7 @@ var (
 	fUA           = flag.String("user-agent", defaultUA, "user-agent string")
 	fRobotsPolicy = flag.String("robots", "ignore", "policy for robots.txt: ignore / crawl / respect")
 	fDirsPolicy   = flag.String("dirs", "show", "policy for non-resource urls: show / hide / only")
+	fProxyAuth    = flag.String("proxy-auth", "", "credentials for proxy: user:password")
 )
 
 func version() string {
@@ -75,10 +75,7 @@ func crawl(uri string, opts ...crawler.Option) error {
 	return nil
 }
 
-func initValues() (
-	headers, cookies []string,
-	err error,
-) {
+func loadSmart() (h, c []string, err error) {
 	var wd string
 
 	if wd, err = os.Getwd(); err != nil {
@@ -89,19 +86,19 @@ func initValues() (
 
 	fs := os.DirFS(wd)
 
-	if headers, err = extHeaders.Load(fs); err != nil {
+	if h, err = headers.Load(fs); err != nil {
 		err = fmt.Errorf("headers: %w", err)
 
 		return
 	}
 
-	if cookies, err = extCookies.Load(fs); err != nil {
+	if c, err = cookies.Load(fs); err != nil {
 		err = fmt.Errorf("cookies: %w", err)
 
 		return
 	}
 
-	return headers, cookies, nil
+	return h, c, nil
 }
 
 func initOptions() (rv []crawler.Option, err error) {
@@ -119,9 +116,9 @@ func initOptions() (rv []crawler.Option, err error) {
 		return
 	}
 
-	headers, cookies, err := initValues()
+	h, c, err := loadSmart()
 	if err != nil {
-		err = fmt.Errorf("values: %w", err)
+		err = fmt.Errorf("load: %w", err)
 
 		return
 	}
@@ -136,9 +133,11 @@ func initOptions() (rv []crawler.Option, err error) {
 		crawler.WithDirsPolicy(dirs),
 		crawler.WithRobotsPolicy(robots),
 		crawler.WithoutHeads(*fNoHeads),
-		crawler.WithExtraHeaders(headers),
-		crawler.WithExtraCookies(cookies),
-		crawler.WithTagsFilter(tags),
+		crawler.WithScanJS(*fScanJS),
+		crawler.WithExtraHeaders(h),
+		crawler.WithExtraCookies(c),
+		crawler.WithTagsFilter(tags.Values),
+		crawler.WithIgnored(ignored.Values),
 	}
 
 	return rv, nil
@@ -146,31 +145,26 @@ func initOptions() (rv []crawler.Option, err error) {
 
 func main() {
 	flag.Var(
-		&extHeaders,
+		&headers,
 		"header",
 		"extra headers for request, can be used multiple times, accept files with '@'-prefix",
 	)
 	flag.Var(
-		&extCookies,
+		&cookies,
 		"cookie",
 		"extra cookies for request, can be used multiple times, accept files with '@'-prefix",
 	)
 
-	var tags []string
-
-	flag.Func(
+	flag.Var(
+		&tags,
 		"tag",
-		"tags filter, single or comma-separated tag names allowed",
-		func(val string) error {
-			switch {
-			case strings.ContainsRune(val, ','):
-				tags = append(tags, strings.Split(val, ",")...)
-			default:
-				tags = append(tags, val)
-			}
+		"tags filter, single or comma-separated tag names",
+	)
 
-			return nil
-		},
+	flag.Var(
+		&ignored,
+		"ignore",
+		"patterns (in urls) to be ignored in crawl process",
 	)
 
 	flag.Parse()

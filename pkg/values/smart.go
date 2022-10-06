@@ -9,30 +9,26 @@ import (
 
 const fileMarker = '@' // curl-compatible
 
-type List struct {
+type Smart struct {
 	values []string
 }
 
-func (l *List) String() (rv string) {
-	return
-}
-
-func (l *List) Set(val string) (err error) {
-	l.values = append(l.values, val)
+func (s *Smart) Set(val string) (err error) {
+	s.values = append(s.values, val)
 
 	return
 }
 
-func (l *List) Load(
+func (s *Smart) Load(
 	target fs.FS,
 ) (rv []string, err error) {
-	rv = make([]string, 0, len(l.values))
+	rv = make([]string, 0, len(s.values))
 
 	var vals []string
 
-	for _, v := range l.values {
+	for _, v := range s.values {
 		if v[0] == fileMarker {
-			if vals, err = l.loadFile(target, v[1:]); err != nil {
+			if vals, err = loadFile(target, v[1:]); err != nil {
 				return
 			}
 
@@ -45,7 +41,11 @@ func (l *List) Load(
 	return
 }
 
-func (l *List) loadFile(
+func (s *Smart) String() (rv string) {
+	return
+}
+
+func loadFile(
 	target fs.FS,
 	name string,
 ) (rv []string, err error) {
@@ -57,10 +57,10 @@ func (l *List) loadFile(
 		return
 	}
 
-	s := bufio.NewScanner(bytes.NewReader(body))
+	sc := bufio.NewScanner(bytes.NewReader(body))
 
-	for s.Scan() {
-		rv = append(rv, s.Text())
+	for sc.Scan() {
+		rv = append(rv, sc.Text())
 	}
 
 	return rv, nil

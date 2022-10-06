@@ -16,6 +16,7 @@ type config struct {
 	Headers    []string
 	Cookies    []string
 	AlowedTags []string
+	Ignored    []string
 	UserAgent  string
 	Delay      time.Duration
 	Workers    int
@@ -25,6 +26,7 @@ type config struct {
 	SkipSSL    bool
 	Brute      bool
 	NoHEAD     bool
+	ScanJS     bool
 }
 
 func (c *config) validate() {

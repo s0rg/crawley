@@ -3,6 +3,7 @@ package crawler
 import (
 	"log"
 	"mime"
+	"path/filepath"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -14,6 +15,8 @@ import (
 const (
 	contentType = "Content-Type"
 	contentHTML = "text/html"
+	contentJS   = "application/javascript"
+	fileExtJS   = ".js"
 )
 
 func isHTML(v string) (yes bool) {
@@ -23,6 +26,19 @@ func isHTML(v string) (yes bool) {
 	}
 
 	return typ == contentHTML
+}
+
+func isJS(v, n string) (yes bool) {
+	typ, _, err := mime.ParseMediaType(v)
+	if err != nil {
+		return
+	}
+
+	if typ == contentJS {
+		return true
+	}
+
+	return filepath.Ext(n) == fileExtJS
 }
 
 func prepareFilter(tags []string) links.TokenFilter {

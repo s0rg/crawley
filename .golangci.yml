@@ -26,9 +26,9 @@ linters-settings:
   gocritic:
     enabled-tags:
       - performance
+      - opinionated
       - diagnostic
       - style
-      - opinionated
 
 issues:
   exclude-rules:
@@ -40,7 +40,8 @@ issues:
       linters:
         - goerr113
         - errcheck
-        - funlen
+        - dupword
         - ifshort
         - cyclop
+        - funlen
         - dupl
