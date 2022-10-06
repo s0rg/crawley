@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/s0rg/crawley/pkg/crawler"
@@ -28,9 +27,8 @@ var (
 	BuildDate string
 	defaultUA = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + GitTag + "-" + GitHash
 
-	extCookies values.List
-	extHeaders values.List
-	tags       []string
+	extCookies, extHeaders values.Smart
+	tags                   values.Simple
 
 	fVersion      = flag.Bool("version", false, "show version")
 	fBrute        = flag.Bool("brute", false, "scan html comments")
@@ -138,7 +136,7 @@ func initOptions() (rv []crawler.Option, err error) {
 		crawler.WithoutHeads(*fNoHeads),
 		crawler.WithExtraHeaders(headers),
 		crawler.WithExtraCookies(cookies),
-		crawler.WithTagsFilter(tags),
+		crawler.WithTagsFilter(tags.Values),
 	}
 
 	return rv, nil
@@ -155,22 +153,10 @@ func main() {
 		"cookie",
 		"extra cookies for request, can be used multiple times, accept files with '@'-prefix",
 	)
-
-	var tags []string
-
-	flag.Func(
+	flag.Var(
+		&tags,
 		"tag",
-		"tags filter, single or comma-separated tag names allowed",
-		func(val string) error {
-			switch {
-			case strings.ContainsRune(val, ','):
-				tags = append(tags, strings.Split(val, ",")...)
-			default:
-				tags = append(tags, val)
-			}
-
-			return nil
-		},
+		"tags filter, single or comma-separated tag names",
 	)
 
 	flag.Parse()

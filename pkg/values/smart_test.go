@@ -6,11 +6,11 @@ import (
 	"testing/fstest"
 )
 
-func TestListSet(t *testing.T) {
+func TestSmartSet(t *testing.T) {
 	t.Parallel()
 
 	var (
-		l   List
+		l   Smart
 		err error
 		res []string
 	)
@@ -40,25 +40,25 @@ func TestListSet(t *testing.T) {
 	}
 
 	if len(res) != 2 {
-		t.Fatalf("len a - unexpected length: %d", len(res))
+		t.Fatalf("len b - unexpected length: %d", len(res))
 	}
 
 	if res[1] != "b" {
-		t.Fatalf("res a - unexpected value: %v", res[1])
+		t.Fatalf("res b - unexpected value: %v", res[1])
 	}
 }
 
-func TestListString(t *testing.T) {
+func TestSmartString(t *testing.T) {
 	t.Parallel()
 
-	var l List
+	var l Smart
 
 	if l.String() != "" {
 		t.Fatal("non-empty result")
 	}
 }
 
-func TestLoadFS(t *testing.T) {
+func TestSmartLoad(t *testing.T) {
 	t.Parallel()
 
 	fsys := fstest.MapFS{
@@ -66,7 +66,7 @@ func TestLoadFS(t *testing.T) {
 		"bar": {Data: []byte("bar1\nbar2")},
 	}
 
-	var l List
+	var l Smart
 
 	l.Set("foo0")
 	l.Set("@foo")
@@ -93,14 +93,14 @@ func TestLoadFS(t *testing.T) {
 	}
 }
 
-func TestLoadFSErrorDir(t *testing.T) {
+func TestSmartLoadFSErrorDir(t *testing.T) {
 	t.Parallel()
 
 	fsys := fstest.MapFS{
 		"foo": {Mode: 0o777 | fs.ModeDir},
 	}
 
-	var l List
+	var l Smart
 
 	l.Set("foo0")
 	l.Set("@foo")
