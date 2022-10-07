@@ -3,15 +3,18 @@ project_name: crawley
 
 before:
   hooks:
-    - go mod tidy
+    - go mod download
 
 builds:
-  - env: [CGO_ENABLED=0]
+  - id: "crawley"
+    dir: .
+    main: ./cmd/crawley
+    env: [CGO_ENABLED=0]
     ldflags:
       - -s -w
-      - -X main.BuildDate={{.Date}}
       - -X main.GitTag={{.Tag}}
       - -X main.GitHash={{.ShortCommit}}
+      - -X main.BuildDate={{.Date}}
     goos:
       - linux
       - darwin
@@ -23,9 +26,6 @@ builds:
     ignore:
       - goos: windows
         goarch: arm64
-    id: "crawley"
-    dir: .
-    main: ./cmd/crawley
 
 archives:
   - format: tar.gz
