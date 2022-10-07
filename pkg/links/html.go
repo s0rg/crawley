@@ -26,7 +26,6 @@ type HTMLHandler func(atom.Atom, string)
 type TokenFilter func(html.Token) bool
 
 type HTMLParams struct {
-	// Base    *url.URL
 	Brute   bool
 	Filter  TokenFilter
 	Handler HTMLHandler
@@ -153,32 +152,4 @@ func extractTag(base *url.URL, token *html.Token, key string) (rv string) {
 	}
 
 	return rv
-}
-
-func clean(base *url.URL, link string) (rv string, ok bool) {
-	u, err := url.Parse(link)
-	if err != nil {
-		return
-	}
-
-	if u.Host == "" {
-		if u = base.ResolveReference(u); u.Host == "" {
-			return
-		}
-	}
-
-	switch u.Scheme {
-	case jsScheme:
-		return
-	case "":
-		u.Scheme = base.Scheme
-	}
-
-	if u.Path == "" {
-		u.Path = "/"
-	}
-
-	u.Fragment = ""
-
-	return u.String(), true
 }

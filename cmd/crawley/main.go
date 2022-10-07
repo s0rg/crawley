@@ -138,6 +138,7 @@ func initOptions() (rv []crawler.Option, err error) {
 		crawler.WithExtraCookies(c),
 		crawler.WithTagsFilter(tags.Values),
 		crawler.WithIgnored(ignored.Values),
+		crawler.WithProxyAuth(*fProxyAuth),
 	}
 
 	return rv, nil

@@ -12,16 +12,18 @@ func TestExtractJS(t *testing.T) {
 	const (
 		js = `function() {
  		urls = [
+			// invalid ones
 			"http://example.com",
 			"smb://example.com",
     		"https://www.example.co.us",
+			"/api/create.php?user=test&pass=test#home",
+			"api/create.php?user=test#home",
+			// valid ones
 			"/path/to/file",
 			"/user/create.action?user=Test"
-			"/api/create.php?user=test&pass=test#home",
 		    "api/create.php",
 			"api/create.php?user=test"
 		    "api/create.php?user=test&pass=test",
-			"api/create.php?user=test#home",
 			"user/create.action?user=Test",
 			"user/create.notaext?user=Test",
 		    "api/user",
@@ -35,17 +37,18 @@ func TestExtractJS(t *testing.T) {
     		"index.html",
     		"robots.txt",
     		"users.xml"
-		]
+		];
 		}`
-		count = 23
+		count = 18
 	)
 
 	u, _ := url.Parse("http://HOST")
 
 	var c int
 
-	ExtractJS(strings.NewReader(js), u, func(_ string) {
+	ExtractJS(strings.NewReader(js), u, func(uri string) {
 		c++
+		t.Logf("found: %s", uri)
 	})
 
 	if c != count {
