@@ -14,6 +14,9 @@ func TestExtractJS(t *testing.T) {
  		urls = [
 			// invalid ones
 			"user/create.notaext?user=Test",
+			"text/html",
+			"text/plain",
+			"application/json",
 			// valid ones
 			"smb://example.com",
 			"http://example.com",

@@ -32,7 +32,7 @@ var (
 
 	fVersion      = flag.Bool("version", false, "show version")
 	fBrute        = flag.Bool("brute", false, "scan html comments")
-	fScanJS       = flag.Bool("js", false, "scan js files")
+	fScanJS       = flag.Bool("js", false, "scan js files for endpoints")
 	fSkipSSL      = flag.Bool("skip-ssl", false, "skip ssl verification")
 	fSilent       = flag.Bool("silent", false, "suppress info and error messages in stderr")
 	fNoHeads      = flag.Bool("headless", false, "disable pre-flight HEAD requests")

@@ -143,6 +143,7 @@ func TestString(t *testing.T) {
 		Workers: 13,
 		Depth:   666,
 		Brute:   true,
+		ScanJS:  true,
 	}
 
 	c.validate()
@@ -157,8 +158,12 @@ func TestString(t *testing.T) {
 		t.Error("1 - bad depth")
 	}
 
-	if !strings.Contains(v, "true") {
+	if !strings.Contains(v, "brute: on") {
 		t.Error("1 - bad brute mode")
+	}
+
+	if !strings.Contains(v, "js: on") {
+		t.Error("1 - bad js mode")
 	}
 
 	if strings.Contains(v, "delay") {
@@ -173,7 +178,7 @@ func TestString(t *testing.T) {
 
 	v = c.String()
 
-	if !strings.Contains(v, "false") {
+	if strings.Contains(v, "brute") {
 		t.Error("2 - bad brute mode")
 	}
 

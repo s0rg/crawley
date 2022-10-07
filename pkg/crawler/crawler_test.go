@@ -2,6 +2,7 @@ package crawler
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -21,7 +22,7 @@ var testOptions = []Option{
 	WithMaxCrawlDepth(1),
 }
 
-func TestCrawler(t *testing.T) {
+func TestCrawlerOK(t *testing.T) {
 	t.Parallel()
 
 	var (
@@ -90,7 +91,7 @@ func TestCrawler(t *testing.T) {
 	}
 }
 
-func TestBadLink(t *testing.T) {
+func TestCrawlerBadLink(t *testing.T) {
 	t.Parallel()
 
 	c := New(testOptions...)
@@ -100,7 +101,7 @@ func TestBadLink(t *testing.T) {
 	}
 }
 
-func TestBadHead(t *testing.T) {
+func TestCrawlerBadHead(t *testing.T) {
 	t.Parallel()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -116,7 +117,7 @@ func TestBadHead(t *testing.T) {
 	}
 }
 
-func TestBadGet(t *testing.T) {
+func TestCrawlerBadGet(t *testing.T) {
 	t.Parallel()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -138,7 +139,7 @@ func TestBadGet(t *testing.T) {
 	}
 }
 
-func TestRobots(t *testing.T) {
+func TestCrawlerRobots(t *testing.T) {
 	t.Parallel()
 
 	const (
@@ -261,7 +262,7 @@ sitemap: http://other.host/sitemap.xml`
 	}
 }
 
-func TestRobotsErr500(t *testing.T) {
+func TestCrawlerRobotsErr500(t *testing.T) {
 	t.Parallel()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -300,7 +301,7 @@ func TestRobotsErr500(t *testing.T) {
 	}
 }
 
-func TestRobotsErr400(t *testing.T) {
+func TestCrawlerRobotsErr400(t *testing.T) {
 	t.Parallel()
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -344,11 +345,17 @@ type testClient struct {
 	bodyIO io.ReadCloser
 }
 
-func (tc *testClient) Get(_ context.Context, _ string) (body io.ReadCloser, h http.Header, err error) {
+func (tc *testClient) Get(
+	_ context.Context,
+	_ string,
+) (body io.ReadCloser, h http.Header, err error) {
 	return tc.bodyIO, nil, tc.err
 }
 
-func (tc *testClient) Head(_ context.Context, _ string) (h http.Header, err error) {
+func (tc *testClient) Head(
+	_ context.Context,
+	_ string,
+) (h http.Header, err error) {
 	return
 }
 
@@ -360,7 +367,7 @@ func (er *errReader) Read(_ []byte) (n int, err error) {
 	return 0, er.err
 }
 
-func TestRobotsRequestErr(t *testing.T) {
+func TestCrawlerRobotsRequestErr(t *testing.T) {
 	t.Parallel()
 
 	var (
@@ -380,7 +387,7 @@ func TestRobotsRequestErr(t *testing.T) {
 	}
 }
 
-func TestRobotsBodytErr(t *testing.T) {
+func TestCrawlerRobotsBodytErr(t *testing.T) {
 	t.Parallel()
 
 	var (
@@ -400,7 +407,7 @@ func TestRobotsBodytErr(t *testing.T) {
 	}
 }
 
-func TestDumpConfig(t *testing.T) {
+func TestCrawlerDumpConfig(t *testing.T) {
 	t.Parallel()
 
 	c := New(
@@ -414,7 +421,7 @@ func TestDumpConfig(t *testing.T) {
 	}
 }
 
-func TestDirsHide(t *testing.T) {
+func TestCrawlerDirsHide(t *testing.T) {
 	t.Parallel()
 
 	const body = `<html><a href="/a">a</a><a href="/b">b</a><a href="/c.jpg"/>c.jpg</a></html>`
@@ -454,7 +461,7 @@ func TestDirsHide(t *testing.T) {
 	}
 }
 
-func TestDirsOnly(t *testing.T) {
+func TestCrawlerDirsOnly(t *testing.T) {
 	t.Parallel()
 
 	const body = `<html><a href="/a">a</a><a href="/b.gif">b.gif</a><a href="/c.jpg">c.jpg</a></html>`
@@ -495,7 +502,7 @@ func TestDirsOnly(t *testing.T) {
 	}
 }
 
-func TestNoHeads(t *testing.T) {
+func TestCrawlerNoHeads(t *testing.T) {
 	t.Parallel()
 
 	const body = `<html><a href="/a">a</a><a href="/b.gif">b.gif</a></html>`
@@ -537,7 +544,7 @@ func TestNoHeads(t *testing.T) {
 	}
 }
 
-func TestGetNonHTTPErr(t *testing.T) {
+func TestCrawlerGetNonHTTPErr(t *testing.T) {
 	t.Parallel()
 
 	var (
@@ -576,7 +583,7 @@ func TestGetNonHTTPErr(t *testing.T) {
 	}
 }
 
-func TestBadEmit(t *testing.T) {
+func TestCrawlerBadEmit(t *testing.T) {
 	t.Parallel()
 
 	c := New(WithoutHeads(true))
@@ -597,7 +604,7 @@ func TestBadEmit(t *testing.T) {
 	}
 }
 
-func TestBadCrawl(t *testing.T) {
+func TestCrawlerBad(t *testing.T) {
 	t.Parallel()
 
 	c := New(WithoutHeads(true))
@@ -608,7 +615,7 @@ func TestBadCrawl(t *testing.T) {
 	}
 }
 
-func TestSitemap(t *testing.T) {
+func TestCrawlerSitemap(t *testing.T) {
 	t.Parallel()
 
 	const (
@@ -669,7 +676,7 @@ sitemap: %s/sitemap.xml`, ts.URL)
 	}
 }
 
-func TestFilterTags(t *testing.T) {
+func TestCrawlerFilterTags(t *testing.T) {
 	t.Parallel()
 
 	const bodyHTML = `<html><a href="link">ok</a><img src="bad"/><iframe src="ok"/></html>`
@@ -697,5 +704,140 @@ func TestFilterTags(t *testing.T) {
 
 	if err := c.Run(ts.URL, handler); err != nil {
 		t.Errorf("run: %v", err)
+	}
+}
+
+func TestCrawlerIgnored(t *testing.T) {
+	t.Parallel()
+
+	const (
+		body  = `<html><a href="/a">a</a><a href="/b">b</a></html>`
+		bodyA = `<html><a href="http://a">a</a></html>`
+		bodyB = `<html><a href="http://b">b</a></html>`
+
+		resHostB = "http://b/"
+	)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.RequestURI {
+		case "/a":
+			_, _ = io.WriteString(w, bodyA)
+
+		case "/b":
+			_, _ = io.WriteString(w, bodyB)
+
+		default:
+			_, _ = io.WriteString(w, body)
+		}
+	}))
+
+	defer ts.Close()
+
+	handler := func(s string) {
+		if s == resHostB {
+			t.Fatal("traveled to /b")
+		}
+	}
+
+	c := New(
+		WithMaxCrawlDepth(1),
+		WithIgnored([]string{"b"}),
+	)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Error("run - error:", err)
+	}
+}
+
+func TestCrawlerProxyAuth(t *testing.T) {
+	t.Parallel()
+
+	const (
+		testCreds = "user:pass"
+		credCount = 2
+	)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		creds := r.Header.Get(proxyAuthHdr)
+		if creds == "" {
+			t.Fatal("auth header empty")
+		}
+
+		parts := strings.SplitN(creds, " ", credCount)
+		if len(parts) != credCount {
+			t.Fatalf("invalid fields count: %d", len(parts))
+		}
+
+		if !strings.EqualFold(parts[0], proxyAuthTyp) {
+			t.Fatalf("invalid auth type: %s", parts[0])
+		}
+
+		dec, err := base64.StdEncoding.DecodeString(parts[1])
+		if err != nil {
+			t.Fatalf("decode error: %v", err)
+		}
+
+		if string(dec) != testCreds {
+			t.Fatal("invalid creds")
+		}
+
+		io.WriteString(w, "OK")
+	}))
+
+	defer ts.Close()
+
+	handler := func(_ string) {}
+
+	c := New(WithProxyAuth(testCreds))
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Error("run - error:", err)
+	}
+}
+
+func TestCrawlerScanJS(t *testing.T) {
+	t.Parallel()
+
+	const (
+		body   = `<html><script src="test.js"></script></html>`
+		bodyJS = `function() { url = "/api/v1/user"; }`
+	)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Log(r.RequestURI)
+
+		switch r.RequestURI {
+		case "/test.js":
+			w.Header().Add(contentType, contentJS)
+			_, _ = io.WriteString(w, bodyJS)
+
+		default:
+			w.Header().Add(contentType, contentHTML)
+			_, _ = io.WriteString(w, body)
+		}
+	}))
+
+	defer ts.Close()
+
+	var found int
+
+	handler := func(s string) {
+		if s == "/api/v1/user" {
+			found++
+		}
+	}
+
+	c := New(
+		WithMaxCrawlDepth(1),
+		WithoutHeads(true),
+		WithScanJS(true),
+	)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Error("run - error:", err)
+	}
+
+	if found < 1 {
+		t.Fatalf("unexpected result: %d", found)
 	}
 }

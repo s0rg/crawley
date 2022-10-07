@@ -18,26 +18,33 @@ Crawls web pages and prints any link it can find.
 # features
 
 - fast html SAX-parser (powered by `golang.org/x/net/html`)
-- small (~1300 SLOC), idiomatic, 100% test covered codebase
+- small (<1500 SLOC), idiomatic, 100% test covered codebase
 - grabs most of useful resources urls (pics, videos, audios, forms, etc...)
 - found urls are streamed to stdout and guranteed to be unique (with fragments omitted)
 - scan depth (limited by starting host and path, by default - 0) can be configured
 - can crawl rules and sitemaps from `robots.txt`
 - `brute` mode - scan html comments for urls (this can lead to bogus results)
-- make use of `HTTP_PROXY` / `HTTPS_PROXY` environment values
+- make use of `HTTP_PROXY` / `HTTPS_PROXY` environment values + handles proxy auth
 - directory-only scan mode (aka `fast-scan`)
 - user-defined cookies, in curl-compatible format (i.e. `-cookie "ONE=1; TWO=2" -cookie "ITS=ME" -cookie @cookie-file`)
 - user-defined headers, same as curl: `-header "ONE: 1" -header "TWO: 2" -header @headers-file`
 - tag filter - allow to specify tags to crawl for (single: `-tag a -tag form`, multiple: `-tag a,form`, or mixed)
+- url ignore - allow to ignore urls with matched substrings from crawling (i.e.: '-ignore logout')
+- js parser - extract api endpoints from js files
+
+# examples
+```sh
+# print all links in given page:
+crawley http://some-test.site
+
+# print all js files and api endpoints:
+crawley -depth -1 -tag script -js http://some-test.site
+```
 
 # installation
 
-- [binaries](https://github.com/s0rg/crawley/releases) for Linux, FreeBSD, macOS and Windows
-
-## Archlinux User Repository
-
-Crawley is available in the AUR. Linux distributions with access to it can obtain the package from [here](https://aur.archlinux.org/packages/crawley-bin/).
-You can also use your favourite AUR helper to install it, e. g. `paru -S crawley-bin`.
+- [binaries](https://github.com/s0rg/crawley/releases) for Linux, FreeBSD, macOS and Windows, just download and run.
+- [archlinux](https://aur.archlinux.org/packages/crawley-bin/) you can use your favourite AUR helper to install it, e. g. `paru -S crawley-bin`.
 
 # usage
 
@@ -62,6 +69,12 @@ possible flags:
     disable pre-flight HEAD requests
 -help
     this flags (and their defaults) description
+-ignore value
+    patterns (in urls) to be ignored in crawl process
+-js
+    scan js files for endpoints
+-proxy-auth string
+    credentials for proxy: user:password
 -robots string
     policy for robots.txt: ignore / crawl / respect (default "ignore")
 -silent

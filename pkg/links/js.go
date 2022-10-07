@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"regexp"
+	"strings"
 )
 
 const (
@@ -13,6 +14,8 @@ const (
 		`([a-zA-Z0-9_\-/]{1,}/[a-zA-Z0-9_\-/]{1,}\.(?:[a-zA-Z]{1,4}|action)(?:[\?|#][^"|']{0,}|))|` +
 		`([a-zA-Z0-9_\-/]{1,}/[a-zA-Z0-9_\-/]{3,}(?:[\?|#][^"|']{0,}|))|` +
 		`([a-zA-Z0-9_\-]{1,}\.(?:php|asp|aspx|jsp|json|action|html|js|txt|xml|cgi)(?:[\?|#][^"|']{0,}|)))(?:"|')`
+	mimeAppPrefix  = "application/"
+	mimeTxtPrefix  = "text/"
 	codeCleanChars = `"'`
 )
 
@@ -27,12 +30,22 @@ func ExtractJS(r io.Reader, h URLHandler) {
 
 	res := reJSAPI.FindAll(buf, -1)
 	for i := 0; i < len(res); i++ {
-		if uri := cleanResult(res[i]); uri != "" {
+		if uri, ok := cleanResult(res[i]); ok {
 			h(uri)
 		}
 	}
 }
 
-func cleanResult(s []byte) (rv string) {
-	return string(bytes.Trim(s, codeCleanChars))
+func cleanResult(s []byte) (rv string, ok bool) {
+	rv = string(bytes.Trim(s, codeCleanChars))
+
+	if strings.HasPrefix(rv, mimeAppPrefix) {
+		return
+	}
+
+	if strings.HasPrefix(rv, mimeTxtPrefix) {
+		return
+	}
+
+	return rv, true
 }
