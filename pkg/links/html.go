@@ -18,19 +18,22 @@ const (
 	keyDATA   = "data"
 	keyACTION = "action"
 	keyPOSTER = "poster"
-	jsScheme  = "javascript"
 )
 
 // HTMLHandler is a callback for found links.
 type HTMLHandler func(atom.Atom, string)
+
+// TokenFilter is a callback for token filtration.
 type TokenFilter func(html.Token) bool
 
+// HTMLParams holds config for ExtractHTML.
 type HTMLParams struct {
 	Brute   bool
 	Filter  TokenFilter
 	Handler HTMLHandler
 }
 
+// AllowALL - stub that implements TokenFilter, it allows all tokens.
 func AllowALL(_ html.Token) bool { return true }
 
 // ExtractHTML extract urls from html.
@@ -145,7 +148,7 @@ func callHandler(h HTMLHandler, a atom.Atom, s string) {
 func extractTag(base *url.URL, token *html.Token, key string) (rv string) {
 	for i := 0; i < len(token.Attr); i++ {
 		if a := &token.Attr[i]; a.Key == key {
-			if res, ok := clean(base, a.Val); ok {
+			if res, ok := cleanURL(base, a.Val); ok {
 				return res
 			}
 		}

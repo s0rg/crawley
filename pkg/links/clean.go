@@ -2,7 +2,9 @@ package links
 
 import "net/url"
 
-func clean(base *url.URL, link string) (rv string, ok bool) {
+const jsScheme = "javascript"
+
+func cleanURL(base *url.URL, link string) (rv string, ok bool) {
 	u, err := url.Parse(link)
 	if err != nil {
 		return

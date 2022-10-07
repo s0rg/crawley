@@ -41,7 +41,7 @@ func TestClean(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotU, gotOk := clean(tc.args.b, tc.args.r)
+			gotU, gotOk := cleanURL(tc.args.b, tc.args.r)
 			if gotOk != tc.wantOk {
 				t.Errorf("clean() gotOk = %v, want %v", gotOk, tc.wantOk)
 			}

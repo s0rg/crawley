@@ -46,10 +46,8 @@ func ExtractSitemap(r io.Reader, b *url.URL, h URLHandler) {
 			continue
 		}
 
-		if uri, ok = clean(b, e.Loc); !ok {
-			continue
+		if uri, ok = cleanURL(b, e.Loc); ok {
+			h(uri)
 		}
-
-		h(uri)
 	}
 }
