@@ -1,55 +1,36 @@
 package links
 
 import (
-	"bufio"
 	"bytes"
 	"io"
-	"net/url"
 	"regexp"
 )
 
-var reJSURL = regexp.MustCompile(`\"/?[a-zA-Z0-9_/?=&.+ ]*\"`)
-
 const (
-	codeSplitChars = "\n;"
+	regexAPI = `(?:"|')` +
+		`(((?:[a-zA-Z]{1,10}://|//)[^"'/]{1,}\.[a-zA-Z]{2,}[^"']{0,})|` +
+		`((?:/|\.\./|\./)[^"'><,;| *()%$^/\\\[\]][^"'><,;|()]{1,})|` +
+		`([a-zA-Z0-9_\-/]{1,}/[a-zA-Z0-9_\-/]{1,}\.(?:[a-zA-Z]{1,4}|action)(?:[\?|#][^"|']{0,}|))|` +
+		`([a-zA-Z0-9_\-/]{1,}/[a-zA-Z0-9_\-/]{3,}(?:[\?|#][^"|']{0,}|))|` +
+		`([a-zA-Z0-9_\-]{1,}\.(?:php|asp|aspx|jsp|json|action|html|js|txt|xml|cgi)(?:[\?|#][^"|']{0,}|)))(?:"|')`
 	codeCleanChars = `"'`
 )
 
+var reJSAPI = regexp.MustCompile(regexAPI)
+
 // ExtractJS extract urls from js files.
-func ExtractJS(r io.Reader, b *url.URL, h URLHandler) {
-	s := bufio.NewScanner(r)
-	s.Split(splitCode)
+func ExtractJS(r io.Reader, h URLHandler) {
+	buf, err := io.ReadAll(r)
+	if err != nil {
+		return
+	}
 
-	var res [][]byte
-
-	for s.Scan() {
-		res = reJSURL.FindAll(s.Bytes(), -1)
-		for i := 0; i < len(res); i++ {
-			if uri, ok := clean(b, cleanResult(res[i])); ok {
-				h(uri)
-			}
+	res := reJSAPI.FindAll(buf, -1)
+	for i := 0; i < len(res); i++ {
+		if uri := cleanResult(res[i]); uri != "" {
+			h(uri)
 		}
 	}
-}
-
-func splitCode(data []byte, atEOF bool) (advance int, token []byte, err error) {
-	if atEOF && len(data) == 0 {
-		return 0, nil, nil
-	}
-
-	if i := bytes.IndexAny(data, codeSplitChars); i >= 0 {
-		return i + 1, cleanSplit(data[0:i]), nil
-	}
-
-	if atEOF {
-		return len(data), cleanSplit(data), nil
-	}
-
-	return 0, nil, nil
-}
-
-func cleanSplit(s []byte) (rv []byte) {
-	return bytes.Trim(s, codeSplitChars)
 }
 
 func cleanResult(s []byte) (rv string) {

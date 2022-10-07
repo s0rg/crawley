@@ -1,7 +1,6 @@
 package links
 
 import (
-	"net/url"
 	"strings"
 	"testing"
 )
@@ -13,19 +12,19 @@ func TestExtractJS(t *testing.T) {
 		js = `function() {
  		urls = [
 			// invalid ones
-			"http://example.com",
+			"user/create.notaext?user=Test",
+			// valid ones
 			"smb://example.com",
-    		"https://www.example.co.us",
+			"http://example.com",
+			"https://www.example.co.us",
 			"/api/create.php?user=test&pass=test#home",
 			"api/create.php?user=test#home",
-			// valid ones
 			"/path/to/file",
 			"/user/create.action?user=Test"
 		    "api/create.php",
 			"api/create.php?user=test"
 		    "api/create.php?user=test&pass=test",
 			"user/create.action?user=Test",
-			"user/create.notaext?user=Test",
 		    "api/user",
     		"v1/create",
     		"api/v1/user/2",
@@ -39,14 +38,12 @@ func TestExtractJS(t *testing.T) {
     		"users.xml"
 		];
 		}`
-		count = 18
+		count = 22
 	)
-
-	u, _ := url.Parse("http://HOST")
 
 	var c int
 
-	ExtractJS(strings.NewReader(js), u, func(uri string) {
+	ExtractJS(strings.NewReader(js), func(uri string) {
 		c++
 		t.Logf("found: %s", uri)
 	})

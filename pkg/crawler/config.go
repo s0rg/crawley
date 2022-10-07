@@ -49,7 +49,9 @@ func (c *config) validate() {
 func (c *config) String() (rv string) {
 	var sb strings.Builder
 
-	_, _ = sb.WriteString(fmt.Sprintf("workers: %d depth: %d brute: %t", c.Workers, c.Depth, c.Brute))
+	_, _ = sb.WriteString(fmt.Sprintf(
+		"workers: %d depth: %d brute: %t scan-js: %t", c.Workers, c.Depth, c.Brute, c.ScanJS,
+	))
 
 	if c.Delay > 0 {
 		_, _ = sb.WriteString(fmt.Sprintf(" delay: %s", c.Delay))

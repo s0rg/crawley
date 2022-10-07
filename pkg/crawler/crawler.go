@@ -167,7 +167,7 @@ func (c *Crawler) crawl(base *url.URL, t *crawlResult) (yes bool) {
 	}
 
 	switch {
-	case !canCrawl(base, u, c.cfg.Depth), c.robots.Forbidden(u.Path), c.cfg.Dirs == DirsOnly && isResorce(u.Path):
+	case !canCrawl(base, u, c.cfg.Depth), c.robots.Forbidden(u.Path), c.cfg.Dirs == DirsOnly:
 		return
 	default:
 		go func(r *url.URL) { c.crawlCh <- r }(u)
@@ -272,11 +272,11 @@ func (c *Crawler) isIgnored(v string) (yes bool) {
 func (c *Crawler) linkHandler(a atom.Atom, s string) {
 	t := crawlResult{URI: s}
 
-	switch a {
-	case atom.A, atom.Iframe:
-		if !c.isIgnored(s) {
-			t.Flag = TaskCrawl
-		}
+	fetch := (a == atom.A || a == atom.Iframe) ||
+		(c.cfg.ScanJS && a == atom.Script)
+
+	if fetch && !c.isIgnored(s) {
+		t.Flag = TaskCrawl
 	}
 
 	c.resultCh <- t
@@ -311,7 +311,7 @@ func (c *Crawler) fetch(
 	case isSitemap(uri):
 		links.ExtractSitemap(body, base, c.sitemapHandler)
 	case c.cfg.ScanJS && isJS(content, uri):
-		links.ExtractJS(body, base, c.jsHandler)
+		links.ExtractJS(body, c.jsHandler)
 	}
 
 	client.Discard(body)
