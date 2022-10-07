@@ -190,8 +190,7 @@ func main() {
 	}
 
 	if err := crawl(flag.Arg(0), opts...); err != nil {
-		// forcing back stderr in case of errors, otherwise
-		// if 'silent' is on - no one will know what happened.
+		// forcing back stderr in case of errors, otherwise, if 'silent' is on - no one will know what happened.
 		log.SetOutput(os.Stderr)
 		log.Fatal("[-] crawler:", err)
 	}
