@@ -1,6 +1,7 @@
 package links
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
@@ -43,12 +44,34 @@ func TestExtractJS(t *testing.T) {
 
 	var c int
 
-	ExtractJS(strings.NewReader(js), func(uri string) {
+	ExtractJS(strings.NewReader(js), func(_ string) {
 		c++
-		t.Logf("found: %s", uri)
 	})
 
 	if c != count {
+		t.Fatalf("unexpected result got: %d", c)
+	}
+}
+
+type badReader struct{}
+
+func (r *badReader) Read(b []byte) (n int, err error) {
+	return 0, errors.New("reader error")
+}
+
+func TestExtractJSError(t *testing.T) {
+	t.Parallel()
+
+	var (
+		r badReader
+		c int
+	)
+
+	ExtractJS(&r, func(_ string) {
+		c++
+	})
+
+	if c != 0 {
 		t.Fatalf("unexpected result got: %d", c)
 	}
 }

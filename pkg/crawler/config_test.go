@@ -67,6 +67,8 @@ func TestOptions(t *testing.T) {
 		WithExtraHeaders(extHeaders),
 		WithExtraCookies(extCookies),
 		WithTagsFilter([]string{"a", "form"}),
+		WithScanJS(fbool),
+		WithIgnored([]string{"logout"}),
 	}
 
 	c := &config{}
@@ -124,6 +126,14 @@ func TestOptions(t *testing.T) {
 	if len(c.AlowedTags) != 2 {
 		t.Error("unexpected filter size")
 	}
+
+	if c.ScanJS != fbool {
+		t.Error("bad scan-js")
+	}
+
+	if len(c.Ignored) != 1 {
+		t.Error("unexpected ignored size")
+	}
 }
 
 func TestString(t *testing.T) {
@@ -169,5 +179,25 @@ func TestString(t *testing.T) {
 
 	if !strings.Contains(v, "100") {
 		t.Error("2 - bad delay")
+	}
+}
+
+func TestProxyAuth(t *testing.T) {
+	t.Parallel()
+
+	var (
+		c       = &config{}
+		opts    = []Option{WithProxyAuth("user:pass")}
+		headers = []string{proxyAuthHdr + ": " + proxyAuthTyp + " dXNlcjpwYXNz"}
+	)
+
+	for _, o := range opts {
+		o(c)
+	}
+
+	c.validate()
+
+	if !reflect.DeepEqual(c.Headers, headers) {
+		t.Fatalf("bad extra headers: %v", c.Headers)
 	}
 }
