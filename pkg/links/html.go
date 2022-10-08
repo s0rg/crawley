@@ -18,24 +18,26 @@ const (
 	keyDATA   = "data"
 	keyACTION = "action"
 	keyPOSTER = "poster"
-	jsScheme  = "javascript"
 )
 
 // HTMLHandler is a callback for found links.
 type HTMLHandler func(atom.Atom, string)
+
+// TokenFilter is a callback for token filtration.
 type TokenFilter func(html.Token) bool
 
-type ExtractArgs struct {
-	Base    *url.URL
+// HTMLParams holds config for ExtractHTML.
+type HTMLParams struct {
 	Brute   bool
 	Filter  TokenFilter
 	Handler HTMLHandler
 }
 
+// AllowALL - stub that implements TokenFilter, it allows all tokens.
 func AllowALL(_ html.Token) bool { return true }
 
-// ExtractHTML run `handler` for every link found inside html from `r`, rebasing them to `b` (if need).
-func ExtractHTML(r io.Reader, a ExtractArgs) {
+// ExtractHTML extract urls from html.
+func ExtractHTML(r io.Reader, b *url.URL, p HTMLParams) {
 	var (
 		tkns = html.NewTokenizer(r)
 		key  = keySRC
@@ -47,12 +49,12 @@ func ExtractHTML(r io.Reader, a ExtractArgs) {
 		case html.ErrorToken:
 			return
 		case html.StartTagToken, html.SelfClosingTagToken:
-			if t = tkns.Token(); a.Filter(t) {
-				extractToken(a.Base, t, &key, a.Handler)
+			if t = tkns.Token(); p.Filter(t) {
+				extractToken(b, t, &key, p.Handler)
 			}
 		case html.CommentToken:
-			if a.Brute {
-				extractComment(tkns.Token().Data, a.Handler)
+			if p.Brute {
+				extractComment(tkns.Token().Data, p.Handler)
 			}
 		}
 	}
@@ -146,39 +148,11 @@ func callHandler(h HTMLHandler, a atom.Atom, s string) {
 func extractTag(base *url.URL, token *html.Token, key string) (rv string) {
 	for i := 0; i < len(token.Attr); i++ {
 		if a := &token.Attr[i]; a.Key == key {
-			if res, ok := clean(base, a.Val); ok {
+			if res, ok := cleanURL(base, a.Val); ok {
 				return res
 			}
 		}
 	}
 
 	return rv
-}
-
-func clean(base *url.URL, link string) (rv string, ok bool) {
-	u, err := url.Parse(link)
-	if err != nil {
-		return
-	}
-
-	if u.Host == "" {
-		if u = base.ResolveReference(u); u.Host == "" {
-			return
-		}
-	}
-
-	switch u.Scheme {
-	case jsScheme:
-		return
-	case "":
-		u.Scheme = base.Scheme
-	}
-
-	if u.Path == "" {
-		u.Path = "/"
-	}
-
-	u.Fragment = ""
-
-	return u.String(), true
 }

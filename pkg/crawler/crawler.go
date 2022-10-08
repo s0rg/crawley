@@ -167,7 +167,7 @@ func (c *Crawler) crawl(base *url.URL, t *crawlResult) (yes bool) {
 	}
 
 	switch {
-	case !canCrawl(base, u, c.cfg.Depth), c.robots.Forbidden(u.Path), c.cfg.Dirs == DirsOnly && isResorce(u.Path):
+	case !canCrawl(base, u, c.cfg.Depth), c.robots.Forbidden(u.Path), c.cfg.Dirs == DirsOnly:
 		return
 	default:
 		go func(r *url.URL) { c.crawlCh <- r }(u)
@@ -251,11 +251,31 @@ func (c *Crawler) sitemapHandler(s string) {
 	c.linkHandler(atom.A, s)
 }
 
+func (c *Crawler) jsHandler(s string) {
+	c.linkHandler(atom.Link, s)
+}
+
+func (c *Crawler) isIgnored(v string) (yes bool) {
+	if len(c.cfg.Ignored) == 0 {
+		return
+	}
+
+	for _, s := range c.cfg.Ignored {
+		if strings.Contains(v, s) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (c *Crawler) linkHandler(a atom.Atom, s string) {
 	t := crawlResult{URI: s}
 
-	switch a {
-	case atom.A, atom.Iframe:
+	fetch := (a == atom.A || a == atom.Iframe) ||
+		(c.cfg.ScanJS && a == atom.Script)
+
+	if fetch && !c.isIgnored(s) {
 		t.Flag = TaskCrawl
 	}
 
@@ -279,16 +299,19 @@ func (c *Crawler) fetch(
 		}
 	}
 
+	content := hdrs.Get(contentType)
+
 	switch {
-	case isHTML(hdrs.Get(contentType)):
-		links.ExtractHTML(body, links.ExtractArgs{
-			Base:    base,
+	case isHTML(content):
+		links.ExtractHTML(body, base, links.HTMLParams{
 			Brute:   c.cfg.Brute,
 			Filter:  c.filter,
 			Handler: c.linkHandler,
 		})
 	case isSitemap(uri):
-		links.ExtractSitemap(base, body, c.sitemapHandler)
+		links.ExtractSitemap(body, base, c.sitemapHandler)
+	case c.cfg.ScanJS && isJS(content, uri):
+		links.ExtractJS(body, c.jsHandler)
 	}
 
 	client.Discard(body)
@@ -313,7 +336,9 @@ func (c *Crawler) crawler(web crawlClient) {
 			if hdrs, err := web.Head(ctx, us); err != nil {
 				log.Printf("[-] HEAD %s: %v", us, err)
 			} else {
-				parse = isHTML(hdrs.Get(contentType)) || isSitemap(us)
+				ct := hdrs.Get(contentType)
+
+				parse = isHTML(ct) || isSitemap(us) || (c.cfg.ScanJS && isJS(ct, us))
 			}
 		}
 

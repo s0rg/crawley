@@ -27,20 +27,22 @@ var (
 	BuildDate string
 	defaultUA = "Mozilla/5.0 (compatible; Win64; x64) Mr." + appName + "/" + GitTag + "-" + GitHash
 
-	extCookies, extHeaders values.Smart
-	tags                   values.Simple
+	cookies, headers values.Smart
+	tags, ignored    values.Simple
 
-	fVersion      = flag.Bool("version", false, "show version")
+	fDepth        = flag.Int("depth", 0, "scan depth (set -1 for unlimited)")
+	fWorkers      = flag.Int("workers", runtime.NumCPU(), "number of workers")
 	fBrute        = flag.Bool("brute", false, "scan html comments")
+	fNoHeads      = flag.Bool("headless", false, "disable pre-flight HEAD requests")
+	fScanJS       = flag.Bool("js", false, "scan js files for endpoints")
 	fSkipSSL      = flag.Bool("skip-ssl", false, "skip ssl verification")
 	fSilent       = flag.Bool("silent", false, "suppress info and error messages in stderr")
-	fNoHeads      = flag.Bool("headless", false, "disable pre-flight HEAD requests")
-	fDepth        = flag.Int("depth", 0, "scan depth (-1 - unlimited)")
-	fWorkers      = flag.Int("workers", runtime.NumCPU(), "number of workers")
-	fDelay        = flag.Duration("delay", defaultDelay, "per-request delay (0 - disable)")
-	fUA           = flag.String("user-agent", defaultUA, "user-agent string")
-	fRobotsPolicy = flag.String("robots", "ignore", "policy for robots.txt: ignore / crawl / respect")
+	fVersion      = flag.Bool("version", false, "show version")
 	fDirsPolicy   = flag.String("dirs", "show", "policy for non-resource urls: show / hide / only")
+	fProxyAuth    = flag.String("proxy-auth", "", "credentials for proxy: user:password")
+	fRobotsPolicy = flag.String("robots", "ignore", "policy for robots.txt: ignore / crawl / respect")
+	fUA           = flag.String("user-agent", defaultUA, "user-agent string")
+	fDelay        = flag.Duration("delay", defaultDelay, "per-request delay (0 - disable)")
 )
 
 func version() string {
@@ -73,10 +75,7 @@ func crawl(uri string, opts ...crawler.Option) error {
 	return nil
 }
 
-func initValues() (
-	headers, cookies []string,
-	err error,
-) {
+func loadSmart() (h, c []string, err error) {
 	var wd string
 
 	if wd, err = os.Getwd(); err != nil {
@@ -87,19 +86,19 @@ func initValues() (
 
 	fs := os.DirFS(wd)
 
-	if headers, err = extHeaders.Load(fs); err != nil {
+	if h, err = headers.Load(fs); err != nil {
 		err = fmt.Errorf("headers: %w", err)
 
 		return
 	}
 
-	if cookies, err = extCookies.Load(fs); err != nil {
+	if c, err = cookies.Load(fs); err != nil {
 		err = fmt.Errorf("cookies: %w", err)
 
 		return
 	}
 
-	return headers, cookies, nil
+	return h, c, nil
 }
 
 func initOptions() (rv []crawler.Option, err error) {
@@ -117,9 +116,9 @@ func initOptions() (rv []crawler.Option, err error) {
 		return
 	}
 
-	headers, cookies, err := initValues()
+	h, c, err := loadSmart()
 	if err != nil {
-		err = fmt.Errorf("values: %w", err)
+		err = fmt.Errorf("load: %w", err)
 
 		return
 	}
@@ -134,9 +133,12 @@ func initOptions() (rv []crawler.Option, err error) {
 		crawler.WithDirsPolicy(dirs),
 		crawler.WithRobotsPolicy(robots),
 		crawler.WithoutHeads(*fNoHeads),
-		crawler.WithExtraHeaders(headers),
-		crawler.WithExtraCookies(cookies),
+		crawler.WithScanJS(*fScanJS),
+		crawler.WithExtraHeaders(h),
+		crawler.WithExtraCookies(c),
 		crawler.WithTagsFilter(tags.Values),
+		crawler.WithIgnored(ignored.Values),
+		crawler.WithProxyAuth(*fProxyAuth),
 	}
 
 	return rv, nil
@@ -144,12 +146,12 @@ func initOptions() (rv []crawler.Option, err error) {
 
 func main() {
 	flag.Var(
-		&extHeaders,
+		&headers,
 		"header",
 		"extra headers for request, can be used multiple times, accept files with '@'-prefix",
 	)
 	flag.Var(
-		&extCookies,
+		&cookies,
 		"cookie",
 		"extra cookies for request, can be used multiple times, accept files with '@'-prefix",
 	)
@@ -158,11 +160,16 @@ func main() {
 		"tag",
 		"tags filter, single or comma-separated tag names",
 	)
+	flag.Var(
+		&ignored,
+		"ignore",
+		"patterns (in urls) to be ignored in crawl process",
+	)
 
 	flag.Parse()
 
 	if *fVersion {
-		fmt.Println(version())
+		puts(version())
 
 		return
 	}
@@ -183,8 +190,7 @@ func main() {
 	}
 
 	if err := crawl(flag.Arg(0), opts...); err != nil {
-		// forcing back stderr in case of errors, otherwise
-		// if 'silent' is on - no one will know what happened.
+		// forcing back stderr in case of errors, otherwise, if 'silent' is on - no one will know what happened.
 		log.SetOutput(os.Stderr)
 		log.Fatal("[-] crawler:", err)
 	}

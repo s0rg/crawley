@@ -1,6 +1,7 @@
 package crawler
 
 import (
+	"encoding/base64"
 	"time"
 )
 
@@ -88,5 +89,29 @@ func WithExtraCookies(v []string) Option {
 func WithTagsFilter(v []string) Option {
 	return func(c *config) {
 		c.AlowedTags = append(c.AlowedTags, v...)
+	}
+}
+
+// WithSkipPatterns apply URL skip filter for crawler.
+func WithIgnored(v []string) Option {
+	return func(c *config) {
+		c.Ignored = append(c.Ignored, v...)
+	}
+}
+
+// WithScanJS enables js files scanning.
+func WithScanJS(v bool) Option {
+	return func(c *config) {
+		c.ScanJS = v
+	}
+}
+
+// WithProxyAuth enables proxy credentials.
+func WithProxyAuth(v string) Option {
+	return func(c *config) {
+		c.Headers = append(
+			c.Headers,
+			proxyAuthHdr+": "+proxyAuthTyp+" "+base64.StdEncoding.EncodeToString([]byte(v)),
+		)
 	}
 }

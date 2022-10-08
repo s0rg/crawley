@@ -2,7 +2,6 @@ package links
 
 import (
 	"bytes"
-	"io"
 	"net/url"
 	"reflect"
 	"strings"
@@ -15,51 +14,6 @@ import (
 const testRes1 = "http://test/result"
 
 var testBase, _ = url.Parse("http://test/")
-
-func TestClean(t *testing.T) {
-	t.Parallel()
-
-	type args struct {
-		b *url.URL
-		r string
-	}
-
-	testRes2 := "http://result/"
-	testRes3 := "http://test/?foo=bar"
-
-	tests := []struct {
-		name   string
-		args   args
-		wantU  string
-		wantOk bool
-	}{
-		{"bad-uri", args{b: testBase, r: "[%]"}, "", false},
-		{"empty-uri", args{b: testBase, r: "http://"}, "", false},
-		{"js-scheme", args{b: testBase, r: "javascript://result"}, "", false},
-		{"result-ok", args{b: testBase, r: "result"}, testRes1, true},
-		{"result-no-scheme", args{b: testBase, r: "//result"}, testRes2, true},
-		{"result-params", args{b: testBase, r: "/?foo=bar"}, testRes3, true},
-	}
-
-	for _, tt := range tests {
-		tc := tt
-
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
-			gotU, gotOk := clean(tc.args.b, tc.args.r)
-			if gotOk != tc.wantOk {
-				t.Errorf("clean() gotOk = %v, want %v", gotOk, tc.wantOk)
-			}
-
-			if gotOk {
-				if !reflect.DeepEqual(gotU, tc.wantU) {
-					t.Errorf("clean() gotU = %v, want %v", gotU, tc.wantU)
-				}
-			}
-		})
-	}
-}
 
 func TestExtractTag(t *testing.T) {
 	t.Parallel()
@@ -195,8 +149,7 @@ func TestExtractURLS(t *testing.T) {
 
 			var res string
 
-			ExtractHTML(io.NopCloser(buf), ExtractArgs{
-				Base:   testBase,
+			ExtractHTML(buf, testBase, HTMLParams{
 				Brute:  true,
 				Filter: AllowALL,
 				Handler: func(_ atom.Atom, s string) {
@@ -252,8 +205,7 @@ func TestExtractAllowed(t *testing.T) {
 		return tkn.DataAtom == atom.A
 	}
 
-	ExtractHTML(io.NopCloser(buf), ExtractArgs{
-		Base:   testBase,
+	ExtractHTML(buf, testBase, HTMLParams{
 		Brute:  true,
 		Filter: filter,
 		Handler: func(_ atom.Atom, s string) {
