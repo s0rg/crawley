@@ -30,15 +30,18 @@ Crawls web pages and prints any link it can find.
 - user-defined headers, same as curl: `-header "ONE: 1" -header "TWO: 2" -header @headers-file`
 - tag filter - allow to specify tags to crawl for (single: `-tag a -tag form`, multiple: `-tag a,form`, or mixed)
 - url ignore - allow to ignore urls with matched substrings from crawling (i.e.: '-ignore logout')
-- js parser - extract api endpoints from js files
+- js parser - extract api endpoints from js files, this done by regexp, so results can be messy
 
 # examples
 ```sh
-# print all links in given page:
+# print all links from first page:
 crawley http://some-test.site
 
 # print all js files and api endpoints:
 crawley -depth -1 -tag script -js http://some-test.site
+
+# download all png images from site:
+crawley -depth -1 -tag img http://some-test.site | grep '\.png$' | wget -i -
 ```
 
 # installation
