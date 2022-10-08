@@ -40,8 +40,14 @@ crawley http://some-test.site
 # print all js files and api endpoints:
 crawley -depth -1 -tag script -js http://some-test.site
 
+# print all endpoints from js:
+crawley -js http://some-test.site/app.js
+
 # download all png images from site:
 crawley -depth -1 -tag img http://some-test.site | grep '\.png$' | wget -i -
+
+# fast directory traversal:
+crawley -headless -delay 0 -depth -1 -dirs only http://some-test.site
 ```
 
 # installation
