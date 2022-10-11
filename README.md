@@ -18,7 +18,7 @@ Crawls web pages and prints any link it can find.
 # features
 
 - fast html SAX-parser (powered by `golang.org/x/net/html`)
-- small (<1500 SLOC), idiomatic, 100% test covered codebase
+- small (below 1500 SLOC), idiomatic, 100% test covered codebase
 - grabs most of useful resources urls (pics, videos, audios, forms, etc...)
 - found urls are streamed to stdout and guranteed to be unique (with fragments omitted)
 - scan depth (limited by starting host and path, by default - 0) can be configured
@@ -33,6 +33,7 @@ Crawls web pages and prints any link it can find.
 - js parser - extract api endpoints from js files, this done by regexp, so results can be messy
 
 # examples
+
 ```sh
 # print all links from first page:
 crawley http://some-test.site

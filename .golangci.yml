@@ -1,5 +1,6 @@
 run:
   go: '1.19'
+  allow-parallel-runners: true
 
 output:
   format: 'colored-line-number'
@@ -23,6 +24,9 @@ linters:
   fast: false
 
 linters-settings:
+  govet:
+    check-shadowing: true
+    fieldalignment: true
   gocritic:
     enabled-tags:
       - performance
