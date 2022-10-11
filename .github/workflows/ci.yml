@@ -39,7 +39,7 @@ jobs:
           check-latest: true
           cache: true
       - name: test-coverage
-        uses: paambaati/codeclimate-action@v3
+        uses: paambaati/codeclimate-action@v3.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
