@@ -46,13 +46,13 @@ func TestSimpleString(t *testing.T) {
 		t.Fatal("non-empty result")
 	}
 
-	l.Set("a")
+	_ = l.Set("a")
 
 	if l.String() != "a" {
 		t.Fatal("expected a")
 	}
 
-	l.Set("b")
+	_ = l.Set("b")
 
 	if l.String() != "a,b" {
 		t.Fatal("expected a,b")

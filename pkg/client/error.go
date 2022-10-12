@@ -6,8 +6,8 @@ import (
 
 // HTTPError wraps non-200 HTTP state.
 type HTTPError struct {
-	code int
 	msg  string
+	code int
 }
 
 // ErrFromResp creates new HTTPError from response.

@@ -52,12 +52,12 @@ type crawlResult struct {
 // Crawler holds crawling process config and state.
 type Crawler struct {
 	cfg      *config
-	wg       sync.WaitGroup
 	handleCh chan string
 	crawlCh  chan *url.URL
 	resultCh chan crawlResult
 	robots   *robots.TXT
 	filter   links.TokenFilter
+	wg       sync.WaitGroup
 }
 
 // New creates Crawler instance.
