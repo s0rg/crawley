@@ -859,5 +859,4 @@ func TestCrawlerOverflow(t *testing.T) {
 	if c.crawl(base, &res) {
 		t.Error("no overflow")
 	}
-
 }
