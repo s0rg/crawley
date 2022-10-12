@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/s0rg/crawley/pkg/set"
+	"golang.org/x/net/html/atom"
 )
 
 const robotsEP = "/robots.txt"
@@ -24,6 +25,33 @@ var (
 		WithMaxCrawlDepth(1),
 	}
 )
+
+type testClient struct {
+	err    error
+	bodyIO io.ReadCloser
+}
+
+func (tc *testClient) Get(
+	_ context.Context,
+	_ string,
+) (body io.ReadCloser, h http.Header, err error) {
+	return tc.bodyIO, nil, tc.err
+}
+
+func (tc *testClient) Head(
+	_ context.Context,
+	_ string,
+) (h http.Header, err error) {
+	return
+}
+
+type errReader struct {
+	err error
+}
+
+func (er *errReader) Read(_ []byte) (n int, err error) {
+	return 0, er.err
+}
 
 func TestCrawlerOK(t *testing.T) {
 	t.Parallel()
@@ -341,33 +369,6 @@ func TestCrawlerRobotsErr400(t *testing.T) {
 	if c.robots.Forbidden("/some") {
 		t.Error("forbidden")
 	}
-}
-
-type testClient struct {
-	err    error
-	bodyIO io.ReadCloser
-}
-
-func (tc *testClient) Get(
-	_ context.Context,
-	_ string,
-) (body io.ReadCloser, h http.Header, err error) {
-	return tc.bodyIO, nil, tc.err
-}
-
-func (tc *testClient) Head(
-	_ context.Context,
-	_ string,
-) (h http.Header, err error) {
-	return
-}
-
-type errReader struct {
-	err error
-}
-
-func (er *errReader) Read(_ []byte) (n int, err error) {
-	return 0, er.err
 }
 
 func TestCrawlerRobotsRequestErr(t *testing.T) {
@@ -851,6 +852,9 @@ func TestCrawlerOverflow(t *testing.T) {
 	)
 	base, _ := url.Parse("http://test/")
 	res := crawlResult{URI: "http://test/foo"}
+
+	c.emit("/")
+	c.linkHandler(atom.A, "")
 
 	if c.crawl(base, &res) {
 		t.Error("no overflow")
