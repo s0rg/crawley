@@ -13,14 +13,16 @@ func Test_prepareHeaders(t *testing.T) {
 		args []string
 		want []*header
 	}{
-		{"1",
+		{
+			"1",
 			[]string{"foo: bar", "test: me"},
 			[]*header{
 				{"foo", "bar"},
 				{"test", "me"},
 			},
 		},
-		{"2",
+		{
+			"2",
 			[]string{"   one: 1", "junk-key:", "two   : 2  ", ":junk-val"},
 			[]*header{
 				{"one", "1"},

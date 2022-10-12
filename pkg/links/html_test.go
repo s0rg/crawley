@@ -37,8 +37,8 @@ func TestExtractTag(t *testing.T) {
 		args  args
 		wantU string
 	}{
-		{"ok", args{b: testBase, t: &tOK, k: "b"}, testRes1},
-		{"bad", args{b: testBase, t: &tBAD, k: "a"}, ""},
+		{name: "ok", args: args{b: testBase, t: &tOK, k: "b"}, wantU: testRes1},
+		{name: "bad", args: args{b: testBase, t: &tBAD, k: "a"}, wantU: ""},
 	}
 
 	for _, tt := range tests {
@@ -70,26 +70,116 @@ func TestExtractToken(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		token    html.Token
 		keyStart string
 		keyWant  string
 		wantURL  string
+		token    html.Token
 	}{
-		{"no-link", tbad, "", "", ""},
-		{"img-ok", html.Token{DataAtom: atom.Img, Attr: attrs}, "", "", testRes1},
-		{"image-ok", html.Token{DataAtom: atom.Image, Attr: attrs}, "", "", testRes1},
-		{"video-ok", html.Token{DataAtom: atom.Video, Attr: attrs}, "", keySRC, testRes1},
-		{"audio-ok", html.Token{DataAtom: atom.Audio, Attr: attrs}, "", keySRC, testRes1},
-		{"script-ok", html.Token{DataAtom: atom.Script, Attr: attrs}, "", "", testRes1},
-		{"track-ok", html.Token{DataAtom: atom.Track, Attr: attrs}, "", "", testRes1},
-		{"object-ok", html.Token{DataAtom: atom.Object, Attr: attrs}, "", "", testRes1},
-		{"a-ok", html.Token{DataAtom: atom.A, Attr: attrs}, "", "", testRes1},
-		{"iframe-ok", html.Token{DataAtom: atom.Iframe, Attr: attrs}, "", "", testRes1},
-		{"video-empty", html.Token{DataAtom: atom.Video}, "", keySRC, ""},
-		{"audio-empty", html.Token{DataAtom: atom.Audio}, "", keySRC, ""},
-		{"picture-empty", html.Token{DataAtom: atom.Picture}, "", keySRCS, ""},
-		{"source-src-ok", html.Token{DataAtom: atom.Source, Attr: attrs}, keySRC, keySRC, testRes1},
-		{"form-action-ok", html.Token{DataAtom: atom.Form, Attr: attrs}, "", "", testRes1},
+		{
+			name:     "no-link",
+			token:    tbad,
+			keyStart: "",
+			keyWant:  "",
+			wantURL:  "",
+		},
+		{
+			name:     "img-ok",
+			token:    html.Token{DataAtom: atom.Img, Attr: attrs},
+			keyStart: "",
+			keyWant:  "",
+			wantURL:  testRes1,
+		},
+		{
+			name:     "image-ok",
+			token:    html.Token{DataAtom: atom.Image, Attr: attrs},
+			keyStart: "",
+			keyWant:  "",
+			wantURL:  testRes1,
+		},
+		{
+			name:     "video-ok",
+			token:    html.Token{DataAtom: atom.Video, Attr: attrs},
+			keyStart: "",
+			keyWant:  keySRC,
+			wantURL:  testRes1,
+		},
+		{
+			name:     "audio-ok",
+			token:    html.Token{DataAtom: atom.Audio, Attr: attrs},
+			keyStart: "",
+			keyWant:  keySRC,
+			wantURL:  testRes1,
+		},
+		{
+			name:     "script-ok",
+			token:    html.Token{DataAtom: atom.Script, Attr: attrs},
+			keyStart: "",
+			keyWant:  "",
+			wantURL:  testRes1,
+		},
+		{
+			name:     "track-ok",
+			token:    html.Token{DataAtom: atom.Track, Attr: attrs},
+			keyStart: "",
+			keyWant:  "",
+			wantURL:  testRes1,
+		},
+		{
+			name:     "object-ok",
+			token:    html.Token{DataAtom: atom.Object, Attr: attrs},
+			keyStart: "",
+			keyWant:  "",
+			wantURL:  testRes1,
+		},
+		{
+			name:     "a-ok",
+			token:    html.Token{DataAtom: atom.A, Attr: attrs},
+			keyStart: "",
+			keyWant:  "",
+			wantURL:  testRes1,
+		},
+		{
+			name:     "iframe-ok",
+			token:    html.Token{DataAtom: atom.Iframe, Attr: attrs},
+			keyStart: "",
+			keyWant:  "",
+			wantURL:  testRes1,
+		},
+		{
+			name:     "audio-empty",
+			token:    html.Token{DataAtom: atom.Audio},
+			keyStart: "",
+			keyWant:  keySRC,
+			wantURL:  "",
+		},
+		{
+			name:     "audio-empty",
+			token:    html.Token{DataAtom: atom.Audio},
+			keyStart: "",
+			keyWant:  keySRC,
+			wantURL:  "",
+		},
+		{
+			name:     "picture-empty",
+			token:    html.Token{DataAtom: atom.Picture},
+			keyStart: "",
+			keyWant:  keySRCS,
+			wantURL:  "",
+		},
+		{
+			name:     "source-src-ok",
+			token:    html.Token{DataAtom: atom.Source, Attr: attrs},
+			keyStart: keySRC,
+			keyWant:  keySRC,
+			wantURL:  testRes1,
+		},
+		{
+			name:     "form-action-ok",
+			token:    html.Token{DataAtom: atom.Form, Attr: attrs},
+			keyStart: "",
+			keyWant:  "",
+			wantURL:  testRes1,
+		},
 	}
 
 	for _, tt := range tests {
@@ -130,13 +220,33 @@ func TestExtractURLS(t *testing.T) {
 	tests := []struct {
 		name    string
 		raw     string
-		hasLink bool
 		lnk     string
+		hasLink bool
 	}{
-		{"ok-1", raw1, true, testRes1},
-		{"ok-4", raw4, true, testRes1},
-		{"comment", raw3, true, testRes1},
-		{"bad", raw2, false, ""},
+		{
+			name:    "ok-1",
+			raw:     raw1,
+			hasLink: true,
+			lnk:     testRes1,
+		},
+		{
+			name:    "ok-4",
+			raw:     raw4,
+			hasLink: true,
+			lnk:     testRes1,
+		},
+		{
+			name:    "comment",
+			raw:     raw3,
+			hasLink: true,
+			lnk:     testRes1,
+		},
+		{
+			name:    "bad",
+			raw:     raw2,
+			hasLink: false,
+			lnk:     "",
+		},
 	}
 
 	for _, tt := range tests {

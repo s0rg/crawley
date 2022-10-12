@@ -18,9 +18,12 @@ import (
 
 const robotsEP = "/robots.txt"
 
-var testOptions = []Option{
-	WithMaxCrawlDepth(1),
-}
+var (
+	errGeneric  = errors.New("generic error")
+	testOptions = []Option{
+		WithMaxCrawlDepth(1),
+	}
+)
 
 func TestCrawlerOK(t *testing.T) {
 	t.Parallel()
@@ -372,8 +375,7 @@ func TestCrawlerRobotsRequestErr(t *testing.T) {
 
 	var (
 		base, _ = url.Parse("http://test/")
-		genErr  = errors.New("generic error")
-		tc      = testClient{err: genErr}
+		tc      = testClient{err: errGeneric}
 		c       = New(
 			WithMaxCrawlDepth(1),
 			WithRobotsPolicy(RobotsRespect),
@@ -392,8 +394,7 @@ func TestCrawlerRobotsBodytErr(t *testing.T) {
 
 	var (
 		base, _ = url.Parse("http://test/")
-		genErr  = errors.New("generic error")
-		tc      = testClient{err: nil, bodyIO: io.NopCloser(&errReader{err: genErr})}
+		tc      = testClient{err: nil, bodyIO: io.NopCloser(&errReader{err: errGeneric})}
 		c       = New(
 			WithMaxCrawlDepth(1),
 			WithRobotsPolicy(RobotsRespect),
@@ -549,8 +550,7 @@ func TestCrawlerGetNonHTTPErr(t *testing.T) {
 
 	var (
 		base, _ = url.Parse("http://test/")
-		genErr  = errors.New("generic error")
-		tc      = testClient{err: genErr, bodyIO: nil}
+		tc      = testClient{err: errGeneric, bodyIO: nil}
 		c       = New(WithoutHeads(true))
 	)
 
@@ -781,7 +781,7 @@ func TestCrawlerProxyAuth(t *testing.T) {
 			t.Fatal("invalid creds")
 		}
 
-		io.WriteString(w, "OK")
+		_, _ = io.WriteString(w, "OK")
 	}))
 
 	defer ts.Close()
@@ -839,5 +839,20 @@ func TestCrawlerScanJS(t *testing.T) {
 
 	if found < 1 {
 		t.Fatalf("unexpected result: %d", found)
+	}
+}
+
+func TestCrawlerOverflow(t *testing.T) {
+	t.Parallel()
+
+	c := New(
+		WithoutHeads(true),
+		WithMaxCrawlDepth(1),
+	)
+	base, _ := url.Parse("http://test/")
+	res := crawlResult{URI: "http://test/foo"}
+
+	if c.crawl(base, &res) {
+		t.Error("no overflow")
 	}
 }

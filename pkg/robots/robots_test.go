@@ -24,12 +24,14 @@ user-agent: *
 disallow:
 unknown: ha-ha`
 
+var errGeneric = errors.New("generic error")
+
 type errReader struct {
 	err error
 }
 
-func (er *errReader) Read(_ []byte) (n int, err error) {
-	return 0, er.err
+func (r *errReader) Read(_ []byte) (n int, err error) {
+	return 0, r.err
 }
 
 func BenchmarkFromReader(b *testing.B) {
@@ -92,24 +94,23 @@ func TestNewDenyAll(t *testing.T) {
 }
 
 func TestErrReader(t *testing.T) {
-	var (
-		genErr = errors.New("generic error")
-		errIO  = errReader{err: genErr}
-	)
-
 	t.Parallel()
+
+	errIO := errReader{err: errGeneric}
 
 	_, err := FromReader("", &errIO)
 	if err == nil {
 		t.Fatal("no error")
 	}
 
-	if !errors.Is(err, genErr) {
+	if !errors.Is(err, errGeneric) {
 		t.Error("bad error")
 	}
 }
 
 func TestURL(t *testing.T) {
+	t.Parallel()
+
 	testCases := []string{
 		"http://example.com/",
 		"http://example.com/some/path",
@@ -117,8 +118,6 @@ func TestURL(t *testing.T) {
 	}
 
 	const wantURL = "http://example.com/robots.txt"
-
-	t.Parallel()
 
 	for _, c := range testCases {
 		u, err := url.Parse(c)

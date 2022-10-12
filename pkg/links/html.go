@@ -28,9 +28,9 @@ type TokenFilter func(html.Token) bool
 
 // HTMLParams holds config for ExtractHTML.
 type HTMLParams struct {
-	Brute   bool
 	Filter  TokenFilter
 	Handler HTMLHandler
+	Brute   bool
 }
 
 // AllowALL - stub that implements TokenFilter, it allows all tokens.

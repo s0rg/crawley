@@ -6,6 +6,33 @@ import (
 	"testing"
 )
 
+var errReader = errors.New("reader error")
+
+type badReader struct {
+	err error
+}
+
+func (r *badReader) Read(b []byte) (n int, err error) {
+	return 0, r.err
+}
+
+func TestExtractJSError(t *testing.T) {
+	t.Parallel()
+
+	var (
+		r = badReader{err: errReader}
+		c int
+	)
+
+	ExtractJS(&r, func(_ string) {
+		c++
+	})
+
+	if c != 0 {
+		t.Fatalf("unexpected result got: %d", c)
+	}
+}
+
 func TestExtractJS(t *testing.T) {
 	t.Parallel()
 
@@ -52,29 +79,6 @@ func TestExtractJS(t *testing.T) {
 	})
 
 	if c != count {
-		t.Fatalf("unexpected result got: %d", c)
-	}
-}
-
-type badReader struct{}
-
-func (r *badReader) Read(b []byte) (n int, err error) {
-	return 0, errors.New("reader error")
-}
-
-func TestExtractJSError(t *testing.T) {
-	t.Parallel()
-
-	var (
-		r badReader
-		c int
-	)
-
-	ExtractJS(&r, func(_ string) {
-		c++
-	})
-
-	if c != 0 {
 		t.Fatalf("unexpected result got: %d", c)
 	}
 }

@@ -13,13 +13,13 @@ const (
 )
 
 type config struct {
+	UserAgent  string
 	Headers    []string
 	Cookies    []string
 	AlowedTags []string
 	Ignored    []string
-	UserAgent  string
-	Delay      time.Duration
 	Workers    int
+	Delay      time.Duration
 	Depth      int
 	Robots     RobotsPolicy
 	Dirs       DirsPolicy

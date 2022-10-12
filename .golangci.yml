@@ -1,6 +1,6 @@
 run:
-  go: '1.19'
   allow-parallel-runners: true
+  go: '1.19'
 
 output:
   format: 'colored-line-number'
@@ -18,15 +18,14 @@ linters:
     - exhaustruct
     - exhaustive
     - varnamelen
-    - forbidigo
-    - gofumpt
     - gci
-  fast: false
 
 linters-settings:
+  errcheck:
+    check-type-assertions: true
   govet:
     check-shadowing: true
-    fieldalignment: true
+    enable-all: true
   gocritic:
     enabled-tags:
       - performance
@@ -42,10 +41,7 @@ issues:
         - gosec
     - path: ._test\.go
       linters:
-        - goerr113
-        - errcheck
         - dupword
         - ifshort
         - cyclop
         - funlen
-        - dupl

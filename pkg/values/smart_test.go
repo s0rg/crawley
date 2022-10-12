@@ -68,8 +68,8 @@ func TestSmartLoad(t *testing.T) {
 
 	var l Smart
 
-	l.Set("foo0")
-	l.Set("@foo")
+	_ = l.Set("foo0")
+	_ = l.Set("@foo")
 
 	res, err := l.Load(fsys)
 	if err != nil {
@@ -102,8 +102,8 @@ func TestSmartLoadFSErrorDir(t *testing.T) {
 
 	var l Smart
 
-	l.Set("foo0")
-	l.Set("@foo")
+	_ = l.Set("foo0")
+	_ = l.Set("@foo")
 
 	_, err := l.Load(fsys)
 	if err == nil {
