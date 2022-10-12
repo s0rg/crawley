@@ -26,9 +26,9 @@ type crawlClient interface {
 }
 
 const (
-	nMID = 64
-	nBIG = nMID * 2
+	chMult = 256
 
+	chanTimeout   = 100 * time.Millisecond
 	crawlTimeout  = 5 * time.Second
 	robotsTimeout = 3 * time.Second
 )
@@ -72,6 +72,7 @@ func New(opts ...Option) (c *Crawler) {
 
 	return &Crawler{
 		cfg:    cfg,
+		robots: robots.AllowALL(),
 		filter: prepareFilter(cfg.AlowedTags),
 	}
 }
@@ -84,10 +85,10 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 		return fmt.Errorf("parse url: %w", err)
 	}
 
-	n := (c.cfg.Workers + c.cfg.Depth + 1)
-	c.handleCh = make(chan string, n*nMID)
-	c.crawlCh = make(chan *url.URL, n*nMID)
-	c.resultCh = make(chan crawlResult, n*nBIG)
+	n := (c.cfg.Workers + 1)
+	c.handleCh = make(chan string, n*chMult)
+	c.crawlCh = make(chan *url.URL, n*chMult)
+	c.resultCh = make(chan crawlResult, n*chMult)
 
 	defer c.close()
 
@@ -157,23 +158,37 @@ func (c *Crawler) emit(u string) {
 		return
 	}
 
-	c.handleCh <- u
+	t := time.NewTimer(chanTimeout)
+	defer t.Stop()
+
+	select {
+	case c.handleCh <- u:
+	case <-t.C:
+	}
 }
 
-func (c *Crawler) crawl(base *url.URL, t *crawlResult) (yes bool) {
-	u, err := url.Parse(t.URI)
+func (c *Crawler) crawl(base *url.URL, r *crawlResult) (yes bool) {
+	u, err := url.Parse(r.URI)
 	if err != nil {
 		return
 	}
 
-	switch {
-	case !canCrawl(base, u, c.cfg.Depth), c.robots.Forbidden(u.Path), c.cfg.Dirs == DirsOnly:
+	if !canCrawl(base, u, c.cfg.Depth) ||
+		c.robots.Forbidden(u.Path) ||
+		(c.cfg.Dirs == DirsOnly && isResorce(u.Path)) {
 		return
-	default:
-		go func(r *url.URL) { c.crawlCh <- r }(u)
 	}
 
-	return true
+	t := time.NewTimer(chanTimeout)
+	defer t.Stop()
+
+	select {
+	case c.crawlCh <- u:
+		return true
+	case <-t.C:
+	}
+
+	return false
 }
 
 func (c *Crawler) close() {
@@ -188,8 +203,6 @@ func (c *Crawler) close() {
 }
 
 func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
-	c.robots = robots.AllowALL()
-
 	if c.cfg.Robots == RobotsIgnore {
 		return
 	}
@@ -270,16 +283,22 @@ func (c *Crawler) isIgnored(v string) (yes bool) {
 }
 
 func (c *Crawler) linkHandler(a atom.Atom, s string) {
-	t := crawlResult{URI: s}
+	r := crawlResult{URI: s}
 
 	fetch := (a == atom.A || a == atom.Iframe) ||
 		(c.cfg.ScanJS && a == atom.Script)
 
 	if fetch && !c.isIgnored(s) {
-		t.Flag = TaskCrawl
+		r.Flag = TaskCrawl
 	}
 
-	c.resultCh <- t
+	t := time.NewTimer(chanTimeout)
+	defer t.Stop()
+
+	select {
+	case c.resultCh <- r:
+	case <-t.C:
+	}
 }
 
 func (c *Crawler) fetch(

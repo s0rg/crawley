@@ -841,3 +841,18 @@ func TestCrawlerScanJS(t *testing.T) {
 		t.Fatalf("unexpected result: %d", found)
 	}
 }
+
+func TestCrawlerOverflow(t *testing.T) {
+	t.Parallel()
+
+	c := New(
+		WithoutHeads(true),
+		WithMaxCrawlDepth(1),
+	)
+	base, _ := url.Parse("http://test/")
+	res := crawlResult{URI: "http://test/foo"}
+
+	if c.crawl(base, &res) {
+		t.Error("no overflow")
+	}
+}
