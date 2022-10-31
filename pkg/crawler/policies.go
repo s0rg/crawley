@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+const (
+	// DefaultRobotsPolicy is a default policy name for robots handling.
+	DefaultRobotsPolicy = "ignore"
+	// DefaultDirsPolicy is a default policy name for non-resource URLs.
+	DefaultDirsPolicy = "show"
+)
+
 // ErrUnknownPolicy is returned when requested policy unknown.
 var ErrUnknownPolicy = errors.New("unknown policy")
 
