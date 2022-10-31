@@ -226,3 +226,15 @@ func TestIsSitemap(t *testing.T) {
 		}
 	}
 }
+
+func TestUrlHash(t *testing.T) {
+	t.Parallel()
+
+	const val = "http://test/some/path?foo"
+
+	h1, h2 := urlhash(val), urlhash(val)
+
+	if h1 != h2 {
+		t.Error("hashes mismatch")
+	}
+}

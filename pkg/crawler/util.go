@@ -1,6 +1,8 @@
 package crawler
 
 import (
+	"hash/fnv"
+	"io"
 	"log"
 	"mime"
 	"net/url"
@@ -181,4 +183,11 @@ func isJS(v, n string) (yes bool) {
 	}
 
 	return webExt(n) == fileExtJS
+}
+
+func urlhash(s string) (rv uint64) {
+	hash := fnv.New64()
+	_, _ = io.WriteString(hash, strings.ToLower(s))
+
+	return hash.Sum64()
 }

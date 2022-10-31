@@ -8,7 +8,7 @@ func TestSimpleSet(t *testing.T) {
 	t.Parallel()
 
 	var (
-		l   Simple
+		l   List
 		err error
 	)
 
@@ -40,7 +40,7 @@ func TestSimpleSet(t *testing.T) {
 func TestSimpleString(t *testing.T) {
 	t.Parallel()
 
-	var l Simple
+	var l List
 
 	if l.String() != "" {
 		t.Fatal("non-empty result")

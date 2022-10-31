@@ -42,7 +42,7 @@ var (
 	fRobotsPolicy, fUA      string
 	fDelay                  time.Duration
 	cookies, headers        values.Smart
-	tags, ignored           values.Simple
+	tags, ignored           values.List
 )
 
 func version() string {
