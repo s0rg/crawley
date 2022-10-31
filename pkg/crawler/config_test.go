@@ -190,10 +190,12 @@ func TestString(t *testing.T) {
 func TestProxyAuth(t *testing.T) {
 	t.Parallel()
 
+	const creds = "user:pass"
+
 	var (
 		c       = &config{}
-		opts    = []Option{WithProxyAuth("user:pass")}
-		headers = []string{proxyAuthHdr + ": " + proxyAuthTyp + " dXNlcjpwYXNz"}
+		opts    = []Option{WithProxyAuth(creds)}
+		headers = []string{proxyAuthHeader(creds)}
 	)
 
 	for _, o := range opts {

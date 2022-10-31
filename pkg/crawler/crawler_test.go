@@ -759,7 +759,7 @@ func TestCrawlerProxyAuth(t *testing.T) {
 	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		creds := r.Header.Get(proxyAuthHdr)
+		creds := r.Header.Get(proxyAuthKey)
 		if creds == "" {
 			t.Fatal("auth header empty")
 		}
@@ -769,7 +769,7 @@ func TestCrawlerProxyAuth(t *testing.T) {
 			t.Fatalf("invalid fields count: %d", len(parts))
 		}
 
-		if !strings.EqualFold(parts[0], proxyAuthTyp) {
+		if !strings.EqualFold(parts[0], proxyAuthBasic) {
 			t.Fatalf("invalid auth type: %s", parts[0])
 		}
 

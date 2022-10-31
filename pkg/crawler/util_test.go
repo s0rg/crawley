@@ -238,3 +238,16 @@ func TestUrlHash(t *testing.T) {
 		t.Error("hashes mismatch")
 	}
 }
+
+func TestProxyAuthHeader(t *testing.T) {
+	t.Parallel()
+
+	const (
+		got  = "user:pass"
+		want = "Proxy-Authorization: Basic dXNlcjpwYXNz"
+	)
+
+	if rv := proxyAuthHeader(got); rv != want {
+		t.Errorf("invalid header want: '%s' got: '%s'", want, rv)
+	}
+}

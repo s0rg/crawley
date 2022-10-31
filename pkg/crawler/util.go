@@ -1,6 +1,7 @@
 package crawler
 
 import (
+	"encoding/base64"
 	"hash/fnv"
 	"io"
 	"log"
@@ -18,12 +19,13 @@ import (
 )
 
 const (
-	proxyAuthHdr = "Proxy-Authorization"
-	proxyAuthTyp = "Basic"
-	contentType  = "Content-Type"
-	contentHTML  = "text/html"
-	contentJS    = "application/javascript"
-	fileExtJS    = ".js"
+	proxyAuthKey   = "Proxy-Authorization"
+	proxyAuthBasic = "Basic"
+
+	contentType = "Content-Type"
+	contentHTML = "text/html"
+	contentJS   = "application/javascript"
+	fileExtJS   = ".js"
 )
 
 var parsableExts = make(set.Set[string]).Load(
@@ -38,6 +40,10 @@ var parsableExts = make(set.Set[string]).Load(
 	".xml",
 	".js",
 )
+
+func proxyAuthHeader(v string) (rv string) {
+	return proxyAuthKey + ": " + proxyAuthBasic + " " + base64.StdEncoding.EncodeToString([]byte(v))
+}
 
 func prepareFilter(tags []string) links.TokenFilter {
 	if len(tags) == 0 {

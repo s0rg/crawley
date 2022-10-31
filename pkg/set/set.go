@@ -14,11 +14,11 @@ func (s Set[T]) Add(v T) {
 
 // TryAdd takes attempt to add value to set, returns false if value already exists.
 func (s Set[T]) TryAdd(v T) (ok bool) {
-	if _, ok = s[v]; ok {
+	if s.Has(v) {
 		return false
 	}
 
-	s[v] = stub{}
+	s.Add(v)
 
 	return true
 }

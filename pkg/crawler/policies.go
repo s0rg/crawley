@@ -40,21 +40,21 @@ const (
 )
 
 // ParseRobotsPolicy parses robots policy from string.
-func ParseRobotsPolicy(s string) (a RobotsPolicy, err error) {
+func ParseRobotsPolicy(s string) (p RobotsPolicy, err error) {
 	switch strings.ToLower(s) {
 	case "ignore":
-		a = RobotsIgnore
+		p = RobotsIgnore
 	case "crawl":
-		a = RobotsCrawl
+		p = RobotsCrawl
 	case "respect":
-		a = RobotsRespect
+		p = RobotsRespect
 	default:
 		err = ErrUnknownPolicy
 
 		return
 	}
 
-	return a, nil
+	return p, nil
 }
 
 // ParseDirsPolicy parses dirs policy from string.

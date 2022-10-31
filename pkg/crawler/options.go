@@ -1,7 +1,6 @@
 package crawler
 
 import (
-	"encoding/base64"
 	"time"
 )
 
@@ -109,9 +108,6 @@ func WithScanJS(v bool) Option {
 // WithProxyAuth enables proxy credentials.
 func WithProxyAuth(v string) Option {
 	return func(c *config) {
-		c.Headers = append(
-			c.Headers,
-			proxyAuthHdr+": "+proxyAuthTyp+" "+base64.StdEncoding.EncodeToString([]byte(v)),
-		)
+		c.Headers = append(c.Headers, proxyAuthHeader(v))
 	}
 }
