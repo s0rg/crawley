@@ -30,4 +30,12 @@ func TestSet(t *testing.T) {
 	if s.Has(val3) {
 		t.Error("has val3")
 	}
+
+	if !s.TryAdd(val3) {
+		t.Error("TryAdd(val3) == false")
+	}
+
+	if s.TryAdd(val3) {
+		t.Error("TryAdd(val3) == true")
+	}
 }
