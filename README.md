@@ -53,7 +53,7 @@ crawley -headless -delay 0 -depth -1 -dirs only http://some-test.site
 
 # installation
 
-- [binaries](https://github.com/s0rg/crawley/releases) for Linux, FreeBSD, macOS and Windows, just download and run.
+- [binaries / deb / rpm](https://github.com/s0rg/crawley/releases) for Linux, FreeBSD, macOS and Windows.
 - [archlinux](https://aur.archlinux.org/packages/crawley-bin/) you can use your favourite AUR helper to install it, e. g. `paru -S crawley-bin`.
 
 # usage
@@ -61,7 +61,7 @@ crawley -headless -delay 0 -depth -1 -dirs only http://some-test.site
 ```
 crawley [flags] url
 
-possible flags:
+possible flags with default values:
 
 -brute
     scan html comments

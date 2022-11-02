@@ -226,3 +226,28 @@ func TestIsSitemap(t *testing.T) {
 		}
 	}
 }
+
+func TestUrlHash(t *testing.T) {
+	t.Parallel()
+
+	const val = "http://test/some/path?foo"
+
+	h1, h2 := urlhash(val), urlhash(val)
+
+	if h1 != h2 {
+		t.Error("hashes mismatch")
+	}
+}
+
+func TestProxyAuthHeader(t *testing.T) {
+	t.Parallel()
+
+	const (
+		got  = "user:pass"
+		want = "Proxy-Authorization: Basic dXNlcjpwYXNz"
+	)
+
+	if rv := proxyAuthHeader(got); rv != want {
+		t.Errorf("invalid header want: '%s' got: '%s'", want, rv)
+	}
+}

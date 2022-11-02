@@ -2,11 +2,11 @@ package values
 
 import "strings"
 
-type Simple struct {
+type List struct {
 	Values []string
 }
 
-func (s *Simple) Set(val string) (err error) {
+func (s *List) Set(val string) (err error) {
 	switch {
 	case strings.ContainsRune(val, ','):
 		s.Values = append(s.Values, strings.Split(val, ",")...)
@@ -17,6 +17,6 @@ func (s *Simple) Set(val string) (err error) {
 	return
 }
 
-func (s *Simple) String() (rv string) {
+func (s *List) String() (rv string) {
 	return strings.Join(s.Values, ",")
 }

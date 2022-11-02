@@ -46,6 +46,7 @@ const (
 
 type crawlResult struct {
 	URI  string
+	Hash uint64
 	Flag taskFlag
 }
 
@@ -92,8 +93,8 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 
 	defer c.close()
 
-	seen := make(set.URI)
-	seen.Add(uri)
+	seen := make(set.Set[uint64])
+	seen.Add(urlhash(uri))
 
 	web := client.New(
 		c.cfg.UserAgent,
@@ -122,7 +123,7 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 		switch {
 		case t.Flag == TaskDone:
 			w--
-		case seen.Add(t.URI):
+		case seen.TryAdd(t.Hash):
 			if t.Flag == TaskCrawl && c.crawl(base, &t) {
 				w++
 			}
@@ -260,14 +261,6 @@ func (c *Crawler) crawlRobots(host *url.URL) {
 	}
 }
 
-func (c *Crawler) sitemapHandler(s string) {
-	c.linkHandler(atom.A, s)
-}
-
-func (c *Crawler) jsHandler(s string) {
-	c.linkHandler(atom.Link, s)
-}
-
 func (c *Crawler) isIgnored(v string) (yes bool) {
 	if len(c.cfg.Ignored) == 0 {
 		return
@@ -283,7 +276,10 @@ func (c *Crawler) isIgnored(v string) (yes bool) {
 }
 
 func (c *Crawler) linkHandler(a atom.Atom, s string) {
-	r := crawlResult{URI: s}
+	r := crawlResult{
+		URI:  s,
+		Hash: urlhash(s),
+	}
 
 	fetch := (a == atom.A || a == atom.Iframe) ||
 		(c.cfg.ScanJS && a == atom.Script)
@@ -328,9 +324,13 @@ func (c *Crawler) fetch(
 			Handler: c.linkHandler,
 		})
 	case isSitemap(uri):
-		links.ExtractSitemap(body, base, c.sitemapHandler)
+		links.ExtractSitemap(body, base, func(s string) {
+			c.linkHandler(atom.A, s)
+		})
 	case c.cfg.ScanJS && isJS(content, uri):
-		links.ExtractJS(body, c.jsHandler)
+		links.ExtractJS(body, func(s string) {
+			c.linkHandler(atom.Link, s)
+		})
 	}
 
 	client.Discard(body)

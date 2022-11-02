@@ -5,6 +5,13 @@ import (
 	"strings"
 )
 
+const (
+	// DefaultRobotsPolicy is a default policy name for robots handling.
+	DefaultRobotsPolicy = "ignore"
+	// DefaultDirsPolicy is a default policy name for non-resource URLs.
+	DefaultDirsPolicy = "show"
+)
+
 // ErrUnknownPolicy is returned when requested policy unknown.
 var ErrUnknownPolicy = errors.New("unknown policy")
 
@@ -33,21 +40,21 @@ const (
 )
 
 // ParseRobotsPolicy parses robots policy from string.
-func ParseRobotsPolicy(s string) (a RobotsPolicy, err error) {
+func ParseRobotsPolicy(s string) (p RobotsPolicy, err error) {
 	switch strings.ToLower(s) {
 	case "ignore":
-		a = RobotsIgnore
+		p = RobotsIgnore
 	case "crawl":
-		a = RobotsCrawl
+		p = RobotsCrawl
 	case "respect":
-		a = RobotsRespect
+		p = RobotsRespect
 	default:
 		err = ErrUnknownPolicy
 
 		return
 	}
 
-	return a, nil
+	return p, nil
 }
 
 // ParseDirsPolicy parses dirs policy from string.

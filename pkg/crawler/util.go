@@ -1,6 +1,9 @@
 package crawler
 
 import (
+	"encoding/base64"
+	"hash/fnv"
+	"io"
 	"log"
 	"mime"
 	"net/url"
@@ -16,12 +19,13 @@ import (
 )
 
 const (
-	proxyAuthHdr = "Proxy-Authorization"
-	proxyAuthTyp = "Basic"
-	contentType  = "Content-Type"
-	contentHTML  = "text/html"
-	contentJS    = "application/javascript"
-	fileExtJS    = ".js"
+	proxyAuthKey   = "Proxy-Authorization"
+	proxyAuthBasic = "Basic"
+
+	contentType = "Content-Type"
+	contentHTML = "text/html"
+	contentJS   = "application/javascript"
+	fileExtJS   = ".js"
 )
 
 var parsableExts = make(set.Set[string]).Load(
@@ -36,6 +40,10 @@ var parsableExts = make(set.Set[string]).Load(
 	".xml",
 	".js",
 )
+
+func proxyAuthHeader(v string) (rv string) {
+	return proxyAuthKey + ": " + proxyAuthBasic + " " + base64.StdEncoding.EncodeToString([]byte(v))
+}
 
 func prepareFilter(tags []string) links.TokenFilter {
 	if len(tags) == 0 {
@@ -181,4 +189,11 @@ func isJS(v, n string) (yes bool) {
 	}
 
 	return webExt(n) == fileExtJS
+}
+
+func urlhash(s string) (rv uint64) {
+	hash := fnv.New64()
+	_, _ = io.WriteString(hash, strings.ToLower(s))
+
+	return hash.Sum64()
 }
