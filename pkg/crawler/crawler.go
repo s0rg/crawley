@@ -12,12 +12,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/s0rg/set"
 	"golang.org/x/net/html/atom"
 
 	"github.com/s0rg/crawley/pkg/client"
 	"github.com/s0rg/crawley/pkg/links"
 	"github.com/s0rg/crawley/pkg/robots"
-	"github.com/s0rg/crawley/pkg/set"
 )
 
 type crawlClient interface {

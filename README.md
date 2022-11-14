@@ -100,3 +100,11 @@ possible flags with default values:
 -workers int
     number of workers (default - number of CPU cores)
 ```
+
+# flags autocompletion
+
+Crawley can handle flags autocompletion in bash and zsh via `complete`:
+
+```bash
+complete -C "/full-path-to/bin/crawley" crawley
+```
