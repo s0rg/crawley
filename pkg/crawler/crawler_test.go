@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/s0rg/crawley/pkg/set"
+	"github.com/s0rg/set"
 	"golang.org/x/net/html/atom"
 )
 

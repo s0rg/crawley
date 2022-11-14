@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/url"
 
-	"github.com/s0rg/crawley/pkg/set"
+	"github.com/s0rg/set"
 )
 
 const path = "/robots.txt"

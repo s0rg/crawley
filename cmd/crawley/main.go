@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/s0rg/compflag"
+
 	"github.com/s0rg/crawley/pkg/crawler"
 	"github.com/s0rg/crawley/pkg/values"
 )
@@ -202,6 +204,10 @@ func setupFlags() {
 
 func main() {
 	setupFlags()
+
+	if compflag.Complete() {
+		os.Exit(0)
+	}
 
 	flag.Parse()
 

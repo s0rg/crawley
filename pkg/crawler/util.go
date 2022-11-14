@@ -11,11 +11,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/s0rg/set"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 
 	"github.com/s0rg/crawley/pkg/links"
-	"github.com/s0rg/crawley/pkg/set"
 )
 
 const (
