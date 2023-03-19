@@ -30,11 +30,26 @@ func Test_prepareCookies(t *testing.T) {
 				{Name: "VALID", Value: "COOKIE"},
 			},
 		},
+		{
+			"3",
+			[]string{"some_file.txt"},
+			[]*http.Cookie{},
+		},
 	}
 
 	for _, tt := range tests {
-		if got := prepareCookies(tt.args); !reflect.DeepEqual(got, tt.want) {
-			t.Errorf("prepareCookies() = %v, want %v", got, tt.want)
+		got := prepareCookies(tt.args)
+
+		if len(got) != len(tt.want) {
+			t.Errorf("prepareCookies() invalid rusult count for: %v", tt.want)
+		}
+
+		if len(got) == 0 {
+			continue
+		}
+
+		if !reflect.DeepEqual(got, tt.want) {
+			t.Errorf("prepareCookies(): %v, want: %v", got, tt.want)
 		}
 	}
 }

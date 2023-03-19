@@ -1,6 +1,7 @@
 package client
 
 import (
+	"log"
 	"net/http"
 	"strings"
 )
@@ -16,6 +17,8 @@ func prepareCookies(raw []string) (rv []*http.Cookie) {
 		for _, p := range strings.Split(r, valuesSeparator) {
 			if val, ok := parseOne(p); ok {
 				rv = append(rv, val)
+			} else {
+				log.Printf("cannot parse '%s' as cookie, expected format: 'key=value;' as in curl", r)
 			}
 		}
 	}
@@ -25,6 +28,9 @@ func prepareCookies(raw []string) (rv []*http.Cookie) {
 
 func parseOne(raw string) (rv *http.Cookie, ok bool) {
 	pair := strings.SplitN(raw, keyvalSeparator, keyvalParts)
+	if len(pair) != keyvalParts {
+		return
+	}
 
 	var name, value string
 

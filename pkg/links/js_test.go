@@ -12,7 +12,7 @@ type badReader struct {
 	err error
 }
 
-func (r *badReader) Read(b []byte) (n int, err error) {
+func (r *badReader) Read(_ []byte) (n int, err error) {
 	return 0, r.err
 }
 
