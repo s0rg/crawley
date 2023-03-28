@@ -66,5 +66,3 @@ jobs:
           languages: 'go'
       - name: run analysis
         uses: github/codeql-action/analyze@v2
-      - name: update goreportcard
-        uses: creekorful/goreportcard-action@v1.0

@@ -15,9 +15,12 @@ const (
 func TestHTTPGetOK(t *testing.T) {
 	t.Parallel()
 
-	c := New(ua, 1, false, []string{"FOO: BAR"}, []string{"NAME=VAL"})
+	c := New(ua, 1, false, []string{"FOO: BAR"}, []string{"NAME=ENCODED%20VAL"})
 
-	const body = "test-body"
+	const (
+		body   = "test-body"
+		cookie = "ENCODED VAL"
+	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -37,7 +40,7 @@ func TestHTTPGetOK(t *testing.T) {
 			t.Error("extra cookies - retrieve")
 		}
 
-		if c.Value != "VAL" {
+		if c.Value != cookie {
 			t.Error("extra cookies - value")
 		}
 

@@ -141,7 +141,7 @@ func initOptions() (rv []crawler.Option, err error) {
 		return
 	}
 
-	h, c, err := loadSmart()
+	uheaders, ucookies, err := loadSmart()
 	if err != nil {
 		err = fmt.Errorf("load: %w", err)
 
@@ -159,8 +159,8 @@ func initOptions() (rv []crawler.Option, err error) {
 		crawler.WithRobotsPolicy(robots),
 		crawler.WithoutHeads(fNoHeads),
 		crawler.WithScanJS(fScanJS),
-		crawler.WithExtraHeaders(h),
-		crawler.WithExtraCookies(c),
+		crawler.WithExtraHeaders(uheaders),
+		crawler.WithExtraCookies(ucookies),
 		crawler.WithTagsFilter(tags.Values),
 		crawler.WithIgnored(ignored.Values),
 		crawler.WithProxyAuth(fProxyAuth),
@@ -233,7 +233,7 @@ func main() {
 	}
 
 	if err := crawl(flag.Arg(0), opts...); err != nil {
-		// forcing back stderr in case of errors, otherwise, if 'silent' is on - no one will know what happened.
+		// forcing back stderr in case of errors, otherwise, if 'silent' is on - no one will knows what happened.
 		log.SetOutput(os.Stderr)
 		log.Fatal("[-] crawler:", err)
 	}
