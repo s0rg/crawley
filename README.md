@@ -24,7 +24,7 @@ Crawls web pages and prints any link it can find.
 - scan depth (limited by starting host and path, by default - 0) can be configured
 - can crawl rules and sitemaps from `robots.txt`
 - `brute` mode - scan html comments for urls (this can lead to bogus results)
-- make use of `HTTP_PROXY` / `HTTPS_PROXY` environment values + handles proxy auth
+- make use of `HTTP_PROXY` / `HTTPS_PROXY` environment values + handles proxy auth (use `HTTP_PROXY="socks5://127.0.0.1:1080/" crawley` for socks5)
 - directory-only scan mode (aka `fast-scan`)
 - user-defined cookies, in curl-compatible format (i.e. `-cookie "ONE=1; TWO=2" -cookie "ITS=ME" -cookie @cookie-file`)
 - user-defined headers, same as curl: `-header "ONE: 1" -header "TWO: 2" -header @headers-file`
