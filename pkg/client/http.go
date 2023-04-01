@@ -113,6 +113,7 @@ func (h *HTTP) request(req *http.Request) (body io.ReadCloser, hdrs http.Header,
 	req.Header.Set("Accept-Language", "en-US,en;q=0.8")
 	req.Header.Set("Cache-Control", "no-cache")
 	req.Header.Set("User-Agent", h.ua)
+	req.Header.Set("Referer", req.URL.String())
 
 	h.enrich(req)
 
