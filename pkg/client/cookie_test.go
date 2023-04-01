@@ -16,10 +16,10 @@ func Test_prepareCookies(t *testing.T) {
 	}{
 		{
 			"1",
-			[]string{"NAME1=VALUE1; NAME2=VALUE2", "NAME3=VALUE3"},
+			[]string{"NAME1=VALUE1;NAME2=ENCODED%20VALUE;", "NAME3=VALUE3"},
 			[]*http.Cookie{
 				{Name: "NAME1", Value: "VALUE1"},
-				{Name: "NAME2", Value: "VALUE2"},
+				{Name: "NAME2", Value: "ENCODED VALUE"},
 				{Name: "NAME3", Value: "VALUE3"},
 			},
 		},
@@ -27,6 +27,7 @@ func Test_prepareCookies(t *testing.T) {
 			"2",
 			[]string{"", "NAME=", "=VALUE", ";;", "===", " VALID = COOKIE "},
 			[]*http.Cookie{
+				{Name: "NAME", Value: ""},
 				{Name: "VALID", Value: "COOKIE"},
 			},
 		},

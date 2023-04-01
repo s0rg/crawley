@@ -16,6 +16,10 @@ const (
 func prepareCookies(raw []string) (rv []*http.Cookie) {
 	for _, r := range raw {
 		for _, p := range strings.Split(r, valuesSeparator) {
+			if p = strings.TrimSpace(p); p == "" {
+				continue
+			}
+
 			if val, ok := parseOne(p); ok {
 				rv = append(rv, val)
 			} else {
@@ -39,14 +43,14 @@ func parseOne(raw string) (rv *http.Cookie, ok bool) {
 		return
 	}
 
-	if value = strings.TrimSpace(pair[1]); value == "" {
-		return
-	}
+	value = strings.TrimSpace(pair[1])
 
-	var err error
+	if value != "" {
+		var err error
 
-	if value, err = url.QueryUnescape(value); err != nil {
-		return
+		if value, err = url.QueryUnescape(value); err != nil {
+			return
+		}
 	}
 
 	rv = &http.Cookie{

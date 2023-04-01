@@ -108,6 +108,8 @@ func WithScanJS(v bool) Option {
 // WithProxyAuth enables proxy credentials.
 func WithProxyAuth(v string) Option {
 	return func(c *config) {
-		c.Headers = append(c.Headers, proxyAuthHeader(v))
+		if v != "" {
+			c.Headers = append(c.Headers, proxyAuthHeader(v))
+		}
 	}
 }
