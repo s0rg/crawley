@@ -15,11 +15,11 @@ const (
 func TestHTTPGetOK(t *testing.T) {
 	t.Parallel()
 
-	c := New(ua, 1, false, []string{"FOO: BAR"}, []string{"NAME=ENCODED%20VAL"})
+	c := New(ua, 1, false, []string{"FOO: BAR"}, []string{"NAME=VALUE"})
 
 	const (
 		body   = "test-body"
-		cookie = "ENCODED VAL"
+		cookie = "VALUE"
 	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

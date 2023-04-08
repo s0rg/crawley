@@ -19,7 +19,7 @@ func Test_prepareCookies(t *testing.T) {
 			[]string{"NAME1=VALUE1;NAME2=ENCODED%20VALUE;", "NAME3=VALUE3"},
 			[]*http.Cookie{
 				{Name: "NAME1", Value: "VALUE1"},
-				{Name: "NAME2", Value: "ENCODED VALUE"},
+				{Name: "NAME2", Value: "ENCODED%20VALUE"},
 				{Name: "NAME3", Value: "VALUE3"},
 			},
 		},
@@ -42,7 +42,7 @@ func Test_prepareCookies(t *testing.T) {
 		got := prepareCookies(tt.args)
 
 		if len(got) != len(tt.want) {
-			t.Errorf("prepareCookies() invalid rusult count for: %v", tt.want)
+			t.Errorf("prepareCookies() invalid result count for: %v", tt.want)
 		}
 
 		if len(got) == 0 {

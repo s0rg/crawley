@@ -3,7 +3,6 @@ package client
 import (
 	"log"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
@@ -37,25 +36,15 @@ func parseOne(raw string) (rv *http.Cookie, ok bool) {
 		return
 	}
 
-	var name, value string
+	var name string
 
 	if name = strings.TrimSpace(pair[0]); name == "" {
 		return
 	}
 
-	value = strings.TrimSpace(pair[1])
-
-	if value != "" {
-		var err error
-
-		if value, err = url.QueryUnescape(value); err != nil {
-			return
-		}
-	}
-
 	rv = &http.Cookie{
 		Name:  name,
-		Value: value,
+		Value: strings.TrimSpace(pair[1]),
 	}
 
 	return rv, true
