@@ -310,8 +310,6 @@ func (c *Crawler) fetch(
 
 			return
 		}
-
-		// non-network error, try parse what we got.
 	}
 
 	content := hdrs.Get(contentType)
