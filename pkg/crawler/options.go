@@ -113,3 +113,10 @@ func WithProxyAuth(v string) Option {
 		}
 	}
 }
+
+// WithTimeout sets request timeout.
+func WithTimeout(v time.Duration) Option {
+	return func(c *config) {
+		c.Timeout = v
+	}
+}

@@ -26,11 +26,8 @@ type crawlClient interface {
 }
 
 const (
-	chMult = 256
-
-	chanTimeout   = 100 * time.Millisecond
-	crawlTimeout  = 5 * time.Second
-	robotsTimeout = 3 * time.Second
+	chMult    = 256
+	chTimeout = 100 * time.Millisecond
 )
 
 type taskFlag byte
@@ -102,6 +99,7 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 		c.cfg.SkipSSL,
 		c.cfg.Headers,
 		c.cfg.Cookies,
+		c.cfg.Timeout,
 	)
 	c.initRobots(base, web)
 
@@ -159,7 +157,7 @@ func (c *Crawler) emit(u string) {
 		return
 	}
 
-	t := time.NewTimer(chanTimeout)
+	t := time.NewTimer(chTimeout)
 	defer t.Stop()
 
 	select {
@@ -180,7 +178,7 @@ func (c *Crawler) crawl(base *url.URL, r *crawlResult) (yes bool) {
 		return
 	}
 
-	t := time.NewTimer(chanTimeout)
+	t := time.NewTimer(chTimeout)
 	defer t.Stop()
 
 	select {
@@ -208,7 +206,7 @@ func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), robotsTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.Timeout)
 	defer cancel()
 
 	body, _, err := web.Get(ctx, robots.URL(host))
@@ -288,7 +286,7 @@ func (c *Crawler) linkHandler(a atom.Atom, s string) {
 		r.Flag = TaskCrawl
 	}
 
-	t := time.NewTimer(chanTimeout)
+	t := time.NewTimer(chTimeout)
 	defer t.Stop()
 
 	select {
@@ -312,6 +310,8 @@ func (c *Crawler) fetch(
 
 			return
 		}
+
+		// non-network error, try parse what we got.
 	}
 
 	content := hdrs.Get(contentType)
@@ -344,7 +344,7 @@ func (c *Crawler) crawler(web crawlClient) {
 			time.Sleep(c.cfg.Delay)
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), crawlTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), c.cfg.Timeout)
 		us := uri.String()
 
 		var parse bool

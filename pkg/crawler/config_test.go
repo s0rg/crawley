@@ -19,6 +19,7 @@ func TestValidate(t *testing.T) {
 
 	c.Workers = 1000000
 	c.Delay = time.Duration(-100)
+	c.Timeout = time.Hour
 	c.Depth = -5
 
 	c.validate()
@@ -34,6 +35,10 @@ func TestValidate(t *testing.T) {
 	if c.Depth != -1 {
 		t.Error("non empty - bad depth")
 	}
+
+	if c.Timeout != maxTimeout {
+		t.Error("non empty - bad timeout")
+	}
 }
 
 func TestOptions(t *testing.T) {
@@ -42,6 +47,7 @@ func TestOptions(t *testing.T) {
 		rp      = RobotsRespect
 		dp      = DirsOnly
 		delay   = time.Hour
+		timeout = time.Minute * 5
 		workers = 13
 		depth   = 666
 		fbool   = true
@@ -69,6 +75,7 @@ func TestOptions(t *testing.T) {
 		WithTagsFilter([]string{"a", "form"}),
 		WithScanJS(fbool),
 		WithIgnored([]string{"logout"}),
+		WithTimeout(timeout),
 	}
 
 	c := &config{}
@@ -133,6 +140,10 @@ func TestOptions(t *testing.T) {
 
 	if len(c.Ignored) != 1 {
 		t.Error("unexpected ignored size")
+	}
+
+	if c.Timeout != timeout {
+		t.Error("bad timeout")
 	}
 }
 
