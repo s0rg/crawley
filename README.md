@@ -93,6 +93,8 @@ possible flags with default values:
     skip ssl verification
 -tag value
     tags filter, single or comma-separated tag names allowed
+-timeout duration
+    request timeout (min: 1 second, max: 10 minutes) (default 5s)
 -user-agent string
     user-agent string
 -version
