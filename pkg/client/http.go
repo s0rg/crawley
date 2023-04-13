@@ -9,11 +9,7 @@ import (
 	"time"
 )
 
-const (
-	idleTimeout = 5 * time.Second
-	dialTimeout = 5 * time.Second
-	reqTimeout  = 10 * time.Second
-)
+const transportTimeout = 10 * time.Second
 
 // HTTP holds pre-configured http.Client.
 type HTTP struct {
@@ -29,24 +25,25 @@ func New(
 	conns int,
 	skipSSL bool,
 	headers, cookies []string,
+	timeout time.Duration,
 ) (h *HTTP) {
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		Dial: (&net.Dialer{
-			Timeout: dialTimeout,
+			Timeout: transportTimeout,
 		}).Dial,
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: skipSSL,
 		},
-		IdleConnTimeout:     idleTimeout,
-		TLSHandshakeTimeout: dialTimeout,
+		IdleConnTimeout:     transportTimeout,
+		TLSHandshakeTimeout: transportTimeout,
 		MaxConnsPerHost:     conns,
 		MaxIdleConns:        conns,
 		MaxIdleConnsPerHost: conns,
 	}
 
 	client := &http.Client{
-		Timeout:   reqTimeout,
+		Timeout:   timeout,
 		Transport: transport,
 	}
 

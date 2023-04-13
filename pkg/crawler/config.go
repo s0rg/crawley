@@ -10,6 +10,8 @@ const (
 	minWorkers = 1
 	maxWorkers = 64
 	minDelay   = time.Duration(0)
+	minTimeout = time.Second
+	maxTimeout = time.Minute * 10
 )
 
 type config struct {
@@ -27,6 +29,7 @@ type config struct {
 	Brute      bool
 	NoHEAD     bool
 	ScanJS     bool
+	Timeout    time.Duration
 }
 
 func (c *config) validate() {
@@ -35,6 +38,13 @@ func (c *config) validate() {
 		c.Workers = minWorkers
 	case c.Workers > maxWorkers:
 		c.Workers = maxWorkers
+	}
+
+	switch {
+	case c.Timeout < minTimeout:
+		c.Timeout = minTimeout
+	case c.Timeout > maxTimeout:
+		c.Timeout = maxTimeout
 	}
 
 	if c.Delay < minDelay {
@@ -49,7 +59,7 @@ func (c *config) validate() {
 func (c *config) String() (rv string) {
 	var sb strings.Builder
 
-	_, _ = sb.WriteString(fmt.Sprintf("workers: %d depth: %d", c.Workers, c.Depth))
+	_, _ = sb.WriteString(fmt.Sprintf("workers: %d depth: %d timeout: %s", c.Workers, c.Depth, c.Timeout))
 
 	if c.Brute {
 		_, _ = sb.WriteString(" brute: on")

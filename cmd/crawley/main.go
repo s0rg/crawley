@@ -20,10 +20,11 @@ import (
 )
 
 const (
-	appName      = "Crawley"
-	appHelp      = "the unix-way web crawler"
-	appSite      = "https://github.com/s0rg/crawley"
-	defaultDelay = 150 * time.Millisecond
+	appName        = "Crawley"
+	appHelp        = "the unix-way web crawler"
+	appSite        = "https://github.com/s0rg/crawley"
+	defaultDelay   = 150 * time.Millisecond
+	defaultTimeout = 5 * time.Second
 )
 
 // build-time values.
@@ -43,6 +44,7 @@ var (
 	fDirsPolicy, fProxyAuth string
 	fRobotsPolicy, fUA      string
 	fDelay                  time.Duration
+	fTimeout                time.Duration
 	cookies, headers        values.Smart
 	tags, ignored           values.List
 )
@@ -164,6 +166,7 @@ func initOptions() (rv []crawler.Option, err error) {
 		crawler.WithTagsFilter(tags.Values),
 		crawler.WithIgnored(ignored.Values),
 		crawler.WithProxyAuth(fProxyAuth),
+		crawler.WithTimeout(fTimeout),
 	}
 
 	return rv, nil
@@ -198,6 +201,7 @@ func setupFlags() {
 	flag.StringVar(&fProxyAuth, "proxy-auth", "", "credentials for proxy: user:password")
 
 	flag.DurationVar(&fDelay, "delay", defaultDelay, "per-request delay (0 - disable)")
+	flag.DurationVar(&fTimeout, "timeout", defaultTimeout, "request timeout (min: 1 second, max: 10 minutes)")
 
 	flag.Usage = usage
 }

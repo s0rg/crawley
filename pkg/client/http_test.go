@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 const (
@@ -15,7 +16,7 @@ const (
 func TestHTTPGetOK(t *testing.T) {
 	t.Parallel()
 
-	c := New(ua, 1, false, []string{"FOO: BAR"}, []string{"NAME=VALUE"})
+	c := New(ua, 1, false, []string{"FOO: BAR"}, []string{"NAME=VALUE"}, time.Minute)
 
 	const (
 		body   = "test-body"
@@ -71,7 +72,7 @@ func TestHTTPGetOK(t *testing.T) {
 func TestHTTPGetERR(t *testing.T) {
 	t.Parallel()
 
-	c := New("", 1, false, []string{}, []string{})
+	c := New("", 1, false, []string{}, []string{}, time.Second)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -97,7 +98,7 @@ func TestHTTPGetERR(t *testing.T) {
 func TestHTTPHeadOK(t *testing.T) {
 	t.Parallel()
 
-	c := New(ua, 1, false, []string{}, []string{})
+	c := New(ua, 1, false, []string{}, []string{}, time.Second)
 
 	const (
 		key = "x-some-key"
@@ -132,7 +133,7 @@ func TestHTTPHeadOK(t *testing.T) {
 func TestHTTPHeadERR(t *testing.T) {
 	t.Parallel()
 
-	c := New("", 1, false, []string{}, []string{})
+	c := New("", 1, false, []string{}, []string{}, time.Second)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
