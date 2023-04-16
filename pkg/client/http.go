@@ -20,38 +20,32 @@ type HTTP struct {
 }
 
 // New creates and configure client for later use.
-func New(
-	ua string,
-	conns int,
-	skipSSL bool,
-	headers, cookies []string,
-	timeout time.Duration,
-) (h *HTTP) {
+func New(cfg *Config) (h *HTTP) {
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		Dial: (&net.Dialer{
 			Timeout: transportTimeout,
 		}).Dial,
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: skipSSL,
+			InsecureSkipVerify: cfg.SkipSSL,
 		},
 		IdleConnTimeout:     transportTimeout,
 		TLSHandshakeTimeout: transportTimeout,
-		MaxConnsPerHost:     conns,
-		MaxIdleConns:        conns,
-		MaxIdleConnsPerHost: conns,
+		MaxConnsPerHost:     cfg.Workers,
+		MaxIdleConns:        cfg.Workers,
+		MaxIdleConnsPerHost: cfg.Workers,
 	}
 
 	client := &http.Client{
-		Timeout:   timeout,
+		Timeout:   cfg.Timeout,
 		Transport: transport,
 	}
 
 	return &HTTP{
-		ua:      ua,
+		ua:      cfg.UserAgent,
 		c:       client,
-		headers: prepareHeaders(headers),
-		cookies: prepareCookies(cookies),
+		headers: prepareHeaders(cfg.Headers),
+		cookies: prepareCookies(cfg.Cookies),
 	}
 }
 

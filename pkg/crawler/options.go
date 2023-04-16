@@ -10,7 +10,7 @@ type Option func(*config)
 // WithUserAgent sets User-Agent string.
 func WithUserAgent(v string) Option {
 	return func(c *config) {
-		c.UserAgent = v
+		c.Client.UserAgent = v
 	}
 }
 
@@ -31,7 +31,7 @@ func WithMaxCrawlDepth(v int) Option {
 // WithWorkersCount sets maximum workers.
 func WithWorkersCount(v int) Option {
 	return func(c *config) {
-		c.Workers = v
+		c.Client.Workers = v
 	}
 }
 
@@ -52,7 +52,7 @@ func WithDirsPolicy(v DirsPolicy) Option {
 // WithSkipSSL tells crawley to skip any ssl handshake errors.
 func WithSkipSSL(v bool) Option {
 	return func(c *config) {
-		c.SkipSSL = v
+		c.Client.SkipSSL = v
 	}
 }
 
@@ -73,14 +73,14 @@ func WithoutHeads(v bool) Option {
 // WithExtraHeaders add extra HTTP headers to requests.
 func WithExtraHeaders(v []string) Option {
 	return func(c *config) {
-		c.Headers = v
+		c.Client.Headers = v
 	}
 }
 
 // WithExtraCookies add cookies to requests.
 func WithExtraCookies(v []string) Option {
 	return func(c *config) {
-		c.Cookies = v
+		c.Client.Cookies = v
 	}
 }
 
@@ -109,7 +109,7 @@ func WithScanJS(v bool) Option {
 func WithProxyAuth(v string) Option {
 	return func(c *config) {
 		if v != "" {
-			c.Headers = append(c.Headers, proxyAuthHeader(v))
+			c.Client.Headers = append(c.Client.Headers, proxyAuthHeader(v))
 		}
 	}
 }
@@ -117,6 +117,6 @@ func WithProxyAuth(v string) Option {
 // WithTimeout sets request timeout.
 func WithTimeout(v time.Duration) Option {
 	return func(c *config) {
-		c.Timeout = v
+		c.Client.Timeout = v
 	}
 }

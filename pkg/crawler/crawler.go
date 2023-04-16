@@ -35,9 +35,9 @@ type taskFlag byte
 const (
 	// TaskDefault marks result for printing only.
 	TaskDefault taskFlag = iota
-	// TaskCrawl marks result as can-be-crawled.
+	// TaskCrawl marks result as to-be-crawled.
 	TaskCrawl
-	// TaskDone marks result as final - crawling end here.
+	// TaskDone marks result as final - crawling ends here.
 	TaskDone
 )
 
@@ -83,7 +83,9 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 		return fmt.Errorf("parse url: %w", err)
 	}
 
-	n := (c.cfg.Workers + 1)
+	workers := c.cfg.Client.Workers
+
+	n := (workers + 1)
 	c.handleCh = make(chan string, n*chMult)
 	c.crawlCh = make(chan *url.URL, n*chMult)
 	c.resultCh = make(chan crawlResult, n*chMult)
@@ -93,21 +95,14 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 	seen := make(set.Set[uint64])
 	seen.Add(urlhash(uri))
 
-	web := client.New(
-		c.cfg.UserAgent,
-		c.cfg.Workers,
-		c.cfg.SkipSSL,
-		c.cfg.Headers,
-		c.cfg.Cookies,
-		c.cfg.Timeout,
-	)
+	web := client.New(&c.cfg.Client)
 	c.initRobots(base, web)
 
-	for i := 0; i < c.cfg.Workers; i++ {
+	for i := 0; i < workers; i++ {
 		go c.crawler(web)
 	}
 
-	c.wg.Add(c.cfg.Workers)
+	c.wg.Add(workers)
 
 	go c.handler(fn)
 
@@ -206,7 +201,7 @@ func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.cfg.Client.Timeout)
 	defer cancel()
 
 	body, _, err := web.Get(ctx, robots.URL(host))
@@ -228,7 +223,7 @@ func (c *Crawler) initRobots(host *url.URL, web crawlClient) {
 
 	defer body.Close()
 
-	rbt, err := robots.FromReader(c.cfg.UserAgent, body)
+	rbt, err := robots.FromReader(c.cfg.Client.UserAgent, body)
 	if err != nil {
 		log.Println("[-] parse robots.txt:", err)
 
@@ -342,7 +337,7 @@ func (c *Crawler) crawler(web crawlClient) {
 			time.Sleep(c.cfg.Delay)
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), c.cfg.Timeout)
+		ctx, cancel := context.WithTimeout(context.Background(), c.cfg.Client.Timeout)
 		us := uri.String()
 
 		var parse bool

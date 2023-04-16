@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/s0rg/crawley/pkg/client"
 )
 
 const (
@@ -15,36 +17,31 @@ const (
 )
 
 type config struct {
-	UserAgent  string
-	Headers    []string
-	Cookies    []string
 	AlowedTags []string
 	Ignored    []string
-	Workers    int
+	Client     client.Config
 	Delay      time.Duration
 	Depth      int
 	Robots     RobotsPolicy
 	Dirs       DirsPolicy
-	SkipSSL    bool
 	Brute      bool
 	NoHEAD     bool
 	ScanJS     bool
-	Timeout    time.Duration
 }
 
 func (c *config) validate() {
 	switch {
-	case c.Workers < minWorkers:
-		c.Workers = minWorkers
-	case c.Workers > maxWorkers:
-		c.Workers = maxWorkers
+	case c.Client.Workers < minWorkers:
+		c.Client.Workers = minWorkers
+	case c.Client.Workers > maxWorkers:
+		c.Client.Workers = maxWorkers
 	}
 
 	switch {
-	case c.Timeout < minTimeout:
-		c.Timeout = minTimeout
-	case c.Timeout > maxTimeout:
-		c.Timeout = maxTimeout
+	case c.Client.Timeout < minTimeout:
+		c.Client.Timeout = minTimeout
+	case c.Client.Timeout > maxTimeout:
+		c.Client.Timeout = maxTimeout
 	}
 
 	if c.Delay < minDelay {
@@ -59,7 +56,7 @@ func (c *config) validate() {
 func (c *config) String() (rv string) {
 	var sb strings.Builder
 
-	_, _ = sb.WriteString(fmt.Sprintf("workers: %d depth: %d timeout: %s", c.Workers, c.Depth, c.Timeout))
+	_, _ = sb.WriteString(fmt.Sprintf("workers: %d depth: %d timeout: %s", c.Client.Workers, c.Depth, c.Client.Timeout))
 
 	if c.Brute {
 		_, _ = sb.WriteString(" brute: on")
