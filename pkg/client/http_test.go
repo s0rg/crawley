@@ -13,10 +13,21 @@ const (
 	ua = "test-ua"
 )
 
+var cfg = Config{
+	UserAgent: ua,
+	Workers:   1,
+	SkipSSL:   false,
+	Timeout:   time.Second,
+}
+
 func TestHTTPGetOK(t *testing.T) {
 	t.Parallel()
 
-	c := New(ua, 1, false, []string{"FOO: BAR"}, []string{"NAME=VALUE"}, time.Minute)
+	tc := cfg
+	tc.Headers = []string{"FOO: BAR"}
+	tc.Cookies = []string{"NAME=VALUE"}
+
+	c := New(&tc)
 
 	const (
 		body   = "test-body"
@@ -72,7 +83,7 @@ func TestHTTPGetOK(t *testing.T) {
 func TestHTTPGetERR(t *testing.T) {
 	t.Parallel()
 
-	c := New("", 1, false, []string{}, []string{}, time.Second)
+	c := New(&cfg)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
@@ -98,7 +109,7 @@ func TestHTTPGetERR(t *testing.T) {
 func TestHTTPHeadOK(t *testing.T) {
 	t.Parallel()
 
-	c := New(ua, 1, false, []string{}, []string{}, time.Second)
+	c := New(&cfg)
 
 	const (
 		key = "x-some-key"
@@ -133,7 +144,7 @@ func TestHTTPHeadOK(t *testing.T) {
 func TestHTTPHeadERR(t *testing.T) {
 	t.Parallel()
 
-	c := New("", 1, false, []string{}, []string{}, time.Second)
+	c := New(&cfg)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)

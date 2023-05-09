@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/s0rg/crawley/pkg/client"
 )
 
 func TestValidate(t *testing.T) {
@@ -13,18 +15,18 @@ func TestValidate(t *testing.T) {
 	c := &config{}
 	c.validate()
 
-	if c.Workers != minWorkers {
+	if c.Client.Workers != minWorkers {
 		t.Error("empty - bad workers")
 	}
 
-	c.Workers = 1000000
 	c.Delay = time.Duration(-100)
-	c.Timeout = time.Hour
 	c.Depth = -5
+	c.Client.Workers = 1000000
+	c.Client.Timeout = time.Hour
 
 	c.validate()
 
-	if c.Workers != maxWorkers {
+	if c.Client.Workers != maxWorkers {
 		t.Error("non empty - bad workers")
 	}
 
@@ -36,7 +38,7 @@ func TestValidate(t *testing.T) {
 		t.Error("non empty - bad depth")
 	}
 
-	if c.Timeout != maxTimeout {
+	if c.Client.Timeout != maxTimeout {
 		t.Error("non empty - bad timeout")
 	}
 }
@@ -86,7 +88,7 @@ func TestOptions(t *testing.T) {
 
 	c.validate()
 
-	if c.UserAgent != ua {
+	if c.Client.UserAgent != ua {
 		t.Error("bad user-agent")
 	}
 
@@ -102,7 +104,7 @@ func TestOptions(t *testing.T) {
 		t.Error("bad depth")
 	}
 
-	if c.Workers != workers {
+	if c.Client.Workers != workers {
 		t.Error("bad workers")
 	}
 
@@ -110,7 +112,7 @@ func TestOptions(t *testing.T) {
 		t.Error("bad brute mode")
 	}
 
-	if c.SkipSSL != fbool {
+	if c.Client.SkipSSL != fbool {
 		t.Error("bad skip-ssl")
 	}
 
@@ -122,11 +124,11 @@ func TestOptions(t *testing.T) {
 		t.Error("bad dirs policy")
 	}
 
-	if !reflect.DeepEqual(c.Headers, extHeaders) {
+	if !reflect.DeepEqual(c.Client.Headers, extHeaders) {
 		t.Error("bad extra headers")
 	}
 
-	if !reflect.DeepEqual(c.Cookies, extCookies) {
+	if !reflect.DeepEqual(c.Client.Cookies, extCookies) {
 		t.Error("bad extra cookies")
 	}
 
@@ -142,7 +144,7 @@ func TestOptions(t *testing.T) {
 		t.Error("unexpected ignored size")
 	}
 
-	if c.Timeout != timeout {
+	if c.Client.Timeout != timeout {
 		t.Error("bad timeout")
 	}
 }
@@ -151,10 +153,10 @@ func TestString(t *testing.T) {
 	t.Parallel()
 
 	c := &config{
-		Workers: 13,
-		Depth:   666,
-		Brute:   true,
-		ScanJS:  true,
+		Client: client.Config{Workers: 13},
+		Depth:  666,
+		Brute:  true,
+		ScanJS: true,
 	}
 
 	c.validate()
@@ -215,7 +217,7 @@ func TestProxyAuth(t *testing.T) {
 
 	c.validate()
 
-	if !reflect.DeepEqual(c.Headers, headers) {
-		t.Fatalf("bad extra headers: %v", c.Headers)
+	if !reflect.DeepEqual(c.Client.Headers, headers) {
+		t.Fatalf("bad extra headers: %v", c.Client.Headers)
 	}
 }
