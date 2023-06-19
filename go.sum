@@ -2,5 +2,5 @@ github.com/s0rg/compflag v1.1.0 h1:xhCUPLy+5Ue/Q9I/nIcLti2Ul6P42JYx4UvtYoDXmlQ=
 github.com/s0rg/compflag v1.1.0/go.mod h1:XMntVpc3+jpmBe0s8xo4w9swH8T9ARGkMC9HFiDRoUw=
 github.com/s0rg/set v1.0.0 h1:/MAmKEQ3Ltodli7/+e8iSTKNwhzmvxkmSDZO8BMTFbE=
 github.com/s0rg/set v1.0.0/go.mod h1:n2TtovR+7TrBIztw+6muV9ZLRuDIimsd8YyTN+QBmHQ=
-golang.org/x/net v0.10.0 h1:X2//UzNDwYmtCLn7To6G58Wr6f5ahEAQgKNzv9Y951M=
-golang.org/x/net v0.10.0/go.mod h1:0qNGK6F8kojg2nk9dLZ2mShWaEBan6FAoqfSigmmuDg=
+golang.org/x/net v0.11.0 h1:Gi2tvZIJyBtO9SDr1q9h5hEQCp/4L2RQ+ar0qjx2oNU=
+golang.org/x/net v0.11.0/go.mod h1:2L/ixqYpgIVXmeoSA/4Lu7BzTG4KIyPIryS4IsOd1oQ=
