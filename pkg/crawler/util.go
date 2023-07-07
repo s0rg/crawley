@@ -32,13 +32,14 @@ var parsableExts = make(set.Set[string]).Load(
 	".asp",
 	".aspx",
 	".cgi",
-	".jsp",
+	".htm",
 	".html",
-	".pl",
+	".jsp",
 	".php",
+	".pl",
 	".xhtml",
 	".xml",
-	".js",
+	fileExtJS,
 )
 
 func proxyAuthHeader(v string) (rv string) {

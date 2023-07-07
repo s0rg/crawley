@@ -9,6 +9,14 @@ import (
 
 const path = "/robots.txt"
 
+type accessMode byte
+
+const (
+	allowAll accessMode = 0
+	gotRules accessMode = 1
+	denyAll  accessMode = 2
+)
+
 // TXT holds parsed robots.txt contents and/or access mode.
 type TXT struct {
 	links    set.Set[string]
