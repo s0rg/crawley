@@ -104,7 +104,13 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 
 	c.wg.Add(workers)
 
-	go c.handler(fn)
+	go func() {
+		for s := range c.handleCh {
+			fn(s)
+		}
+
+		c.wg.Done()
+	}()
 
 	c.crawlCh <- base
 
@@ -117,11 +123,11 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 		case t.Flag == TaskDone:
 			w--
 		case seen.TryAdd(t.Hash):
-			if t.Flag == TaskCrawl && c.crawl(base, &t) {
+			if t.Flag == TaskCrawl && c.needCrawl(base, &t) {
 				w++
 			}
 
-			c.emit(t.URI)
+			c.handle(t.URI)
 		}
 	}
 
@@ -133,7 +139,7 @@ func (c *Crawler) DumpConfig() string {
 	return c.cfg.String()
 }
 
-func (c *Crawler) emit(u string) {
+func (c *Crawler) handle(u string) {
 	show := true
 
 	idx := strings.LastIndexByte(u, '/')
@@ -161,7 +167,7 @@ func (c *Crawler) emit(u string) {
 	}
 }
 
-func (c *Crawler) crawl(base *url.URL, r *crawlResult) (yes bool) {
+func (c *Crawler) needCrawl(base *url.URL, r *crawlResult) (yes bool) {
 	u, err := url.Parse(r.URI)
 	if err != nil {
 		return
@@ -300,6 +306,7 @@ func (c *Crawler) fetch(
 	if err != nil {
 		var herr client.HTTPError
 
+		// ignore any http errors, just parse body (if any)
 		if !errors.As(err, &herr) {
 			log.Printf("[-] GET %s: %v", uri, err)
 
@@ -362,12 +369,4 @@ func (c *Crawler) crawler(web crawlClient) {
 
 		c.resultCh <- crawlResult{Flag: TaskDone}
 	}
-}
-
-func (c *Crawler) handler(fn func(string)) {
-	for s := range c.handleCh {
-		fn(s)
-	}
-
-	c.wg.Done()
 }
