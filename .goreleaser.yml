@@ -6,7 +6,7 @@ before:
     - go mod download
 
 builds:
-  - id: "crawley"
+  - id: crawley-bin
     dir: .
     main: ./cmd/crawley
     env: [CGO_ENABLED=0]
@@ -28,13 +28,16 @@ builds:
         goarch: arm64
 
 archives:
-  - name_template: >-
+  - id: crawley
+    format: tar.gz
+    builds:
+      - crawley-bin
+    name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
-  - format: tar.gz
     format_overrides:
       - goos: windows
         format: zip
