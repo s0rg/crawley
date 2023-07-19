@@ -109,7 +109,11 @@ func relativeDepth(base, sub string) (n int, ok bool) {
 		return
 	}
 
-	fields := strings.FieldsFunc(sn[len(bn):], isPathSep)
+	const pathSep = '/'
+
+	fields := strings.FieldsFunc(sn[len(bn):], func(r rune) bool {
+		return r == pathSep
+	})
 
 	for i := 0; i < len(fields); i++ {
 		if fields[i] != "" {
@@ -147,18 +151,7 @@ func isSitemap(s string) (yes bool) {
 		sitemapIDX = "sitemap-index.xml"
 	)
 
-	switch {
-	case strings.HasSuffix(s, sitemapXML), strings.HasSuffix(s, sitemapIDX):
-		yes = true
-	}
-
-	return
-}
-
-func isPathSep(r rune) (yes bool) {
-	const pathSep = '/'
-
-	return r == pathSep
+	return strings.HasSuffix(s, sitemapXML) || strings.HasSuffix(s, sitemapIDX)
 }
 
 func isResorce(v string) (yes bool) {

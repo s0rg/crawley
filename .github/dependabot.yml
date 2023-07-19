@@ -1,11 +1,19 @@
 # dependabot settings
 version: 2
 updates:
-  - package-ecosystem: gomod
-    directory: /
+  - package-ecosystem: "gomod"
+    directory: "/"
+    target-branch: "develop"
+    labels:
+      - "gomod dependencies"
     schedule:
-      interval: weekly
+      interval: "weekly"
+      day: "friday"
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "develop"
+    labels:
+      - "github-actions dependencies"
     schedule:
-      interval: weekly
+      interval: "weekly"
+      day: "friday"
