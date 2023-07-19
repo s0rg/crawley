@@ -563,7 +563,7 @@ func TestCrawlerGetNonHTTPErr(t *testing.T) {
 
 	c.wg.Add(1)
 
-	go c.crawler(&tc)
+	go c.worker(&tc)
 
 	c.wg.Wait()
 
@@ -590,7 +590,7 @@ func TestCrawlerBadEmit(t *testing.T) {
 	c := New(WithoutHeads(true))
 	c.handleCh = make(chan string, 1)
 
-	c.handle("no-slash")
+	c.tryHandle("no-slash")
 
 	close(c.handleCh)
 
@@ -611,7 +611,7 @@ func TestCrawlerBad(t *testing.T) {
 	c := New(WithoutHeads(true))
 	base, _ := url.Parse("http://test/")
 
-	if c.needCrawl(base, &crawlResult{URI: "%"}) {
+	if c.tryEnqueue(base, &crawlResult{URI: "%"}) {
 		t.Error("can crawl bad uri")
 	}
 }
@@ -853,10 +853,10 @@ func TestCrawlerOverflow(t *testing.T) {
 	base, _ := url.Parse("http://test/")
 	res := crawlResult{URI: "http://test/foo"}
 
-	c.handle("/")
+	c.tryHandle("/")
 	c.linkHandler(atom.A, "")
 
-	if c.needCrawl(base, &res) {
+	if c.tryEnqueue(base, &res) {
 		t.Error("no overflow")
 	}
 }

@@ -99,7 +99,7 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 	c.initRobots(base, web)
 
 	for i := 0; i < workers; i++ {
-		go c.crawler(web)
+		go c.worker(web)
 	}
 
 	c.wg.Add(workers)
@@ -123,11 +123,11 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 		case t.Flag == TaskDone:
 			w--
 		case seen.TryAdd(t.Hash):
-			if t.Flag == TaskCrawl && c.needCrawl(base, &t) {
+			if t.Flag == TaskCrawl && c.tryEnqueue(base, &t) {
 				w++
 			}
 
-			c.handle(t.URI)
+			c.tryHandle(t.URI)
 		}
 	}
 
@@ -139,7 +139,7 @@ func (c *Crawler) DumpConfig() string {
 	return c.cfg.String()
 }
 
-func (c *Crawler) handle(u string) {
+func (c *Crawler) tryHandle(u string) {
 	show := true
 
 	idx := strings.LastIndexByte(u, '/')
@@ -167,7 +167,7 @@ func (c *Crawler) handle(u string) {
 	}
 }
 
-func (c *Crawler) needCrawl(base *url.URL, r *crawlResult) (yes bool) {
+func (c *Crawler) tryEnqueue(base *url.URL, r *crawlResult) (yes bool) {
 	u, err := url.Parse(r.URI)
 	if err != nil {
 		return
@@ -296,7 +296,7 @@ func (c *Crawler) linkHandler(a atom.Atom, s string) {
 	}
 }
 
-func (c *Crawler) fetch(
+func (c *Crawler) process(
 	ctx context.Context,
 	web crawlClient,
 	base *url.URL,
@@ -336,7 +336,7 @@ func (c *Crawler) fetch(
 	client.Discard(body)
 }
 
-func (c *Crawler) crawler(web crawlClient) {
+func (c *Crawler) worker(web crawlClient) {
 	defer c.wg.Done()
 
 	for uri := range c.crawlCh {
@@ -347,22 +347,22 @@ func (c *Crawler) crawler(web crawlClient) {
 		ctx, cancel := context.WithTimeout(context.Background(), c.cfg.Client.Timeout)
 		us := uri.String()
 
-		var parse bool
+		var canProcess bool
 
 		if c.cfg.NoHEAD {
-			parse = canParse(uri.Path)
+			canProcess = canParse(uri.Path)
 		} else {
 			if hdrs, err := web.Head(ctx, us); err != nil {
 				log.Printf("[-] HEAD %s: %v", us, err)
 			} else {
 				ct := hdrs.Get(contentType)
 
-				parse = isHTML(ct) || isSitemap(us) || (c.cfg.ScanJS && isJS(ct, us))
+				canProcess = isHTML(ct) || isSitemap(us) || (c.cfg.ScanJS && isJS(ct, us))
 			}
 		}
 
-		if parse {
-			c.fetch(ctx, web, uri, us)
+		if canProcess {
+			c.process(ctx, web, uri, us)
 		}
 
 		cancel()
