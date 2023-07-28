@@ -39,12 +39,8 @@ func ExtractJS(r io.Reader, h URLHandler) {
 func cleanResult(s []byte) (rv string, ok bool) {
 	rv = string(bytes.Trim(s, codeCleanChars))
 
-	if strings.HasPrefix(rv, mimeAppPrefix) {
-		return
-	}
-
-	if strings.HasPrefix(rv, mimeTxtPrefix) {
-		return
+	if strings.HasPrefix(rv, mimeAppPrefix) || strings.HasPrefix(rv, mimeTxtPrefix) {
+		return "", false
 	}
 
 	return rv, true
