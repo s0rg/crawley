@@ -319,9 +319,13 @@ func (c *Crawler) process(
 	switch {
 	case isHTML(content):
 		links.ExtractHTML(body, base, links.HTMLParams{
-			Brute:   c.cfg.Brute,
-			Filter:  c.filter,
-			Handler: c.linkHandler,
+			Brute:      c.cfg.Brute,
+			ScanJS:     c.cfg.ScanJS,
+			Filter:     c.filter,
+			HandleHTML: c.linkHandler,
+			HandleJS: func(s string) {
+				c.linkHandler(atom.Link, s)
+			},
 		})
 	case isSitemap(uri):
 		links.ExtractSitemap(body, base, func(s string) {

@@ -28,33 +28,45 @@ type TokenFilter func(html.Token) bool
 
 // HTMLParams holds config for ExtractHTML.
 type HTMLParams struct {
-	Filter  TokenFilter
-	Handler HTMLHandler
-	Brute   bool
+	Filter     TokenFilter
+	HandleHTML HTMLHandler
+	HandleJS   URLHandler
+	ScanJS     bool
+	Brute      bool
 }
 
 // AllowALL - stub that implements TokenFilter, it allows all tokens.
 func AllowALL(_ html.Token) bool { return true }
 
 // ExtractHTML extract urls from html.
-func ExtractHTML(r io.Reader, b *url.URL, p HTMLParams) {
+func ExtractHTML(r io.Reader, base *url.URL, cfg HTMLParams) {
 	var (
 		tkns = html.NewTokenizer(r)
 		key  = keySRC
-		t    html.Token
+		tok  html.Token
+		isJS bool
 	)
 
 	for {
 		switch tkns.Next() {
 		case html.ErrorToken:
 			return
+
 		case html.StartTagToken, html.SelfClosingTagToken:
-			if t = tkns.Token(); p.Filter(t) {
-				extractToken(b, t, &key, p.Handler)
+			if tok = tkns.Token(); cfg.Filter(tok) {
+				isJS = extractToken(base, tok, &key, cfg.HandleHTML)
 			}
+
+		case html.TextToken:
+			if cfg.ScanJS && isJS {
+				ExtractJS(bytes.NewReader(tkns.Text()), cfg.HandleJS)
+			}
+
+			isJS = false
+
 		case html.CommentToken:
-			if p.Brute {
-				extractComment(tkns.Token().Data, p.Handler)
+			if cfg.Brute {
+				extractComment(tkns.Token().Data, cfg.HandleHTML)
 			}
 		}
 	}
@@ -100,54 +112,69 @@ func extractComment(s string, h HTMLHandler) {
 	}
 }
 
-func extractToken(b *url.URL, t html.Token, k *string, h HTMLHandler) {
+func extractToken(
+	base *url.URL,
+	tok html.Token,
+	key *string,
+	handle HTMLHandler,
+) (js bool) {
 	var (
 		poster string
 		uri    string
 	)
 
-	switch t.DataAtom {
+	switch tok.DataAtom {
 	case atom.A:
-		uri = extractTag(b, &t, keyHREF)
+		uri = extractTag(base, &tok, keyHREF)
 
-	case atom.Img, atom.Image, atom.Iframe, atom.Script, atom.Track:
-		uri = extractTag(b, &t, keySRC)
+	case atom.Img, atom.Image, atom.Iframe, atom.Track:
+		uri = extractTag(base, &tok, keySRC)
+
+	case atom.Script:
+		uri = extractTag(base, &tok, keySRC)
+		js = uri == ""
 
 	case atom.Form:
-		uri = extractTag(b, &t, keyACTION)
+		uri = extractTag(base, &tok, keyACTION)
 
 	case atom.Object:
-		uri = extractTag(b, &t, keyDATA)
+		uri = extractTag(base, &tok, keyDATA)
 
 	case atom.Video:
-		poster = extractTag(b, &t, keyPOSTER)
+		poster = extractTag(base, &tok, keyPOSTER)
 
 		fallthrough
 
 	case atom.Audio:
-		*k = keySRC
-		uri = extractTag(b, &t, keySRC)
+		*key = keySRC
+		uri = extractTag(base, &tok, keySRC)
 
 	case atom.Picture:
-		*k = keySRCS
+		*key = keySRCS
 
 	case atom.Source:
-		uri = extractTag(b, &t, *k)
+		uri = extractTag(base, &tok, *key)
 	}
 
-	callHandler(h, t.DataAtom, uri)
-	callHandler(h, t.DataAtom, poster)
+	handleNotEmpty(handle, tok.DataAtom, uri)
+	handleNotEmpty(handle, tok.DataAtom, poster)
+
+	return js
 }
 
-func callHandler(h HTMLHandler, a atom.Atom, s string) {
+func handleNotEmpty(h HTMLHandler, a atom.Atom, s string) {
 	if s != "" {
 		h(a, s)
 	}
 }
 
-func extractTag(base *url.URL, token *html.Token, key string) (rv string) {
-	for i := 0; i < len(token.Attr); i++ {
-		if a := &token.Attr[i]; a.Key == key {
+func extractTag(
+	base *url.URL,
+	tok *html.Token,
+	key string,
+) (rv string) {
+	for i := 0; i < len(tok.Attr); i++ {
+		if a := &tok.Attr[i]; a.Key == key {
 			if res, ok := cleanURL(base, a.Val); ok {
 				return res
 			}

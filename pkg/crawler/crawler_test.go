@@ -796,7 +796,7 @@ func TestCrawlerProxyAuth(t *testing.T) {
 	}
 }
 
-func TestCrawlerScanJS(t *testing.T) {
+func TestCrawlerScanJSURL(t *testing.T) {
 	t.Parallel()
 
 	const (
@@ -805,8 +805,6 @@ func TestCrawlerScanJS(t *testing.T) {
 	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t.Log(r.RequestURI)
-
 		switch r.RequestURI {
 		case "/test.js":
 			w.Header().Add(contentType, contentJS)
@@ -820,11 +818,11 @@ func TestCrawlerScanJS(t *testing.T) {
 
 	defer ts.Close()
 
-	var found int
+	var found bool
 
 	handler := func(s string) {
 		if s == "/api/v1/user" {
-			found++
+			found = true
 		}
 	}
 
@@ -838,8 +836,43 @@ func TestCrawlerScanJS(t *testing.T) {
 		t.Error("run - error:", err)
 	}
 
-	if found < 1 {
-		t.Fatalf("unexpected result: %d", found)
+	if !found {
+		t.Fail()
+	}
+}
+
+func TestCrawlerScanJSInline(t *testing.T) {
+	t.Parallel()
+
+	const body = `<html><body><script>var foo = "http://test.me/";</script></body></html>`
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Add(contentType, contentHTML)
+		_, _ = io.WriteString(w, body)
+	}))
+
+	defer ts.Close()
+
+	var found bool
+
+	handler := func(s string) {
+		if s == "http://test.me/" {
+			found = true
+		}
+	}
+
+	c := New(
+		WithMaxCrawlDepth(1),
+		WithoutHeads(true),
+		WithScanJS(true),
+	)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Error("run - error:", err)
+	}
+
+	if !found {
+		t.Fail()
 	}
 }
 

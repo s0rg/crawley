@@ -30,7 +30,7 @@ Crawls web pages and prints any link it can find.
 - user-defined headers, same as curl: `-header "ONE: 1" -header "TWO: 2" -header @headers-file`
 - tag filter - allow to specify tags to crawl for (single: `-tag a -tag form`, multiple: `-tag a,form`, or mixed)
 - url ignore - allow to ignore urls with matched substrings from crawling (i.e.: `-ignore logout`)
-- js parser - extract api endpoints from js files, this done by regexp, so results can be messy
+- js parser - extract api endpoints from js code, this done by regexp, so results can be messy
 
 # examples
 

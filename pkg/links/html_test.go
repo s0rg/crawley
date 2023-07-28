@@ -192,9 +192,14 @@ func TestExtractToken(t *testing.T) {
 
 			var res string
 
-			extractToken(testBase, tc.token, &key, func(_ atom.Atom, s string) {
-				res = s
-			})
+			extractToken(
+				testBase,
+				tc.token,
+				&key,
+				func(_ atom.Atom, s string) {
+					res = s
+				},
+			)
 
 			if key != tc.keyWant {
 				t.Errorf("extractToken() key gotU = %v, want %v", key, tc.keyWant)
@@ -204,6 +209,30 @@ func TestExtractToken(t *testing.T) {
 				t.Errorf("extractToken() link gotU = %v, want %v", res, tc.wantURL)
 			}
 		})
+	}
+}
+
+func TestExtractTokenJS(t *testing.T) {
+	t.Parallel()
+
+	const raw = `<html><script>var url = "http://example.com";</script></html>`
+
+	var res string
+
+	ExtractHTML(
+		bytes.NewBufferString(raw),
+		testBase,
+		HTMLParams{
+			Filter: AllowALL,
+			ScanJS: true,
+			HandleJS: func(s string) {
+				res = s
+			},
+		},
+	)
+
+	if res != "http://example.com" {
+		t.Fail()
 	}
 }
 
@@ -262,7 +291,7 @@ func TestExtractURLS(t *testing.T) {
 			ExtractHTML(buf, testBase, HTMLParams{
 				Brute:  true,
 				Filter: AllowALL,
-				Handler: func(_ atom.Atom, s string) {
+				HandleHTML: func(_ atom.Atom, s string) {
 					res = s
 				},
 			})
@@ -318,7 +347,7 @@ func TestExtractAllowed(t *testing.T) {
 	ExtractHTML(buf, testBase, HTMLParams{
 		Brute:  true,
 		Filter: filter,
-		Handler: func(_ atom.Atom, s string) {
+		HandleHTML: func(_ atom.Atom, s string) {
 			res = append(res, s)
 		},
 	})
