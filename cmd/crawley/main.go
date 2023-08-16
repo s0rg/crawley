@@ -21,7 +21,6 @@ import (
 
 const (
 	appName        = "Crawley"
-	appHelp        = "the unix-way web crawler"
 	appSite        = "https://github.com/s0rg/crawley"
 	defaultDelay   = 150 * time.Millisecond
 	defaultTimeout = 5 * time.Second
@@ -63,20 +62,9 @@ func version() string {
 func usage() {
 	var sb strings.Builder
 
-	const twoCR = "\n\n"
-
-	sb.WriteString(appName)
-	sb.WriteString(" - ")
-	sb.WriteString(appHelp)
-	sb.WriteString(", usage:")
-	sb.WriteString(twoCR)
-
-	sb.WriteString(filepath.Base(os.Args[0]))
-	sb.WriteString(" [flags] url")
-	sb.WriteString(twoCR)
-
-	sb.WriteString("possible flags with default values:")
-	sb.WriteString(twoCR)
+	fmt.Fprintf(&sb, "%s - the unix-way web crawler, usage:\n\n", appName)
+	fmt.Fprintf(&sb, "%s [flags] url\n\n", filepath.Base(os.Args[0]))
+	fmt.Fprint(&sb, "possible flags with default values:\n\n")
 
 	_, _ = os.Stderr.WriteString(sb.String())
 

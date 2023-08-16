@@ -6,10 +6,7 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"time"
 )
-
-const transportTimeout = 10 * time.Second
 
 // HTTP holds pre-configured http.Client.
 type HTTP struct {
@@ -24,13 +21,13 @@ func New(cfg *Config) (h *HTTP) {
 	transport := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		Dial: (&net.Dialer{
-			Timeout: transportTimeout,
+			Timeout: cfg.Timeout,
 		}).Dial,
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: cfg.SkipSSL,
 		},
-		IdleConnTimeout:     transportTimeout,
-		TLSHandshakeTimeout: transportTimeout,
+		IdleConnTimeout:     cfg.Timeout,
+		TLSHandshakeTimeout: cfg.Timeout,
 		MaxConnsPerHost:     cfg.Workers,
 		MaxIdleConns:        cfg.Workers,
 		MaxIdleConnsPerHost: cfg.Workers,

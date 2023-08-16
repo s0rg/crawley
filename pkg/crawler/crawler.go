@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -76,7 +77,7 @@ func New(opts ...Option) (c *Crawler) {
 }
 
 // Run starts crawling process for given base uri.
-func (c *Crawler) Run(uri string, fn func(string)) (err error) {
+func (c *Crawler) Run(uri string, urlcb func(string)) (err error) {
 	var base *url.URL
 
 	if base, err = url.Parse(uri); err != nil {
@@ -106,7 +107,7 @@ func (c *Crawler) Run(uri string, fn func(string)) (err error) {
 
 	go func() {
 		for s := range c.handleCh {
-			fn(s)
+			urlcb(s)
 		}
 
 		c.wg.Done()
@@ -195,7 +196,7 @@ func (c *Crawler) close() {
 	close(c.crawlCh)
 	c.wg.Wait() // wait for crawlers
 
-	c.wg.Add(1)
+	c.wg.Add(1) // for handler`s Done()
 	close(c.handleCh)
 	c.wg.Wait() // wait for handler
 
@@ -265,13 +266,9 @@ func (c *Crawler) isIgnored(v string) (yes bool) {
 		return
 	}
 
-	for _, s := range c.cfg.Ignored {
-		if strings.Contains(v, s) {
-			return true
-		}
-	}
-
-	return false
+	return slices.ContainsFunc(c.cfg.Ignored, func(s string) bool {
+		return strings.Contains(v, s)
+	})
 }
 
 func (c *Crawler) linkHandler(a atom.Atom, s string) {

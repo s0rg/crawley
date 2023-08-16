@@ -64,12 +64,11 @@ func extractToken(b []byte) (k tokenKind, v string) {
 		return
 	}
 
-	var val []byte
-	if val = bytes.TrimSpace(b[pos+1:]); len(val) == 0 {
-		return
+	if val := bytes.TrimSpace(b[pos+1:]); len(val) > 0 {
+		return kind, string(val)
 	}
 
-	return kind, string(val)
+	return
 }
 
 func parseRobots(r io.Reader, ua string, t *TXT) (err error) {

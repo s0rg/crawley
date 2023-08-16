@@ -105,7 +105,6 @@ func TestCrawlerOK(t *testing.T) {
 	}
 
 	if len(results) != 3 {
-		t.Log(results)
 		t.Error("results: less than expected")
 	}
 
@@ -250,7 +249,6 @@ sitemap: http://other.host/sitemap.xml`
 	}
 
 	if len(resA) != 5 {
-		t.Log(resA)
 		t.Fatal("unexpected len for A")
 	}
 
