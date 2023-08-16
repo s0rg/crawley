@@ -1,6 +1,6 @@
 run:
   allow-parallel-runners: true
-  go: '1.20'
+  go: '1.21'
 
 output:
   format: 'colored-line-number'

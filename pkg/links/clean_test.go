@@ -2,7 +2,6 @@ package links
 
 import (
 	"net/url"
-	"reflect"
 	"testing"
 )
 
@@ -47,7 +46,7 @@ func TestClean(t *testing.T) {
 			}
 
 			if gotOk {
-				if !reflect.DeepEqual(gotU, tc.wantU) {
+				if gotU != tc.wantU {
 					t.Errorf("clean() gotU = %v, want %v", gotU, tc.wantU)
 				}
 			}

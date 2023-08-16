@@ -117,7 +117,6 @@ func TestExtractSitemapURLError(t *testing.T) {
 	})
 
 	if len(l) != 0 {
-		t.Log(l)
 		t.Error("unexpected results count")
 	}
 }

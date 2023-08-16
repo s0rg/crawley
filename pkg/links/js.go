@@ -40,7 +40,7 @@ func cleanResult(s []byte) (rv string, ok bool) {
 	rv = string(bytes.Trim(s, codeCleanChars))
 
 	if strings.HasPrefix(rv, mimeAppPrefix) || strings.HasPrefix(rv, mimeTxtPrefix) {
-		return "", false
+		return
 	}
 
 	return rv, true

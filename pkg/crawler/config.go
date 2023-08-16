@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	minDepth   = -1
 	minWorkers = 1
 	maxWorkers = 64
 	minDelay   = time.Duration(0)
@@ -30,44 +31,27 @@ type config struct {
 }
 
 func (c *config) validate() {
-	switch {
-	case c.Client.Workers < minWorkers:
-		c.Client.Workers = minWorkers
-	case c.Client.Workers > maxWorkers:
-		c.Client.Workers = maxWorkers
-	}
-
-	switch {
-	case c.Client.Timeout < minTimeout:
-		c.Client.Timeout = minTimeout
-	case c.Client.Timeout > maxTimeout:
-		c.Client.Timeout = maxTimeout
-	}
-
-	if c.Delay < minDelay {
-		c.Delay = minDelay
-	}
-
-	if c.Depth < 0 {
-		c.Depth = -1
-	}
+	c.Client.Workers = min(maxWorkers, max(minWorkers, c.Client.Workers))
+	c.Client.Timeout = min(maxTimeout, max(minTimeout, c.Client.Timeout))
+	c.Delay = max(minDelay, c.Delay)
+	c.Depth = max(minDepth, c.Depth)
 }
 
 func (c *config) String() (rv string) {
 	var sb strings.Builder
 
-	_, _ = sb.WriteString(fmt.Sprintf("workers: %d depth: %d timeout: %s", c.Client.Workers, c.Depth, c.Client.Timeout))
+	fmt.Fprintf(&sb, "workers: %d depth: %d timeout: %s", c.Client.Workers, c.Depth, c.Client.Timeout)
 
 	if c.Brute {
-		_, _ = sb.WriteString(" brute: on")
+		sb.WriteString(" brute: on")
 	}
 
 	if c.ScanJS {
-		_, _ = sb.WriteString(" js: on")
+		sb.WriteString(" js: on")
 	}
 
 	if c.Delay > 0 {
-		_, _ = sb.WriteString(fmt.Sprintf(" delay: %s", c.Delay))
+		fmt.Fprintf(&sb, " delay: %s", c.Delay)
 	}
 
 	return sb.String()

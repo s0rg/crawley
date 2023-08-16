@@ -51,8 +51,8 @@ nfpms:
     license: MIT
     vendor: Crawley
     formats:
-    - deb
-    - rpm
+      - deb
+      - rpm
 
 changelog:
   filters:

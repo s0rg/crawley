@@ -3,7 +3,7 @@ package links
 import (
 	"bytes"
 	"net/url"
-	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -49,7 +49,7 @@ func TestExtractTag(t *testing.T) {
 
 			gotU := extractTag(tc.args.b, tc.args.t, tc.args.k)
 
-			if !reflect.DeepEqual(gotU, tc.wantU) {
+			if gotU != tc.wantU {
 				t.Errorf("extractTag() gotU = %v, want %v", gotU, tc.wantU)
 			}
 		})
@@ -205,7 +205,7 @@ func TestExtractToken(t *testing.T) {
 				t.Errorf("extractToken() key gotU = %v, want %v", key, tc.keyWant)
 			}
 
-			if !reflect.DeepEqual(res, tc.wantURL) {
+			if res != tc.wantURL {
 				t.Errorf("extractToken() link gotU = %v, want %v", res, tc.wantURL)
 			}
 		})
@@ -297,7 +297,7 @@ func TestExtractURLS(t *testing.T) {
 			})
 
 			if tc.hasLink {
-				if !reflect.DeepEqual(res, tc.lnk) {
+				if res != tc.lnk {
 					t.Errorf("extractToken() link gotU = %v, want %v", res, tc.lnk)
 				}
 			}
@@ -326,7 +326,7 @@ loremipsumhTTp://foo fdfdfs HttPs://bar
 		t.Error("unexpected len")
 	}
 
-	if !reflect.DeepEqual(res, want) {
+	if slices.Compare(res, want) != 0 {
 		t.Error("unexpected result")
 	}
 }
