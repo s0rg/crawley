@@ -54,6 +54,7 @@ jobs:
   codeql:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    needs: [lint, test]
     environment:
       name: ci
     steps:
