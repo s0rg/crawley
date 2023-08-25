@@ -93,7 +93,7 @@ func (c *Crawler) Run(uri string, urlcb func(string)) (err error) {
 
 	defer c.close()
 
-	seen := make(set.Set[uint64])
+	seen := make(set.Unordered[uint64])
 	seen.Add(urlhash(uri))
 
 	web := client.New(&c.cfg.Client)
@@ -123,7 +123,7 @@ func (c *Crawler) Run(uri string, urlcb func(string)) (err error) {
 		switch {
 		case t.Flag == TaskDone:
 			w--
-		case seen.TryAdd(t.Hash):
+		case seen.Add(t.Hash):
 			if t.Flag == TaskCrawl && c.tryEnqueue(base, &t) {
 				w++
 			}

@@ -28,7 +28,7 @@ const (
 	fileExtJS   = ".js"
 )
 
-var parsableExts = make(set.Set[string]).Load(
+var parsableExts = set.Load(make(set.Unordered[string]),
 	".asp",
 	".aspx",
 	".cgi",
@@ -51,7 +51,7 @@ func prepareFilter(tags []string) links.TokenFilter {
 		return links.AllowALL
 	}
 
-	atoms := make(set.Set[atom.Atom])
+	atoms := make(set.Unordered[atom.Atom])
 
 	var a atom.Atom
 

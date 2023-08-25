@@ -231,7 +231,7 @@ sitemap: http://other.host/sitemap.xml`
 
 	// case A
 
-	resA := make(set.Set[string])
+	resA := make(set.Unordered[string])
 
 	handlerA := func(s string) {
 		resA.Add(s)
@@ -262,7 +262,7 @@ sitemap: http://other.host/sitemap.xml`
 
 	// case B
 
-	resB := make(set.Set[string])
+	resB := make(set.Unordered[string])
 
 	handlerB := func(s string) {
 		resB.Add(s)

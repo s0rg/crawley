@@ -39,9 +39,9 @@ func DenyALL() *TXT {
 func FromReader(ua string, r io.Reader) (t *TXT, err error) {
 	t = &TXT{
 		mode:     gotRules,
-		links:    make(set.Set[string]),
-		deny:     make(set.Set[string]),
-		sitemaps: make(set.Set[string]),
+		links:    make(set.Unordered[string]),
+		deny:     make(set.Unordered[string]),
+		sitemaps: make(set.Unordered[string]),
 	}
 
 	if err = parseRobots(r, ua, t); err != nil {
@@ -66,7 +66,7 @@ func URL(u *url.URL) (rv string) {
 func (t *TXT) Forbidden(path string) (yes bool) {
 	switch t.mode {
 	case gotRules:
-		_, yes = t.deny[path]
+		yes = t.deny.Has(path)
 	case denyAll:
 		yes = true
 	case allowAll:
@@ -77,10 +77,10 @@ func (t *TXT) Forbidden(path string) (yes bool) {
 
 // Sitemaps returns list of parsed sitemaps urls.
 func (t *TXT) Sitemaps() (rv []string) {
-	return t.sitemaps.List()
+	return set.ToSlice(t.sitemaps)
 }
 
 // Links returns list of parsed rules urls (both allowed and denided, for all useragents).
 func (t *TXT) Links() (rv []string) {
-	return t.links.List()
+	return set.ToSlice(t.links)
 }
