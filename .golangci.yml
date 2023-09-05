@@ -16,9 +16,22 @@ linters:
     - nonamedreturns
     - testpackage
     - exhaustruct
+    - structcheck
+    - tagliatelle
+    - nosnakecase
+    - exhaustruct
     - exhaustive
     - varnamelen
+    - interfacer
+    - scopelint
+    - deadcode
+    - maligned
+    - varcheck
     - depguard
+    - ifshort
+    - ireturn
+    - gofumpt
+    - golint
     - gci
 
 linters-settings:
