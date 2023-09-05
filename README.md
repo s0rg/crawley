@@ -3,6 +3,7 @@
 [![Release](https://img.shields.io/github/v/release/s0rg/crawley)](https://github.com/s0rg/crawley/releases/latest)
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)
 ![Downloads](https://img.shields.io/github/downloads/s0rg/crawley/total.svg)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fs0rg%2Fcrawley.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fs0rg%2Fcrawley?ref=badge_shield)
 
 [![CI](https://github.com/s0rg/crawley/workflows/ci/badge.svg)](https://github.com/s0rg/crawley/actions?query=workflow%3Aci)
 [![Go Report Card](https://goreportcard.com/badge/github.com/s0rg/crawley)](https://goreportcard.com/report/github.com/s0rg/crawley)
@@ -110,3 +111,7 @@ Crawley can handle flags autocompletion in bash and zsh via `complete`:
 ```bash
 complete -C "/full-path-to/bin/crawley" crawley
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fs0rg%2Fcrawley.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fs0rg%2Fcrawley?ref=badge_large)
