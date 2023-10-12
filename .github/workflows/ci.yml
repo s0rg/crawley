@@ -39,7 +39,11 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ^1.21
+      - name: tests-only
+        if: ${{ github.event_name == 'pull_request' }}
+        run: make test
       - name: test-coverage
+        if: ${{ github.event_name == 'push' }}
         uses: paambaati/codeclimate-action@v5.0.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
