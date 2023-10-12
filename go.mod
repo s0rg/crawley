@@ -1,6 +1,6 @@
 module github.com/s0rg/crawley
 
-go 1.21.1
+go 1.21.3
 
 require (
 	github.com/s0rg/compflag v1.1.0
