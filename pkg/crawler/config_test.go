@@ -153,10 +153,11 @@ func TestString(t *testing.T) {
 	t.Parallel()
 
 	c := &config{
-		Client: client.Config{Workers: 13},
-		Depth:  666,
-		Brute:  true,
-		ScanJS: true,
+		Client:  client.Config{Workers: 13},
+		Depth:   666,
+		Brute:   true,
+		ScanJS:  true,
+		ScanCSS: true,
 	}
 
 	c.validate()
@@ -175,8 +176,12 @@ func TestString(t *testing.T) {
 		t.Error("1 - bad brute mode")
 	}
 
-	if !strings.Contains(v, "js: on") {
+	if !strings.Contains(v, "+js") {
 		t.Error("1 - bad js mode")
+	}
+
+	if !strings.Contains(v, "+css") {
+		t.Error("1 - bad css mode")
 	}
 
 	if strings.Contains(v, "delay") {

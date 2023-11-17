@@ -256,7 +256,7 @@ func (c *Crawler) crawlRobots(host *url.URL) {
 
 	for _, u := range c.robots.Sitemaps() {
 		if _, e := url.Parse(u); e == nil {
-			c.linkHandler(atom.A, u)
+			c.crawlHandler(u)
 		}
 	}
 }
@@ -293,6 +293,14 @@ func (c *Crawler) linkHandler(a atom.Atom, s string) {
 	}
 }
 
+func (c *Crawler) staticHandler(s string) {
+	c.linkHandler(atom.Link, s)
+}
+
+func (c *Crawler) crawlHandler(s string) {
+	c.linkHandler(atom.A, s)
+}
+
 func (c *Crawler) process(
 	ctx context.Context,
 	web crawlClient,
@@ -316,22 +324,19 @@ func (c *Crawler) process(
 	switch {
 	case isHTML(content):
 		links.ExtractHTML(body, base, links.HTMLParams{
-			Brute:      c.cfg.Brute,
-			ScanJS:     c.cfg.ScanJS,
-			Filter:     c.filter,
-			HandleHTML: c.linkHandler,
-			HandleJS: func(s string) {
-				c.linkHandler(atom.Link, s)
-			},
+			Brute:        c.cfg.Brute,
+			ScanJS:       c.cfg.ScanJS,
+			ScanCSS:      c.cfg.ScanCSS,
+			Filter:       c.filter,
+			HandleHTML:   c.linkHandler,
+			HandleStatic: c.staticHandler,
 		})
 	case isSitemap(uri):
-		links.ExtractSitemap(body, base, func(s string) {
-			c.linkHandler(atom.A, s)
-		})
+		links.ExtractSitemap(body, base, c.crawlHandler)
 	case c.cfg.ScanJS && isJS(content, uri):
-		links.ExtractJS(body, func(s string) {
-			c.linkHandler(atom.Link, s)
-		})
+		links.ExtractJS(body, c.staticHandler)
+	case c.cfg.ScanCSS && false:
+		links.ExtractCSS(body, c.staticHandler)
 	}
 
 	client.Discard(body)

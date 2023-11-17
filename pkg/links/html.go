@@ -28,11 +28,12 @@ type TokenFilter func(html.Token) bool
 
 // HTMLParams holds config for ExtractHTML.
 type HTMLParams struct {
-	Filter     TokenFilter
-	HandleHTML HTMLHandler
-	HandleJS   URLHandler
-	ScanJS     bool
-	Brute      bool
+	Filter       TokenFilter
+	HandleHTML   HTMLHandler
+	HandleStatic URLHandler
+	Brute        bool
+	ScanJS       bool
+	ScanCSS      bool
 }
 
 // AllowALL - stub that implements TokenFilter, it allows all tokens.
@@ -58,8 +59,11 @@ func ExtractHTML(r io.Reader, base *url.URL, cfg HTMLParams) {
 			}
 
 		case html.TextToken:
-			if cfg.ScanJS && isJS {
-				ExtractJS(bytes.NewReader(tkns.Text()), cfg.HandleJS)
+			switch {
+			case cfg.ScanJS && isJS:
+				ExtractJS(bytes.NewReader(tkns.Text()), cfg.HandleStatic)
+			case cfg.ScanCSS && false:
+
 			}
 
 			isJS = false
@@ -124,7 +128,7 @@ func extractToken(
 	)
 
 	switch tok.DataAtom {
-	case atom.A:
+	case atom.A, atom.Link:
 		uri = extractTag(base, &tok, keyHREF)
 
 	case atom.Img, atom.Image, atom.Iframe, atom.Track:
@@ -133,6 +137,8 @@ func extractToken(
 	case atom.Script:
 		uri = extractTag(base, &tok, keySRC)
 		js = uri == ""
+
+	case atom.Style:
 
 	case atom.Form:
 		uri = extractTag(base, &tok, keyACTION)

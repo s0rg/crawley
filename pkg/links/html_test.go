@@ -225,7 +225,7 @@ func TestExtractTokenJS(t *testing.T) {
 		HTMLParams{
 			Filter: AllowALL,
 			ScanJS: true,
-			HandleJS: func(s string) {
+			HandleStatic: func(s string) {
 				res = s
 			},
 		},

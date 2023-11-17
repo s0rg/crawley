@@ -98,7 +98,7 @@ func WithIgnored(v []string) Option {
 	}
 }
 
-// WithScanJS enables js files scanning.
+// WithScanJS enables js scanning.
 func WithScanJS(v bool) Option {
 	return func(c *config) {
 		c.ScanJS = v
@@ -118,5 +118,12 @@ func WithProxyAuth(v string) Option {
 func WithTimeout(v time.Duration) Option {
 	return func(c *config) {
 		c.Client.Timeout = v
+	}
+}
+
+// WithScanCSS enables css scanning.
+func WithScanCSS(v bool) Option {
+	return func(c *config) {
+		c.ScanCSS = v
 	}
 }

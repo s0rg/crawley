@@ -3,45 +3,38 @@ package links
 import (
 	"bytes"
 	"io"
-	"regexp"
 	"strings"
+
+	"github.com/tdewolff/parse/v2"
+	"github.com/tdewolff/parse/v2/js"
 )
 
 const (
-	regexAPI = `(?:"|')` +
-		`(((?:[a-zA-Z]{1,10}://|//)[^"'/]{1,}\.[a-zA-Z]{2,}[^"']{0,})|` +
-		`((?:/|\.\./|\./)[^"'><,;| *()%$^/\\\[\]][^"'><,;|()]{1,})|` +
-		`([a-zA-Z0-9_\-/]{1,}/[a-zA-Z0-9_\-/]{1,}\.(?:[a-zA-Z]{1,4}|action)(?:[\?|#][^"|']{0,}|))|` +
-		`([a-zA-Z0-9_\-/]{1,}/[a-zA-Z0-9_\-/]{3,}(?:[\?|#][^"|']{0,}|))|` +
-		`([a-zA-Z0-9_\-]{1,}\.(?:php|asp|aspx|jsp|json|action|html|js|txt|xml|cgi)(?:[\?|#][^"|']{0,}|)))(?:"|')`
-	mimeAppPrefix  = "application/"
-	mimeTxtPrefix  = "text/"
 	codeCleanChars = `"'`
+	dash           = "/"
+	doubleDash     = dash + dash
 )
-
-var reJSAPI = regexp.MustCompile(regexAPI)
 
 // ExtractJS extract urls from js files.
 func ExtractJS(r io.Reader, h URLHandler) {
-	buf, err := io.ReadAll(r)
-	if err != nil {
-		return
-	}
+	l := js.NewLexer(parse.NewInput(r))
 
-	res := reJSAPI.FindAll(buf, -1)
-	for i := 0; i < len(res); i++ {
-		if uri, ok := cleanResult(res[i]); ok {
-			h(uri)
+	for {
+		tt, text := l.Next()
+		switch tt {
+		case js.ErrorToken:
+			return
+		case js.StringToken:
+			if res, ok := extractJSURL(text); ok {
+				h(res)
+			}
 		}
 	}
 }
 
-func cleanResult(s []byte) (rv string, ok bool) {
-	rv = string(bytes.Trim(s, codeCleanChars))
+func extractJSURL(v []byte) (rv string, ok bool) {
+	rv = string(bytes.Trim(v, codeCleanChars))
+	ok = strings.HasPrefix(rv, dash) || strings.Contains(rv, doubleDash)
 
-	if strings.HasPrefix(rv, mimeAppPrefix) || strings.HasPrefix(rv, mimeTxtPrefix) {
-		return
-	}
-
-	return rv, true
+	return rv, ok
 }
