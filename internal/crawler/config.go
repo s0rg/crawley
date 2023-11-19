@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/s0rg/crawley/pkg/client"
+	"github.com/s0rg/crawley/internal/client"
 )
 
 const (

@@ -50,7 +50,7 @@ linters-settings:
 
 issues:
   exclude-rules:
-    - path: pkg/client/http.go
+    - path: internal/client/http.go
       text: "G402" # G402: TLS InsecureSkipVerify set true.
       linters:
         - gosec

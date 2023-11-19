@@ -15,8 +15,8 @@ import (
 
 	"github.com/s0rg/compflag"
 
-	"github.com/s0rg/crawley/pkg/crawler"
-	"github.com/s0rg/crawley/pkg/values"
+	"github.com/s0rg/crawley/internal/crawler"
+	"github.com/s0rg/crawley/internal/values"
 )
 
 const (

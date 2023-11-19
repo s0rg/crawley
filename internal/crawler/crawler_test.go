@@ -891,3 +891,41 @@ func TestCrawlerOverflow(t *testing.T) {
 		t.Error("no overflow")
 	}
 }
+
+func TestCrawlerScanCSSInline(t *testing.T) {
+	t.Parallel()
+
+	const body = `<html><head><style>
+body {background: url("test.png");}
+</style></head><body></body></html>`
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Add(contentType, contentHTML)
+		_, _ = io.WriteString(w, body)
+	}))
+
+	defer ts.Close()
+
+	var found bool
+
+	handler := func(s string) {
+		t.Log(s)
+		if s == "test.png" {
+			found = true
+		}
+	}
+
+	c := New(
+		WithMaxCrawlDepth(1),
+		WithoutHeads(true),
+		WithScanCSS(true),
+	)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Error("run - error:", err)
+	}
+
+	if !found {
+		t.Fail()
+	}
+}

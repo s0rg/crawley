@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/s0rg/crawley/pkg/client"
+	"github.com/s0rg/crawley/internal/client"
 )
 
 func TestValidate(t *testing.T) {

@@ -180,6 +180,20 @@ func TestExtractToken(t *testing.T) {
 			keyWant:  "",
 			wantURL:  testRes1,
 		},
+		{
+			name:     "css-link-ok",
+			token:    html.Token{DataAtom: atom.Link, Attr: attrs},
+			keyStart: keySRC,
+			keyWant:  keySRC,
+			wantURL:  testRes1,
+		},
+		{
+			name:     "css-style-empty",
+			token:    html.Token{DataAtom: atom.Style},
+			keyStart: "",
+			keyWant:  "",
+			wantURL:  "",
+		},
 	}
 
 	for _, tt := range tests {

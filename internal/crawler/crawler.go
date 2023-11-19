@@ -16,9 +16,9 @@ import (
 	"github.com/s0rg/set"
 	"golang.org/x/net/html/atom"
 
-	"github.com/s0rg/crawley/pkg/client"
-	"github.com/s0rg/crawley/pkg/links"
-	"github.com/s0rg/crawley/pkg/robots"
+	"github.com/s0rg/crawley/internal/client"
+	"github.com/s0rg/crawley/internal/links"
+	"github.com/s0rg/crawley/internal/robots"
 )
 
 type crawlClient interface {
@@ -335,7 +335,7 @@ func (c *Crawler) process(
 		links.ExtractSitemap(body, base, c.crawlHandler)
 	case c.cfg.ScanJS && isJS(content, uri):
 		links.ExtractJS(body, c.staticHandler)
-	case c.cfg.ScanCSS && false:
+	case c.cfg.ScanCSS && isCSS(content, uri):
 		links.ExtractCSS(body, c.staticHandler)
 	}
 
@@ -363,7 +363,10 @@ func (c *Crawler) worker(web crawlClient) {
 			} else {
 				ct := hdrs.Get(contentType)
 
-				canProcess = isHTML(ct) || isSitemap(us) || (c.cfg.ScanJS && isJS(ct, us))
+				canProcess = isHTML(ct) ||
+					isSitemap(us) ||
+					(c.cfg.ScanJS && isJS(ct, us)) ||
+					(c.cfg.ScanCSS && isCSS(ct, us))
 			}
 		}
 
