@@ -28,11 +28,12 @@ type TokenFilter func(html.Token) bool
 
 // HTMLParams holds config for ExtractHTML.
 type HTMLParams struct {
-	Filter     TokenFilter
-	HandleHTML HTMLHandler
-	HandleJS   URLHandler
-	ScanJS     bool
-	Brute      bool
+	Filter       TokenFilter
+	HandleHTML   HTMLHandler
+	HandleStatic URLHandler
+	Brute        bool
+	ScanJS       bool
+	ScanCSS      bool
 }
 
 // AllowALL - stub that implements TokenFilter, it allows all tokens.
@@ -41,10 +42,10 @@ func AllowALL(_ html.Token) bool { return true }
 // ExtractHTML extract urls from html.
 func ExtractHTML(r io.Reader, base *url.URL, cfg HTMLParams) {
 	var (
-		tkns = html.NewTokenizer(r)
-		key  = keySRC
-		tok  html.Token
-		isJS bool
+		tkns        = html.NewTokenizer(r)
+		key         = keySRC
+		tok         html.Token
+		isJS, isCSS bool
 	)
 
 	for {
@@ -54,15 +55,18 @@ func ExtractHTML(r io.Reader, base *url.URL, cfg HTMLParams) {
 
 		case html.StartTagToken, html.SelfClosingTagToken:
 			if tok = tkns.Token(); cfg.Filter(tok) {
-				isJS = extractToken(base, tok, &key, cfg.HandleHTML)
+				isJS, isCSS = extractToken(base, tok, &key, cfg.HandleHTML)
 			}
 
 		case html.TextToken:
-			if cfg.ScanJS && isJS {
-				ExtractJS(bytes.NewReader(tkns.Text()), cfg.HandleJS)
+			switch {
+			case cfg.ScanJS && isJS:
+				ExtractJS(bytes.NewReader(tkns.Text()), cfg.HandleStatic)
+			case cfg.ScanCSS && isCSS:
+				ExtractCSS(bytes.NewReader(tkns.Text()), cfg.HandleStatic)
 			}
 
-			isJS = false
+			isJS, isCSS = false, false
 
 		case html.CommentToken:
 			if cfg.Brute {
@@ -117,14 +121,14 @@ func extractToken(
 	tok html.Token,
 	key *string,
 	handle HTMLHandler,
-) (js bool) {
+) (js, css bool) {
 	var (
 		poster string
 		uri    string
 	)
 
 	switch tok.DataAtom {
-	case atom.A:
+	case atom.A, atom.Link:
 		uri = extractTag(base, &tok, keyHREF)
 
 	case atom.Img, atom.Image, atom.Iframe, atom.Track:
@@ -133,6 +137,9 @@ func extractToken(
 	case atom.Script:
 		uri = extractTag(base, &tok, keySRC)
 		js = uri == ""
+
+	case atom.Style:
+		css = true
 
 	case atom.Form:
 		uri = extractTag(base, &tok, keyACTION)
@@ -159,7 +166,7 @@ func extractToken(
 	handleNotEmpty(handle, tok.DataAtom, uri)
 	handleNotEmpty(handle, tok.DataAtom, poster)
 
-	return js
+	return js, css
 }
 
 func handleNotEmpty(h HTMLHandler, a atom.Atom, s string) {

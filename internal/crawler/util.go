@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 
-	"github.com/s0rg/crawley/pkg/links"
+	"github.com/s0rg/crawley/internal/links"
 )
 
 const (
@@ -24,8 +24,10 @@ const (
 
 	contentType = "Content-Type"
 	contentHTML = "text/html"
+	contentCSS  = "text/css"
 	contentJS   = "application/javascript"
 	fileExtJS   = ".js"
+	fileExtCSS  = ".css"
 )
 
 var parsableExts = set.Load(make(set.Unordered[string]),
@@ -40,6 +42,7 @@ var parsableExts = set.Load(make(set.Unordered[string]),
 	".xhtml",
 	".xml",
 	fileExtJS,
+	fileExtCSS,
 )
 
 func proxyAuthHeader(v string) (rv string) {
@@ -183,6 +186,15 @@ func isJS(v, n string) (yes bool) {
 	}
 
 	return webExt(n) == fileExtJS
+}
+
+func isCSS(v, n string) (yes bool) {
+	typ, _, err := mime.ParseMediaType(v)
+	if err == nil && typ == contentCSS {
+		return true
+	}
+
+	return webExt(n) == fileExtCSS
 }
 
 func urlhash(s string) (rv uint64) {

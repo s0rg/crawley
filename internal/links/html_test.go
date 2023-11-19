@@ -180,6 +180,20 @@ func TestExtractToken(t *testing.T) {
 			keyWant:  "",
 			wantURL:  testRes1,
 		},
+		{
+			name:     "css-link-ok",
+			token:    html.Token{DataAtom: atom.Link, Attr: attrs},
+			keyStart: keySRC,
+			keyWant:  keySRC,
+			wantURL:  testRes1,
+		},
+		{
+			name:     "css-style-empty",
+			token:    html.Token{DataAtom: atom.Style},
+			keyStart: "",
+			keyWant:  "",
+			wantURL:  "",
+		},
 	}
 
 	for _, tt := range tests {
@@ -225,13 +239,37 @@ func TestExtractTokenJS(t *testing.T) {
 		HTMLParams{
 			Filter: AllowALL,
 			ScanJS: true,
-			HandleJS: func(s string) {
+			HandleStatic: func(s string) {
 				res = s
 			},
 		},
 	)
 
 	if res != "http://example.com" {
+		t.Fail()
+	}
+}
+
+func TestExtractTokenCSS(t *testing.T) {
+	t.Parallel()
+
+	const raw = `<html><style>foo {bar:url(test.png);}</style></html>`
+
+	var res string
+
+	ExtractHTML(
+		bytes.NewBufferString(raw),
+		testBase,
+		HTMLParams{
+			Filter:  AllowALL,
+			ScanCSS: true,
+			HandleStatic: func(s string) {
+				res = s
+			},
+		},
+	)
+
+	if !strings.HasSuffix(res, "test.png") {
 		t.Fail()
 	}
 }

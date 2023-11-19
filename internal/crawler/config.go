@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/s0rg/crawley/pkg/client"
+	"github.com/s0rg/crawley/internal/client"
 )
 
 const (
@@ -28,6 +28,7 @@ type config struct {
 	Brute      bool
 	NoHEAD     bool
 	ScanJS     bool
+	ScanCSS    bool
 }
 
 func (c *config) validate() {
@@ -46,12 +47,16 @@ func (c *config) String() (rv string) {
 		sb.WriteString(" brute: on")
 	}
 
-	if c.ScanJS {
-		sb.WriteString(" js: on")
-	}
-
 	if c.Delay > 0 {
 		fmt.Fprintf(&sb, " delay: %s", c.Delay)
+	}
+
+	if c.ScanJS {
+		sb.WriteString(" +js")
+	}
+
+	if c.ScanCSS {
+		sb.WriteString(" +css")
 	}
 
 	return sb.String()

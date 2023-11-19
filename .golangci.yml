@@ -20,6 +20,7 @@ linters:
     - tagliatelle
     - nosnakecase
     - exhaustruct
+    - inamedparam
     - exhaustive
     - varnamelen
     - interfacer
@@ -40,6 +41,8 @@ linters-settings:
   govet:
     check-shadowing: true
     enable-all: true
+  cyclop:
+    max-complexity: 15
   gocritic:
     enabled-tags:
       - performance
@@ -49,7 +52,7 @@ linters-settings:
 
 issues:
   exclude-rules:
-    - path: pkg/client/http.go
+    - path: internal/client/http.go
       text: "G402" # G402: TLS InsecureSkipVerify set true.
       linters:
         - gosec
@@ -59,6 +62,7 @@ issues:
         - ifshort
         - cyclop
         - funlen
+        - dupl
     - path: cmd/crawley/main.go
       linters:
         - nakedret

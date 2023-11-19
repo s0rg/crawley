@@ -18,12 +18,13 @@ Crawls web pages and prints any link it can find.
 
 # features
 
-- fast html SAX-parser (powered by `golang.org/x/net/html`)
+- fast html SAX-parser (powered by [x/net/html](https://golang.org/x/net/html))
+- js/css lexical parsers (powered by [tdewolff/parse](https://github.com/tdewolff/parse)) - extract api endpoints from js code and `url()` properties
 - small (below 1500 SLOC), idiomatic, 100% test covered codebase
 - grabs most of useful resources urls (pics, videos, audios, forms, etc...)
 - found urls are streamed to stdout and guranteed to be unique (with fragments omitted)
 - scan depth (limited by starting host and path, by default - 0) can be configured
-- can crawl rules and sitemaps from `robots.txt`
+- can be polite - crawl rules and sitemaps from `robots.txt`
 - `brute` mode - scan html comments for urls (this can lead to bogus results)
 - make use of `HTTP_PROXY` / `HTTPS_PROXY` environment values + handles proxy auth (use `HTTP_PROXY="socks5://127.0.0.1:1080/" crawley` for socks5)
 - directory-only scan mode (aka `fast-scan`)
@@ -31,7 +32,6 @@ Crawls web pages and prints any link it can find.
 - user-defined headers, same as curl: `-header "ONE: 1" -header "TWO: 2" -header @headers-file`
 - tag filter - allow to specify tags to crawl for (single: `-tag a -tag form`, multiple: `-tag a,form`, or mixed)
 - url ignore - allow to ignore urls with matched substrings from crawling (i.e.: `-ignore logout`)
-- js parser - extract api endpoints from js code, this done by regexp, so results can be messy
 
 # examples
 
@@ -64,26 +64,28 @@ crawley [flags] url
 
 possible flags with default values:
 
+-all
+    scan all known sources (js/css/...)
 -brute
     scan html comments
 -cookie value
     extra cookies for request, can be used multiple times, accept files with '@'-prefix
+-css
+    scan css for urls
 -delay duration
     per-request delay (0 - disable) (default 150ms)
 -depth int
-    scan depth (-1 - unlimited)
+    scan depth (set -1 for unlimited)
 -dirs string
     policy for non-resource urls: show / hide / only (default "show")
 -header value
     extra headers for request, can be used multiple times, accept files with '@'-prefix
 -headless
     disable pre-flight HEAD requests
--help
-    this flags (and their defaults) description
 -ignore value
     patterns (in urls) to be ignored in crawl process
 -js
-    scan js files for endpoints
+    scan js code for endpoints
 -proxy-auth string
     credentials for proxy: user:password
 -robots string
@@ -93,7 +95,7 @@ possible flags with default values:
 -skip-ssl
     skip ssl verification
 -tag value
-    tags filter, single or comma-separated tag names allowed
+    tags filter, single or comma-separated tag names
 -timeout duration
     request timeout (min: 1 second, max: 10 minutes) (default 5s)
 -user-agent string
@@ -101,7 +103,7 @@ possible flags with default values:
 -version
     show version
 -workers int
-    number of workers (default - number of CPU cores)
+      number of workers (default - number of CPU cores)
 ```
 
 # flags autocompletion

@@ -16,9 +16,9 @@ import (
 	"github.com/s0rg/set"
 	"golang.org/x/net/html/atom"
 
-	"github.com/s0rg/crawley/pkg/client"
-	"github.com/s0rg/crawley/pkg/links"
-	"github.com/s0rg/crawley/pkg/robots"
+	"github.com/s0rg/crawley/internal/client"
+	"github.com/s0rg/crawley/internal/links"
+	"github.com/s0rg/crawley/internal/robots"
 )
 
 type crawlClient interface {
@@ -27,8 +27,9 @@ type crawlClient interface {
 }
 
 const (
-	chMult    = 256
-	chTimeout = 100 * time.Millisecond
+	chMult     = 256
+	chTimeout  = 100 * time.Millisecond
+	doubleDash = "//"
 )
 
 type taskFlag byte
@@ -256,7 +257,7 @@ func (c *Crawler) crawlRobots(host *url.URL) {
 
 	for _, u := range c.robots.Sitemaps() {
 		if _, e := url.Parse(u); e == nil {
-			c.linkHandler(atom.A, u)
+			c.crawlHandler(u)
 		}
 	}
 }
@@ -278,7 +279,8 @@ func (c *Crawler) linkHandler(a atom.Atom, s string) {
 	}
 
 	fetch := (a == atom.A || a == atom.Iframe) ||
-		(c.cfg.ScanJS && a == atom.Script)
+		(c.cfg.ScanJS && a == atom.Script) ||
+		(c.cfg.ScanCSS && a == atom.Link)
 
 	if fetch && !c.isIgnored(s) {
 		r.Flag = TaskCrawl
@@ -291,6 +293,14 @@ func (c *Crawler) linkHandler(a atom.Atom, s string) {
 	case c.resultCh <- r:
 	case <-t.C:
 	}
+}
+
+func (c *Crawler) staticHandler(s string) {
+	c.linkHandler(atom.Link, s)
+}
+
+func (c *Crawler) crawlHandler(s string) {
+	c.linkHandler(atom.A, s)
 }
 
 func (c *Crawler) process(
@@ -311,27 +321,38 @@ func (c *Crawler) process(
 		}
 	}
 
+	handleStatic := func(s string) {
+		switch {
+		case strings.HasPrefix(s, doubleDash):
+			s = base.Scheme + s
+		case strings.Contains(s, doubleDash):
+		default:
+			b, _ := url.Parse(uri)
+			r, _ := url.Parse(s)
+			s = b.ResolveReference(r).String()
+		}
+
+		c.staticHandler(s)
+	}
+
 	content := hdrs.Get(contentType)
 
 	switch {
 	case isHTML(content):
 		links.ExtractHTML(body, base, links.HTMLParams{
-			Brute:      c.cfg.Brute,
-			ScanJS:     c.cfg.ScanJS,
-			Filter:     c.filter,
-			HandleHTML: c.linkHandler,
-			HandleJS: func(s string) {
-				c.linkHandler(atom.Link, s)
-			},
+			Brute:        c.cfg.Brute,
+			ScanJS:       c.cfg.ScanJS,
+			ScanCSS:      c.cfg.ScanCSS,
+			Filter:       c.filter,
+			HandleHTML:   c.linkHandler,
+			HandleStatic: handleStatic,
 		})
 	case isSitemap(uri):
-		links.ExtractSitemap(body, base, func(s string) {
-			c.linkHandler(atom.A, s)
-		})
+		links.ExtractSitemap(body, base, c.crawlHandler)
 	case c.cfg.ScanJS && isJS(content, uri):
-		links.ExtractJS(body, func(s string) {
-			c.linkHandler(atom.Link, s)
-		})
+		links.ExtractJS(body, handleStatic)
+	case c.cfg.ScanCSS && isCSS(content, uri):
+		links.ExtractCSS(body, handleStatic)
 	}
 
 	client.Discard(body)
@@ -358,7 +379,10 @@ func (c *Crawler) worker(web crawlClient) {
 			} else {
 				ct := hdrs.Get(contentType)
 
-				canProcess = isHTML(ct) || isSitemap(us) || (c.cfg.ScanJS && isJS(ct, us))
+				canProcess = isHTML(ct) ||
+					isSitemap(us) ||
+					(c.cfg.ScanJS && isJS(ct, us)) ||
+					(c.cfg.ScanCSS && isCSS(ct, us))
 			}
 		}
 

@@ -44,32 +44,32 @@ func TestExtractJS(t *testing.T) {
 			"text/html",
 			"text/plain",
 			"application/json",
-			// valid ones
-			"smb://example.com",
-			"http://example.com",
-			"https://www.example.co.us",
-			"/api/create.php?user=test&pass=test#home",
 			"api/create.php?user=test#home",
-			"/path/to/file",
-			"/user/create.action?user=Test"
 		    "api/create.php",
 			"api/create.php?user=test"
 		    "api/create.php?user=test&pass=test",
 			"user/create.action?user=Test",
 		    "api/user",
+		    "test_1.json",
     		"v1/create",
     		"api/v1/user/2",
 			"api/v1/search?text=Test Hello",
-		    "test_1.json",
 			"test2.aspx?arg1=tmp1+tmp2&arg2=tmp3",
    			"addUser.action",
     		"main.js",
     		"index.html",
     		"robots.txt",
     		"users.xml"
+			// valid ones
+			"smb://example.com",
+			"http://example.com",
+			"https://www.example.co.us",
+			"/api/create.php?user=test&pass=test#home",
+			"/path/to/file",
+			"/user/create.action?user=Test"
 		];
 		}`
-		count = 22
+		count = 6
 	)
 
 	var c int

@@ -819,7 +819,7 @@ func TestCrawlerScanJSURL(t *testing.T) {
 	var found bool
 
 	handler := func(s string) {
-		if s == "/api/v1/user" {
+		if strings.HasSuffix(s, "/api/v1/user") {
 			found = true
 		}
 	}
@@ -874,6 +874,95 @@ func TestCrawlerScanJSInline(t *testing.T) {
 	}
 }
 
+func TestCrawlerScanCSSURL(t *testing.T) {
+	t.Parallel()
+
+	const (
+		body    = `<html><link href="test.css" rel="stylesheet" type="text/css"/></html>`
+		bodyCSS = `foo {bar:url(//static/test.png);}`
+	)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.RequestURI {
+		case "/test.css":
+			w.Header().Add(contentType, contentCSS)
+			_, _ = io.WriteString(w, bodyCSS)
+
+		default:
+			w.Header().Add(contentType, contentHTML)
+			_, _ = io.WriteString(w, body)
+		}
+	}))
+
+	defer ts.Close()
+
+	var found bool
+
+	handler := func(s string) {
+		if strings.HasSuffix(s, "test.png") {
+			found = true
+		}
+	}
+
+	c := New(
+		WithMaxCrawlDepth(1),
+		WithoutHeads(true),
+		WithScanCSS(true),
+	)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Error("run - error:", err)
+	}
+
+	if !found {
+		t.Fail()
+	}
+}
+
+func TestCrawlerScanCSSURLNoCT(t *testing.T) {
+	t.Parallel()
+
+	const (
+		body    = `<html><link href="test.css" rel="stylesheet" type="text/css"/></html>`
+		bodyCSS = `foo {bar:url(//static/test2.png);}`
+	)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.RequestURI {
+		case "/test.css":
+			_, _ = io.WriteString(w, bodyCSS)
+
+		default:
+			w.Header().Add(contentType, contentHTML)
+			_, _ = io.WriteString(w, body)
+		}
+	}))
+
+	defer ts.Close()
+
+	var found bool
+
+	handler := func(s string) {
+		if strings.HasSuffix(s, "test2.png") {
+			found = true
+		}
+	}
+
+	c := New(
+		WithMaxCrawlDepth(1),
+		WithoutHeads(true),
+		WithScanCSS(true),
+	)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Error("run - error:", err)
+	}
+
+	if !found {
+		t.Fail()
+	}
+}
+
 func TestCrawlerOverflow(t *testing.T) {
 	t.Parallel()
 
@@ -889,5 +978,42 @@ func TestCrawlerOverflow(t *testing.T) {
 
 	if c.tryEnqueue(base, &res) {
 		t.Error("no overflow")
+	}
+}
+
+func TestCrawlerScanCSSInline(t *testing.T) {
+	t.Parallel()
+
+	const body = `<html><head><style>
+body {background: url("test.png");}
+</style></head><body></body></html>`
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Add(contentType, contentHTML)
+		_, _ = io.WriteString(w, body)
+	}))
+
+	defer ts.Close()
+
+	var found bool
+
+	handler := func(s string) {
+		if strings.HasSuffix(s, "test.png") {
+			found = true
+		}
+	}
+
+	c := New(
+		WithMaxCrawlDepth(1),
+		WithoutHeads(true),
+		WithScanCSS(true),
+	)
+
+	if err := c.Run(ts.URL, handler); err != nil {
+		t.Error("run - error:", err)
+	}
+
+	if !found {
+		t.Fail()
 	}
 }

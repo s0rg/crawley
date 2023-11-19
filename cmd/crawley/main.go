@@ -15,8 +15,8 @@ import (
 
 	"github.com/s0rg/compflag"
 
-	"github.com/s0rg/crawley/pkg/crawler"
-	"github.com/s0rg/crawley/pkg/values"
+	"github.com/s0rg/crawley/internal/crawler"
+	"github.com/s0rg/crawley/internal/values"
 )
 
 const (
@@ -40,6 +40,7 @@ var (
 	fSilent, fVersion       bool
 	fBrute, fNoHeads        bool
 	fSkipSSL, fScanJS       bool
+	fScanCSS, fScanALL      bool
 	fDirsPolicy, fProxyAuth string
 	fRobotsPolicy, fUA      string
 	fDelay                  time.Duration
@@ -116,7 +117,7 @@ func loadSmart() (h, c []string, err error) {
 	return h, c, nil
 }
 
-func initOptions() (rv []crawler.Option, err error) {
+func parseFlags() (rv []crawler.Option, err error) {
 	robots, err := crawler.ParseRobotsPolicy(fRobotsPolicy)
 	if err != nil {
 		err = fmt.Errorf("robots policy: %w", err)
@@ -138,6 +139,12 @@ func initOptions() (rv []crawler.Option, err error) {
 		return
 	}
 
+	scanJS, scanCSS := fScanJS, fScanCSS
+
+	if fScanALL {
+		scanJS, scanCSS = true, true
+	}
+
 	rv = []crawler.Option{
 		crawler.WithUserAgent(fUA),
 		crawler.WithDelay(fDelay),
@@ -148,7 +155,8 @@ func initOptions() (rv []crawler.Option, err error) {
 		crawler.WithDirsPolicy(dirs),
 		crawler.WithRobotsPolicy(robots),
 		crawler.WithoutHeads(fNoHeads),
-		crawler.WithScanJS(fScanJS),
+		crawler.WithScanJS(scanJS),
+		crawler.WithScanCSS(scanCSS),
 		crawler.WithExtraHeaders(uheaders),
 		crawler.WithExtraCookies(ucookies),
 		crawler.WithTagsFilter(tags.Values),
@@ -174,9 +182,11 @@ func setupFlags() {
 	flag.IntVar(&fDepth, "depth", 0, "scan depth (set -1 for unlimited)")
 	flag.IntVar(&fWorkers, "workers", runtime.NumCPU(), "number of workers")
 
+	flag.BoolVar(&fScanALL, "all", false, "scan all known sources (js/css/...)")
 	flag.BoolVar(&fBrute, "brute", false, "scan html comments")
+	flag.BoolVar(&fScanCSS, "css", false, "scan css for urls")
 	flag.BoolVar(&fNoHeads, "headless", false, "disable pre-flight HEAD requests")
-	flag.BoolVar(&fScanJS, "js", false, "scan js files for endpoints")
+	flag.BoolVar(&fScanJS, "js", false, "scan js code for endpoints")
 	flag.BoolVar(&fSkipSSL, "skip-ssl", false, "skip ssl verification")
 	flag.BoolVar(&fSilent, "silent", false, "suppress info and error messages in stderr")
 	flag.BoolVar(&fVersion, "version", false, "show version")
@@ -215,7 +225,7 @@ func main() {
 		return
 	}
 
-	opts, err := initOptions()
+	opts, err := parseFlags()
 	if err != nil {
 		log.Fatal("[-] options:", err)
 	}
