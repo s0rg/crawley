@@ -819,7 +819,7 @@ func TestCrawlerScanJSURL(t *testing.T) {
 	var found bool
 
 	handler := func(s string) {
-		if s == "/api/v1/user" {
+		if strings.HasSuffix(s, "/api/v1/user") {
 			found = true
 		}
 	}
@@ -909,8 +909,7 @@ body {background: url("test.png");}
 	var found bool
 
 	handler := func(s string) {
-		t.Log(s)
-		if s == "test.png" {
+		if strings.HasSuffix(s, "test.png") {
 			found = true
 		}
 	}

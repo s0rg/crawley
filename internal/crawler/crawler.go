@@ -27,8 +27,9 @@ type crawlClient interface {
 }
 
 const (
-	chMult    = 256
-	chTimeout = 100 * time.Millisecond
+	chMult     = 256
+	chTimeout  = 100 * time.Millisecond
+	doubleDash = "//"
 )
 
 type taskFlag byte
@@ -319,6 +320,20 @@ func (c *Crawler) process(
 		}
 	}
 
+	handleStatic := func(s string) {
+		switch {
+		case strings.HasPrefix(s, doubleDash):
+			s = base.Scheme + s
+		case strings.Contains(s, doubleDash):
+		default:
+			b, _ := url.Parse(uri)
+			r, _ := url.Parse(s)
+			s = b.ResolveReference(r).String()
+		}
+
+		c.staticHandler(s)
+	}
+
 	content := hdrs.Get(contentType)
 
 	switch {
@@ -329,14 +344,14 @@ func (c *Crawler) process(
 			ScanCSS:      c.cfg.ScanCSS,
 			Filter:       c.filter,
 			HandleHTML:   c.linkHandler,
-			HandleStatic: c.staticHandler,
+			HandleStatic: handleStatic,
 		})
 	case isSitemap(uri):
 		links.ExtractSitemap(body, base, c.crawlHandler)
 	case c.cfg.ScanJS && isJS(content, uri):
-		links.ExtractJS(body, c.staticHandler)
+		links.ExtractJS(body, handleStatic)
 	case c.cfg.ScanCSS && isCSS(content, uri):
-		links.ExtractCSS(body, c.staticHandler)
+		links.ExtractCSS(body, handleStatic)
 	}
 
 	client.Discard(body)
