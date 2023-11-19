@@ -279,7 +279,8 @@ func (c *Crawler) linkHandler(a atom.Atom, s string) {
 	}
 
 	fetch := (a == atom.A || a == atom.Iframe) ||
-		(c.cfg.ScanJS && a == atom.Script)
+		(c.cfg.ScanJS && a == atom.Script) ||
+		(c.cfg.ScanCSS && a == atom.Link)
 
 	if fetch && !c.isIgnored(s) {
 		r.Flag = TaskCrawl

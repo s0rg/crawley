@@ -250,6 +250,30 @@ func TestExtractTokenJS(t *testing.T) {
 	}
 }
 
+func TestExtractTokenCSS(t *testing.T) {
+	t.Parallel()
+
+	const raw = `<html><style>foo {bar:url(test.png);}</style></html>`
+
+	var res string
+
+	ExtractHTML(
+		bytes.NewBufferString(raw),
+		testBase,
+		HTMLParams{
+			Filter:  AllowALL,
+			ScanCSS: true,
+			HandleStatic: func(s string) {
+				res = s
+			},
+		},
+	)
+
+	if !strings.HasSuffix(res, "test.png") {
+		t.Fail()
+	}
+}
+
 func TestExtractURLS(t *testing.T) {
 	t.Parallel()
 
