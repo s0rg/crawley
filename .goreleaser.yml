@@ -37,7 +37,8 @@ archives:
       {{- .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
+      {{- else }}{{ .Arch }}{{ end }}_
+      {{- .Tag }}
     format_overrides:
       - goos: windows
         format: zip
@@ -45,7 +46,9 @@ archives:
 nfpms:
   - id: packages
     file_name_template: >-
-      '{{ .ProjectName }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+      {{ .ProjectName }}_
+      {{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}_
+      {{ .Tag }}
     homepage: https://github.com/s0rg/crawley
     description: Unix-way web crawler, written in Golang.
     maintainer: s0rg
