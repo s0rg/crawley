@@ -72,12 +72,14 @@ func TestCrawlerOK(t *testing.T) {
 		switch r.Method {
 		case http.MethodHead:
 			gotHEAD = true
+
 			w.Header().Add(contentType, contentHTML)
 
 		case http.MethodGet:
 			if gotHEAD {
 				gotGET = true
 			}
+
 			_, _ = io.WriteString(w, body)
 		}
 	}))

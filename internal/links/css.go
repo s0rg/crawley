@@ -35,5 +35,5 @@ func extractCSSURL(v []byte) (rv string, ok bool) {
 
 	rv = string(bytes.Trim(v[o+1:c], codeCleanChars))
 
-	return rv, len(rv) > 0
+	return rv, rv != ""
 }
