@@ -94,6 +94,7 @@ func TestRelativeDepth(t *testing.T) {
 			if gotDepht != tc.wantDepht {
 				t.Errorf("pathDepth() gotDepht = %v, want %v", gotDepht, tc.wantDepht)
 			}
+
 			if gotFound != tc.wantFound {
 				t.Errorf("pathDepth() gotFound = %v, want %v", gotFound, tc.wantFound)
 			}
