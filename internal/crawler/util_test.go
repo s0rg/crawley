@@ -84,9 +84,7 @@ func TestRelativeDepth(t *testing.T) {
 
 	t.Parallel()
 
-	for _, tt := range tests {
-		tc := tt
-
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -150,9 +148,7 @@ func TestCanCrawl(t *testing.T) {
 		{"url3-3", args{b: base, u: url3, d: 0}, false},
 	}
 
-	for _, tt := range tests {
-		tc := tt
-
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 

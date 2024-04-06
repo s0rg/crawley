@@ -41,9 +41,7 @@ func TestExtractTag(t *testing.T) {
 		{name: "bad", args: args{b: testBase, t: &tBAD, k: "a"}, wantU: ""},
 	}
 
-	for _, tt := range tests {
-		tc := tt
-
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -196,9 +194,7 @@ func TestExtractToken(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		tc := tt
-
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -316,9 +312,7 @@ func TestExtractURLS(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		tc := tt
-
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
