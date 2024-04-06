@@ -34,9 +34,7 @@ func TestClean(t *testing.T) {
 		{"result-api", args{b: testBase, r: "/api/v1/user"}, testRes4, true},
 	}
 
-	for _, tt := range tests {
-		tc := tt
-
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
