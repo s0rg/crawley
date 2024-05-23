@@ -127,3 +127,10 @@ func WithScanCSS(v bool) Option {
 		c.ScanCSS = v
 	}
 }
+
+// WithSubdomins enables subdomains scanning.
+func WithSubdomains(v bool) Option {
+	return func(c *config) {
+		c.Subdomains = v
+	}
+}

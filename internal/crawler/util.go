@@ -71,9 +71,27 @@ func prepareFilter(tags []string) links.TokenFilter {
 	}
 }
 
-func canCrawl(a, b *url.URL, d int) (yes bool) {
+func canCrawl(a, b *url.URL, d int, subdomains bool) (yes bool) {
 	if a.Host != b.Host {
-		return
+		if subdomains{
+			domainA := strings.Split(a.Host, ".")
+			domainB := strings.Split(b.Host, ".")
+			if len(domainA) >= len(domainB){
+				// The base domain must be shorter than the found domain
+				return
+			}
+			j := len(domainB) - 1
+			for i := len(domainA) - 1; i >= 0 && j >= 0; i-- {
+				// Traverse each domain from the end, to check if their top-level domain are the same
+				if domainA[i] != domainB[j] {
+					// not the same top-level host
+					return
+				}
+				j--
+			}
+		} else{
+			return
+		}
 	}
 
 	var apath, bpath string
@@ -104,7 +122,7 @@ func relativeDepth(base, sub string) (n int, ok bool) {
 		sn = path.Clean(sub)
 	)
 
-	if len(sn) <= len(bn) {
+	if len(sn) < len(bn) {
 		return
 	}
 
