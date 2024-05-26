@@ -32,6 +32,7 @@ Crawls web pages and prints any link it can find.
 - user-defined headers, same as curl: `-header "ONE: 1" -header "TWO: 2" -header @headers-file`
 - tag filter - allow to specify tags to crawl for (single: `-tag a -tag form`, multiple: `-tag a,form`, or mixed)
 - url ignore - allow to ignore urls with matched substrings from crawling (i.e.: `-ignore logout`)
+- subdomains support - allow depth crawling for subdomains as well (e.g. `crawley http://some-test.site` will be able to crawl `http://www.some-test.site`)
 
 # examples
 
@@ -94,6 +95,8 @@ possible flags with default values:
     suppress info and error messages in stderr
 -skip-ssl
     skip ssl verification
+-subdomains
+    support subdomains (e.g. if www.domain.com found, recurse over it)
 -tag value
     tags filter, single or comma-separated tag names
 -timeout duration
