@@ -120,6 +120,7 @@ func TestCanCrawl(t *testing.T) {
 		b *url.URL
 		u *url.URL
 		d int
+		subdomains bool
 	}
 
 	base, _ := url.Parse("http://test/some/path")
@@ -128,31 +129,39 @@ func TestCanCrawl(t *testing.T) {
 	url1, _ := url.Parse("http://test/some/path/even")
 	url2, _ := url.Parse("http://test/some/path/even/more")
 	url3, _ := url.Parse("http://test")
+	url4, _ := url.Parse("http://abc.test/some")
+	url5, _ := url.Parse("http://abc.test/some/path")
+	url6, _ := url.Parse("http://abc.test/some/path/even")
 
 	tests := []struct {
 		name    string
 		args    args
 		wantYes bool
 	}{
-		{"url0-1", args{b: base, u: url0, d: 1}, false},
-		{"url1-0", args{b: base, u: url1, d: 0}, false},
-		{"url1-1", args{b: base, u: url1, d: 1}, true},
-		{"url2-0", args{b: base, u: url2, d: 0}, false},
-		{"url2-1", args{b: base, u: url2, d: 1}, false},
-		{"url2-2", args{b: base, u: url2, d: 2}, true},
-		{"url2-3", args{b: base, u: url2, d: 3}, true},
-		{"badh-1", args{b: base, u: badh, d: 1}, false},
-		{"url2-0-1", args{b: base, u: url0, d: -1}, false},
-		{"url2-1-1", args{b: base, u: url1, d: -1}, true},
-		{"url2-2-1", args{b: base, u: url2, d: -1}, true},
-		{"url3-3", args{b: base, u: url3, d: 0}, false},
+		{"url0-1", args{b: base, u: url0, d: 1, subdomains: false}, false},
+		{"url1-0", args{b: base, u: url1, d: 0, subdomains: false}, false},
+		{"url1-1", args{b: base, u: url1, d: 1, subdomains: false}, true},
+		{"url2-0", args{b: base, u: url2, d: 0, subdomains: false}, false},
+		{"url2-1", args{b: base, u: url2, d: 1, subdomains: false}, false},
+		{"url2-2", args{b: base, u: url2, d: 2, subdomains: false}, true},
+		{"url2-3", args{b: base, u: url2, d: 3, subdomains: false}, true},
+		{"badh-1", args{b: base, u: badh, d: 1, subdomains: false}, false},
+		{"url2-0-1", args{b: base, u: url0, d: -1, subdomains: false}, false},
+		{"url2-1-1", args{b: base, u: url1, d: -1, subdomains: false}, true},
+		{"url2-2-1", args{b: base, u: url2, d: -1, subdomains: false}, true},
+		{"url3-3", args{b: base, u: url3, d: 0, subdomains: false}, false},
+		{"url4-1", args{b: base, u: url4, d: 1000, subdomains: true}, false},
+		{"url5-1", args{b: base, u: url5, d: -1, subdomains: true}, true},
+		{"url5-2", args{b: base, u: url5, d: -1, subdomains: false}, false},
+		{"url6-1", args{b: base, u: url6, d: 1, subdomains: true}, true},
+		{"url6-2", args{b: base, u: url6, d: 0, subdomains: true}, false},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			if gotYes := canCrawl(tc.args.b, tc.args.u, tc.args.d); gotYes != tc.wantYes {
+			if gotYes := canCrawl(tc.args.b, tc.args.u, tc.args.d, tc.args.subdomains); gotYes != tc.wantYes {
 				t.Errorf("canCrawl() = %v, want %v", gotYes, tc.wantYes)
 			}
 		})

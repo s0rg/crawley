@@ -29,6 +29,7 @@ type config struct {
 	NoHEAD     bool
 	ScanJS     bool
 	ScanCSS    bool
+	Subdomains bool
 }
 
 func (c *config) validate() {
@@ -57,6 +58,10 @@ func (c *config) String() (rv string) {
 
 	if c.ScanCSS {
 		sb.WriteString(" +css")
+	}
+
+	if c.Subdomains{
+		sb.WriteString(" +subdomains")
 	}
 
 	return sb.String()

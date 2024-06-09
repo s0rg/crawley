@@ -175,7 +175,7 @@ func (c *Crawler) tryEnqueue(base *url.URL, r *crawlResult) (yes bool) {
 		return
 	}
 
-	if !canCrawl(base, u, c.cfg.Depth) ||
+	if !canCrawl(base, u, c.cfg.Depth, c.cfg.Subdomains) ||
 		c.robots.Forbidden(u.Path) ||
 		(c.cfg.Dirs == DirsOnly && isResorce(u.Path)) {
 		return
