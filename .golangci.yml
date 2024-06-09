@@ -57,6 +57,7 @@ issues:
         - gosec
     - path: ._test\.go
       linters:
+        - canonicalheader
         - dupword
         - ifshort
         - cyclop
