@@ -60,7 +60,7 @@ func (c *config) String() (rv string) {
 		sb.WriteString(" +css")
 	}
 
-	if c.Subdomains{
+	if c.Subdomains {
 		sb.WriteString(" +subdomains")
 	}
 

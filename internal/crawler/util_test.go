@@ -117,9 +117,9 @@ func TestCanCrawl(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
-		b *url.URL
-		u *url.URL
-		d int
+		b          *url.URL
+		u          *url.URL
+		d          int
 		subdomains bool
 	}
 

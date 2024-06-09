@@ -41,7 +41,7 @@ var (
 	fBrute, fNoHeads        bool
 	fSkipSSL, fScanJS       bool
 	fScanCSS, fScanALL      bool
-	fSubdomains				bool
+	fSubdomains             bool
 	fDirsPolicy, fProxyAuth string
 	fRobotsPolicy, fUA      string
 	fDelay                  time.Duration

@@ -73,24 +73,28 @@ func prepareFilter(tags []string) links.TokenFilter {
 
 func canCrawl(a, b *url.URL, d int, subdomains bool) (yes bool) {
 	if a.Host != b.Host {
-		if subdomains{
-			domainA := strings.Split(a.Host, ".")
-			domainB := strings.Split(b.Host, ".")
-			if len(domainA) >= len(domainB){
-				// The base domain must be shorter than the found domain
-				return
+		if !subdomains {
+			return false
+		}
+
+		domainA := strings.Split(a.Host, ".")
+		domainB := strings.Split(b.Host, ".")
+
+		if len(domainA) >= len(domainB) {
+			// The base domain must be shorter than the found domain
+			return false
+		}
+
+		j := len(domainB) - 1
+
+		for i := len(domainA) - 1; i >= 0 && j >= 0; i-- {
+			// Traverse each domain from the end, to check if their top-level domain are the same
+			if domainA[i] != domainB[j] {
+				// not the same top-level host
+				return false
 			}
-			j := len(domainB) - 1
-			for i := len(domainA) - 1; i >= 0 && j >= 0; i-- {
-				// Traverse each domain from the end, to check if their top-level domain are the same
-				if domainA[i] != domainB[j] {
-					// not the same top-level host
-					return
-				}
-				j--
-			}
-		} else{
-			return
+
+			j--
 		}
 	}
 
@@ -106,11 +110,11 @@ func canCrawl(a, b *url.URL, d int, subdomains bool) (yes bool) {
 
 	depth, found := relativeDepth(apath, bpath)
 	if !found {
-		return
+		return false
 	}
 
 	if d >= 0 && depth > d {
-		return
+		return false
 	}
 
 	return true
