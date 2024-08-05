@@ -322,17 +322,20 @@ func (c *Crawler) process(
 	}
 
 	handleStatic := func(s string) {
+		var ok bool
+
 		switch {
 		case strings.HasPrefix(s, doubleDash):
-			s = base.Scheme + s
+			s, ok = base.Scheme+s, true
 		case strings.Contains(s, doubleDash):
+			ok = true
 		default:
-			b, _ := url.Parse(uri)
-			r, _ := url.Parse(s)
-			s = b.ResolveReference(r).String()
+			s, ok = resolveRef(uri, s)
 		}
 
-		c.staticHandler(s)
+		if ok {
+			c.staticHandler(s)
+		}
 	}
 
 	content := hdrs.Get(contentType)
