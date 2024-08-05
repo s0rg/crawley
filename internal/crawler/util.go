@@ -225,3 +225,19 @@ func urlhash(s string) (rv uint64) {
 
 	return hash.Sum64()
 }
+
+func resolveRef(base, uri string) (rv string, ok bool) {
+	b, err := url.Parse(base)
+	if err != nil {
+		return
+	}
+
+	u, err := url.Parse(uri)
+	if err != nil {
+		return
+	}
+
+	rv = b.ResolveReference(u).String()
+
+	return rv, true
+}
