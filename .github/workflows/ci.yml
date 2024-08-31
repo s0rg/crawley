@@ -24,7 +24,7 @@ jobs:
       - name: setup golang
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.22
+          go-version: ^1.23
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v5
       - name: goreleaser-check
@@ -42,7 +42,7 @@ jobs:
       - name: setup golang
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.22
+          go-version: ^1.23
       - name: tests-only
         if: ${{ github.event_name == 'pull_request' }}
         run: make test
@@ -67,7 +67,7 @@ jobs:
       - name: setup golang
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.22
+          go-version: ^1.23
       - name: init codeql
         uses: github/codeql-action/init@v2
         with:
