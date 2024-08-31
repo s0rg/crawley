@@ -1,7 +1,7 @@
 github.com/s0rg/compflag v1.1.0 h1:xhCUPLy+5Ue/Q9I/nIcLti2Ul6P42JYx4UvtYoDXmlQ=
 github.com/s0rg/compflag v1.1.0/go.mod h1:XMntVpc3+jpmBe0s8xo4w9swH8T9ARGkMC9HFiDRoUw=
-github.com/s0rg/set v1.2.0 h1:53b207YMktNQJXYei/oHuTR5oOO2e9+eieZOncYsh9g=
-github.com/s0rg/set v1.2.0/go.mod h1:xz3nDbjF4nyMLvAHvmE7rigXpNrKKTsi6iANznIB1/4=
+github.com/s0rg/set v1.2.1 h1:OMm/sxnO0tIqINEFdr7RbvMWLEFrdleNOuoEQNMTnGk=
+github.com/s0rg/set v1.2.1/go.mod h1:/7U/8G00WOM4Nhlww3hXj7Q96Pw+bFinc17N5sh0l8E=
 github.com/tdewolff/parse/v2 v2.7.15 h1:hysDXtdGZIRF5UZXwpfn3ZWRbm+ru4l53/ajBRGpCTw=
 github.com/tdewolff/parse/v2 v2.7.15/go.mod h1:3FbJWZp3XT9OWVN3Hmfp0p/a08v4h8J9W1aghka0soA=
 github.com/tdewolff/test v1.0.11-0.20231101010635-f1265d231d52 h1:gAQliwn+zJrkjAHVcBEYW/RFvd2St4yYimisvozAYlA=

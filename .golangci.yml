@@ -1,6 +1,5 @@
 run:
   allow-parallel-runners: true
-  go: '1.22'
 
 output:
   print-issued-lines: true
@@ -11,28 +10,18 @@ linters:
   enable-all: true
   disable:
     - gochecknoglobals
-    - exhaustivestruct
     - nonamedreturns
     - testpackage
     - exhaustruct
-    - structcheck
     - tagliatelle
-    - nosnakecase
     - exhaustruct
     - inamedparam
     - exhaustive
     - varnamelen
-    - interfacer
-    - scopelint
     - intrange
-    - deadcode
-    - maligned
-    - varcheck
     - depguard
-    - ifshort
     - ireturn
     - gofumpt
-    - golint
     - gci
 
 linters-settings:
