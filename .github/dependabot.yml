@@ -3,7 +3,7 @@ version: 2
 updates:
   - package-ecosystem: gomod
     directory: /
-    target-branch: develop
+    target-branch: master
     labels:
       - gomod
     schedule:
@@ -11,7 +11,7 @@ updates:
       day: friday
   - package-ecosystem: github-actions
     directory: /
-    target-branch: develop
+    target-branch: master
     labels:
       - github
     schedule:
