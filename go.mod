@@ -8,5 +8,5 @@ require (
 	github.com/s0rg/compflag v1.1.0
 	github.com/s0rg/set v1.2.1
 	github.com/tdewolff/parse/v2 v2.7.15
-	golang.org/x/net v0.28.0
+	golang.org/x/net v0.29.0
 )
