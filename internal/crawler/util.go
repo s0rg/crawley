@@ -241,3 +241,13 @@ func resolveRef(base, uri string) (rv string, ok bool) {
 
 	return rv, true
 }
+
+func NormalizeURL(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+	u.RawQuery = ""
+
+	return u.String()
+}
