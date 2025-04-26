@@ -1,4 +1,5 @@
 # .goreleaser.yml
+version: 2
 project_name: crawley
 
 before:
