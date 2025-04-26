@@ -7,14 +7,15 @@
 
 [![CI](https://github.com/s0rg/crawley/workflows/ci/badge.svg)](https://github.com/s0rg/crawley/actions?query=workflow%3Aci)
 [![Go Report Card](https://goreportcard.com/badge/github.com/s0rg/crawley)](https://goreportcard.com/report/github.com/s0rg/crawley)
-[![Maintainability](https://api.codeclimate.com/v1/badges/6542cd90a6c665e4202e/maintainability)](https://codeclimate.com/github/s0rg/crawley/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/e1c002df2b4571e01537/test_coverage)](https://codeclimate.com/github/s0rg/crawley/test_coverage)
+[![Maintainability](https://qlty.sh/badges/f6bbc710-32a4-430b-ba73-51ae05fd0916/maintainability.svg)](https://qlty.sh/gh/s0rg/projects/crawley)
+[![Code Coverage](https://qlty.sh/badges/f6bbc710-32a4-430b-ba73-51ae05fd0916/test_coverage.svg)](https://qlty.sh/gh/s0rg/projects/crawley)
 [![libraries.io](https://img.shields.io/librariesio/github/s0rg/crawley)](https://libraries.io/github/s0rg/crawley)
 ![Issues](https://img.shields.io/github/issues/s0rg/crawley)
 
 # crawley
 
 Crawls web pages and prints any link it can find.
+
 
 # features
 
@@ -33,6 +34,7 @@ Crawls web pages and prints any link it can find.
 - tag filter - allow to specify tags to crawl for (single: `-tag a -tag form`, multiple: `-tag a,form`, or mixed)
 - url ignore - allow to ignore urls with matched substrings from crawling (i.e.: `-ignore logout`)
 - subdomains support - allow depth crawling for subdomains as well (e.g. `crawley http://some-test.site` will be able to crawl `http://www.some-test.site`)
+
 
 # examples
 
@@ -53,10 +55,12 @@ crawley -depth -1 -tag img http://some-test.site | grep '\.png$' | wget -i -
 crawley -headless -delay 0 -depth -1 -dirs only http://some-test.site
 ```
 
+
 # installation
 
 - [binaries / deb / rpm](https://github.com/s0rg/crawley/releases) for Linux, FreeBSD, macOS and Windows.
 - [archlinux](https://aur.archlinux.org/packages/crawley-bin/) you can use your favourite AUR helper to install it, e. g. `paru -S crawley-bin`.
+
 
 # usage
 
@@ -108,6 +112,7 @@ possible flags with default values:
 -workers int
       number of workers (default - number of CPU cores)
 ```
+
 
 # flags autocompletion
 

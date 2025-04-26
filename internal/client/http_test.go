@@ -61,7 +61,7 @@ func TestHTTPGetOK(t *testing.T) {
 
 	defer ts.Close()
 
-	res, _, err := c.Get(context.Background(), ts.URL)
+	res, _, err := c.Get(t.Context(), ts.URL)
 	if err != nil {
 		t.Fatal("get:", err)
 	}
@@ -91,7 +91,7 @@ func TestHTTPGetERR(t *testing.T) {
 
 	defer ts.Close()
 
-	if _, _, err := c.Get(context.Background(), "["); err == nil {
+	if _, _, err := c.Get(t.Context(), "["); err == nil {
 		t.Error("url - err is nil")
 	}
 
@@ -101,7 +101,7 @@ func TestHTTPGetERR(t *testing.T) {
 		t.Error("ctx - err is nil")
 	}
 
-	if _, _, err := c.Get(context.Background(), ts.URL); err == nil {
+	if _, _, err := c.Get(t.Context(), ts.URL); err == nil {
 		t.Error("status - err is nil")
 	}
 }
@@ -131,7 +131,7 @@ func TestHTTPHeadOK(t *testing.T) {
 
 	defer ts.Close()
 
-	hdr, err := c.Head(context.Background(), ts.URL)
+	hdr, err := c.Head(t.Context(), ts.URL)
 	if err != nil {
 		t.Fatal("head:", err)
 	}
@@ -152,7 +152,7 @@ func TestHTTPHeadERR(t *testing.T) {
 
 	defer ts.Close()
 
-	if _, err := c.Head(context.Background(), "]"); err == nil {
+	if _, err := c.Head(t.Context(), "]"); err == nil {
 		t.Error("url - err is nil")
 	}
 
@@ -162,7 +162,7 @@ func TestHTTPHeadERR(t *testing.T) {
 		t.Error("ctx - err is nil")
 	}
 
-	if _, err := c.Head(context.Background(), ts.URL); err == nil {
+	if _, err := c.Head(t.Context(), ts.URL); err == nil {
 		t.Error("status - err is nil")
 	}
 }

@@ -32,13 +32,6 @@ type config struct {
 	Subdomains bool
 }
 
-func (c *config) validate() {
-	c.Client.Workers = min(maxWorkers, max(minWorkers, c.Client.Workers))
-	c.Client.Timeout = min(maxTimeout, max(minTimeout, c.Client.Timeout))
-	c.Delay = max(minDelay, c.Delay)
-	c.Depth = max(minDepth, c.Depth)
-}
-
 func (c *config) String() (rv string) {
 	var sb strings.Builder
 
@@ -65,4 +58,11 @@ func (c *config) String() (rv string) {
 	}
 
 	return sb.String()
+}
+
+func (c *config) validate() {
+	c.Client.Workers = min(maxWorkers, max(minWorkers, c.Client.Workers))
+	c.Client.Timeout = min(maxTimeout, max(minTimeout, c.Client.Timeout))
+	c.Delay = max(minDelay, c.Delay)
+	c.Depth = max(minDepth, c.Depth)
 }

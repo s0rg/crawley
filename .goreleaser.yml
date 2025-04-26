@@ -1,4 +1,5 @@
 # .goreleaser.yml
+version: 2
 project_name: crawley
 
 before:
@@ -29,9 +30,8 @@ builds:
 
 archives:
   - id: crawley
-    format: tar.gz
-    builds:
-      - crawley-bin
+    formats: ['tar.gz']
+    ids: [crawley-bin]
     name_template: >-
       {{ .ProjectName }}_
       {{- .Tag }}_
@@ -41,7 +41,7 @@ archives:
       {{- else }}{{ .Arch }}{{ end }}
     format_overrides:
       - goos: windows
-        format: zip
+        formats: ['zip']
 
 nfpms:
   - id: packages
