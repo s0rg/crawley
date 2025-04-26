@@ -30,9 +30,8 @@ builds:
 
 archives:
   - id: crawley
-    format: tar.gz
-    builds:
-      - crawley-bin
+    formats: ['tar.gz']
+    builds: [crawley-bin]
     name_template: >-
       {{ .ProjectName }}_
       {{- .Tag }}_
@@ -42,7 +41,7 @@ archives:
       {{- else }}{{ .Arch }}{{ end }}
     format_overrides:
       - goos: windows
-        format: zip
+        formats: ['zip']
 
 nfpms:
   - id: packages
