@@ -1,57 +1,65 @@
+version: "2"
 run:
   allow-parallel-runners: true
-
-output:
-  print-issued-lines: true
-  print-linter-name: true
-  sort-results: true
-
 linters:
-  enable-all: true
+  default: all
   disable:
-    - gochecknoglobals
-    - nonamedreturns
-    - testpackage
-    - exhaustruct
-    - tagliatelle
-    - exhaustruct
-    - inamedparam
-    - exhaustive
-    - varnamelen
-    - intrange
     - depguard
+    - exhaustive
+    - exhaustruct
+    - gochecknoglobals
+    - inamedparam
+    - intrange
     - ireturn
-    - gofumpt
-    - gci
-
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-  govet:
-    enable-all: true
-  cyclop:
-    max-complexity: 15
-  gocritic:
-    enabled-tags:
-      - performance
-      - opinionated
-      - diagnostic
-      - style
-
-issues:
-  exclude-rules:
-    - path: internal/client/http.go
-      text: "G402" # G402: TLS InsecureSkipVerify set true.
-      linters:
-        - gosec
-    - path: ._test\.go
-      linters:
-        - canonicalheader
-        - dupword
-        - ifshort
-        - cyclop
-        - funlen
-        - dupl
-    - path: cmd/crawley/main.go
-      linters:
-        - nakedret
+    - nonamedreturns
+    - tagliatelle
+    - testpackage
+    - varnamelen
+  settings:
+    cyclop:
+      max-complexity: 15
+    errcheck:
+      check-type-assertions: true
+    gocritic:
+      enabled-tags:
+        - performance
+        - opinionated
+        - diagnostic
+        - style
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - gosec
+        path: internal/client/http.go
+        text: G402
+      - linters:
+          - canonicalheader
+          - cyclop
+          - dupl
+          - dupword
+          - funlen
+          - ifshort
+        path: ._test\.go
+      - linters:
+          - nakedret
+        path: cmd/crawley/main.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

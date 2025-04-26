@@ -7,8 +7,8 @@
 
 [![CI](https://github.com/s0rg/crawley/workflows/ci/badge.svg)](https://github.com/s0rg/crawley/actions?query=workflow%3Aci)
 [![Go Report Card](https://goreportcard.com/badge/github.com/s0rg/crawley)](https://goreportcard.com/report/github.com/s0rg/crawley)
-[![Maintainability](https://api.codeclimate.com/v1/badges/6542cd90a6c665e4202e/maintainability)](https://codeclimate.com/github/s0rg/crawley/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/e1c002df2b4571e01537/test_coverage)](https://codeclimate.com/github/s0rg/crawley/test_coverage)
+[![Maintainability](https://qlty.sh/badges/f6bbc710-32a4-430b-ba73-51ae05fd0916/maintainability.svg)](https://qlty.sh/gh/s0rg/projects/crawley)
+[![Code Coverage](https://qlty.sh/badges/f6bbc710-32a4-430b-ba73-51ae05fd0916/test_coverage.svg)](https://qlty.sh/gh/s0rg/projects/crawley)
 [![libraries.io](https://img.shields.io/librariesio/github/s0rg/crawley)](https://libraries.io/github/s0rg/crawley)
 ![Issues](https://img.shields.io/github/issues/s0rg/crawley)
 
