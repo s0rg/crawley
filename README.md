@@ -16,6 +16,7 @@
 
 Crawls web pages and prints any link it can find.
 
+
 # features
 
 - fast html SAX-parser (powered by [x/net/html](https://golang.org/x/net/html))
@@ -33,6 +34,7 @@ Crawls web pages and prints any link it can find.
 - tag filter - allow to specify tags to crawl for (single: `-tag a -tag form`, multiple: `-tag a,form`, or mixed)
 - url ignore - allow to ignore urls with matched substrings from crawling (i.e.: `-ignore logout`)
 - subdomains support - allow depth crawling for subdomains as well (e.g. `crawley http://some-test.site` will be able to crawl `http://www.some-test.site`)
+
 
 # examples
 
@@ -53,10 +55,12 @@ crawley -depth -1 -tag img http://some-test.site | grep '\.png$' | wget -i -
 crawley -headless -delay 0 -depth -1 -dirs only http://some-test.site
 ```
 
+
 # installation
 
 - [binaries / deb / rpm](https://github.com/s0rg/crawley/releases) for Linux, FreeBSD, macOS and Windows.
 - [archlinux](https://aur.archlinux.org/packages/crawley-bin/) you can use your favourite AUR helper to install it, e. g. `paru -S crawley-bin`.
+
 
 # usage
 
@@ -108,6 +112,7 @@ possible flags with default values:
 -workers int
       number of workers (default - number of CPU cores)
 ```
+
 
 # flags autocompletion
 
