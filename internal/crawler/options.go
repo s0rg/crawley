@@ -134,3 +134,10 @@ func WithSubdomains(v bool) Option {
 		c.Subdomains = v
 	}
 }
+
+// WithIgnoreQueryParams strips query parameters from uri.
+func WithIgnoreQueryParams(v bool) Option {
+	return func(c *config) {
+		c.IgnoreQuery = v
+	}
+}
