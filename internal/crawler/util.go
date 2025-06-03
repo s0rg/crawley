@@ -242,12 +242,14 @@ func resolveRef(base, uri string) (rv string, ok bool) {
 	return rv, true
 }
 
-func NormalizeURL(rawURL string) string {
-	u, err := url.Parse(rawURL)
-	if err != nil {
-		return rawURL
-	}
+func normalizeURL(u *url.URL) (yes bool) {
+	//	u, err := url.Parse(rawURL)
+	// if err != nil {
+	// 	return rawURL
+	// }
 	u.RawQuery = ""
+	u.Fragment = ""
 
-	return u.String()
+	return true
+	// return u.String()
 }
