@@ -241,9 +241,6 @@ func main() {
 	}
 	uri := flag.Arg(0)
 
-	// 	uri = crawler.NormalizeURL(uri)
-	// }
-
 	if err := crawl(uri, opts...); err != nil {
 		// forcing back stderr in case of errors, otherwise, if 'silent' is on - no one will knows what happened.
 		log.SetOutput(os.Stderr)

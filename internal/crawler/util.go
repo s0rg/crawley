@@ -243,13 +243,9 @@ func resolveRef(base, uri string) (rv string, ok bool) {
 }
 
 func normalizeURL(u *url.URL) (yes bool) {
-	//	u, err := url.Parse(rawURL)
-	// if err != nil {
-	// 	return rawURL
-	// }
+
 	u.RawQuery = ""
 	u.Fragment = ""
 
 	return true
-	// return u.String()
 }

@@ -88,9 +88,7 @@ func (c *Crawler) Run(uri string, urlcb func(string)) (err error) {
 	if c.cfg.IgnoreQuery {
 		normalizeURL(base)
 	}
-	fmt.Println("helloxxxxxx", base.String())
 
-	//GO FROM HERE TO TRY ENQUEU
 	workers := c.cfg.Client.Workers
 
 	n := (workers + 1)
