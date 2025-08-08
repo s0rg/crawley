@@ -52,7 +52,7 @@ jobs:
         run: make test
       - name: push-coverage
         if: ${{ github.event_name == 'push' }}
-        uses: qltysh/qlty-action/coverage@v1
+        uses: qltysh/qlty-action/coverage@v2
         with:
           token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
           files: ${{ github.workspace }}/cover.out
