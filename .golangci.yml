@@ -4,6 +4,7 @@ run:
 linters:
   default: all
   disable:
+    - wsl
     - depguard
     - exhaustive
     - exhaustruct
@@ -15,6 +16,7 @@ linters:
     - tagliatelle
     - testpackage
     - varnamelen
+    - noinlineerr
   settings:
     cyclop:
       max-complexity: 15
@@ -26,6 +28,10 @@ linters:
         - opinionated
         - diagnostic
         - style
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 2
   exclusions:
     generated: lax
     presets:

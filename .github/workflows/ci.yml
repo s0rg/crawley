@@ -25,13 +25,13 @@ jobs:
       name: ci
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: setup golang
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.24
+          go-version: ^1.25
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v8
       - name: goreleaser-check
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -43,16 +43,16 @@ jobs:
       name: ci
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: setup golang
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.24
+          go-version: ^1.25
       - name: run-test
         run: make test
       - name: push-coverage
         if: ${{ github.event_name == 'push' }}
-        uses: qltysh/qlty-action/coverage@v1
+        uses: qltysh/qlty-action/coverage@v2
         with:
           token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
           files: ${{ github.workspace }}/cover.out
@@ -64,11 +64,11 @@ jobs:
       name: ci
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: setup golang
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.24
+          go-version: ^1.25
       - name: init codeql
         uses: github/codeql-action/init@v3
         with:

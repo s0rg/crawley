@@ -11,7 +11,6 @@ func TestSimpleSet(t *testing.T) {
 		l   List
 		err error
 	)
-
 	if err = l.Set("a"); err != nil {
 		t.Fatalf("set a - unexpected error: %v", err)
 	}
