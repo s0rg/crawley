@@ -14,7 +14,6 @@ func TestSmartSet(t *testing.T) {
 		err error
 		res []string
 	)
-
 	if err = l.Set("a"); err != nil {
 		t.Fatalf("set a - unexpected error: %v", err)
 	}

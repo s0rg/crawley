@@ -559,6 +559,7 @@ func TestCrawlerGetNonHTTPErr(t *testing.T) {
 	c.resultCh = make(chan crawlResult, 1)
 
 	c.crawlCh <- base
+
 	close(c.crawlCh)
 
 	c.wg.Add(1)

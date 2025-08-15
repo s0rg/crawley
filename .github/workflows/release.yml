@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: set up golang
         uses: actions/setup-go@v5
         with:
-          go-version: ^1.24
+          go-version: ^1.25
       - name: build
         uses: goreleaser/goreleaser-action@v6
         with:
