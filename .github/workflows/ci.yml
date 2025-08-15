@@ -25,7 +25,7 @@ jobs:
       name: ci
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: setup golang
         uses: actions/setup-go@v5
         with:
@@ -43,7 +43,7 @@ jobs:
       name: ci
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: setup golang
         uses: actions/setup-go@v5
         with:
@@ -64,7 +64,7 @@ jobs:
       name: ci
     steps:
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: setup golang
         uses: actions/setup-go@v5
         with:
