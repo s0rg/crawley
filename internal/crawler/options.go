@@ -91,7 +91,7 @@ func WithTagsFilter(v []string) Option {
 	}
 }
 
-// WithSkipPatterns apply URL skip filter for crawler.
+// WithIgnored apply URL skip filter for crawler.
 func WithIgnored(v []string) Option {
 	return func(c *config) {
 		c.Ignored = append(c.Ignored, v...)
@@ -128,7 +128,7 @@ func WithScanCSS(v bool) Option {
 	}
 }
 
-// WithSubdomins enables subdomains scanning.
+// WithSubdomains enables subdomains scanning.
 func WithSubdomains(v bool) Option {
 	return func(c *config) {
 		c.Subdomains = v
