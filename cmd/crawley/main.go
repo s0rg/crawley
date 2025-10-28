@@ -42,6 +42,7 @@ var (
 	fSkipSSL, fScanJS       bool
 	fScanCSS, fScanALL      bool
 	fSubdomains             bool
+	fIgnoreQuery            bool
 	fDirsPolicy, fProxyAuth string
 	fRobotsPolicy, fUA      string
 	fDelay                  time.Duration
@@ -165,6 +166,7 @@ func parseFlags() (rv []crawler.Option, err error) {
 		crawler.WithProxyAuth(fProxyAuth),
 		crawler.WithTimeout(fTimeout),
 		crawler.WithSubdomains(fSubdomains),
+		crawler.WithIgnoreQueryParams(fIgnoreQuery),
 	}
 
 	return rv, nil
@@ -193,6 +195,7 @@ func setupFlags() {
 	flag.BoolVar(&fSkipSSL, "skip-ssl", false, "skip ssl verification")
 	flag.BoolVar(&fSilent, "silent", false, "suppress info and error messages in stderr")
 	flag.BoolVar(&fVersion, "version", false, "show version")
+	flag.BoolVar(&fIgnoreQuery, "ignore-query", false, "ignore query parameters in URL comparison")
 
 	flag.StringVar(&fDirsPolicy, "dirs", crawler.DefaultDirsPolicy,
 		"policy for non-resource urls: show / hide / only")
@@ -236,8 +239,9 @@ func main() {
 	if fSilent {
 		log.SetOutput(io.Discard)
 	}
+	uri := flag.Arg(0)
 
-	if err := crawl(flag.Arg(0), opts...); err != nil {
+	if err := crawl(uri, opts...); err != nil {
 		// forcing back stderr in case of errors, otherwise, if 'silent' is on - no one will knows what happened.
 		log.SetOutput(os.Stderr)
 		log.Fatal("[-] crawler:", err)
