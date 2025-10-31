@@ -106,9 +106,7 @@ func BenchmarkDepth(b *testing.B) {
 		y = "/some/rather/long/path/but/longer"
 	)
 
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = relativeDepth(x, y)
 	}
 }

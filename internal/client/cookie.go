@@ -14,7 +14,7 @@ const (
 
 func prepareCookies(raw []string) (rv []*http.Cookie) {
 	for _, r := range raw {
-		for _, p := range strings.Split(r, valuesSeparator) {
+		for p := range strings.SplitSeq(r, valuesSeparator) {
 			if p = strings.TrimSpace(p); p == "" {
 				continue
 			}

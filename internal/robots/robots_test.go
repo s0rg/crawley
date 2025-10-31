@@ -37,9 +37,7 @@ func (r *errReader) Read(_ []byte) (n int, err error) {
 func BenchmarkFromReader(b *testing.B) {
 	buf := bytes.NewBufferString(rawRobots)
 
-	b.ResetTimer()
-
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = FromReader("b", buf)
 	}
 }
