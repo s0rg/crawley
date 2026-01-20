@@ -18,18 +18,19 @@ const (
 )
 
 type config struct {
-	AlowedTags []string
-	Ignored    []string
-	Client     client.Config
-	Delay      time.Duration
-	Depth      int
-	Robots     RobotsPolicy
-	Dirs       DirsPolicy
-	Brute      bool
-	NoHEAD     bool
-	ScanJS     bool
-	ScanCSS    bool
-	Subdomains bool
+	AlowedTags  []string
+	Ignored     []string
+	Client      client.Config
+	Delay       time.Duration
+	Depth       int
+	Robots      RobotsPolicy
+	Dirs        DirsPolicy
+	Brute       bool
+	NoHEAD      bool
+	ScanJS      bool
+	ScanCSS     bool
+	Subdomains  bool
+	IgnoreQuery bool
 }
 
 func (c *config) String() (rv string) {
@@ -55,6 +56,10 @@ func (c *config) String() (rv string) {
 
 	if c.Subdomains {
 		sb.WriteString(" +subdomains")
+	}
+
+	if c.IgnoreQuery {
+		sb.WriteString(" +ignore-query")
 	}
 
 	return sb.String()

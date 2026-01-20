@@ -241,3 +241,11 @@ func resolveRef(base, uri string) (rv string, ok bool) {
 
 	return rv, true
 }
+
+func normalizeURL(u *url.URL) (yes bool) {
+
+	u.RawQuery = ""
+	u.Fragment = ""
+
+	return true
+}
