@@ -5,6 +5,6 @@ go 1.26
 require (
 	github.com/s0rg/compflag v1.1.1
 	github.com/s0rg/set v1.2.4
-	github.com/tdewolff/parse/v2 v2.8.5
+	github.com/tdewolff/parse/v2 v2.8.6
 	golang.org/x/net v0.50.0
 )
