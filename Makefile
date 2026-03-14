@@ -73,6 +73,12 @@ code/test: code/vet
 	@echo "Running single test: ${name}"
 	@CGO_ENABLED=1 ${TSTFLAGS} -run ${name} "${ALL}"
 
+## code/test-cover: Runs test-coverage
+code/test-cover: code/vet
+	@echo "Running test covarage"
+	@go test -v -coverprofile="$(COP)" -cover ./... -coverpkg ./... -covermode=count
+	@go tool cover -func="$(COP)" -o="$(COP)"
+
 ## code/benchmark: Runs code benchmarks
 code/benchmark: code/test
 	@echo "Running benchmarks..."
