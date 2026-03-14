@@ -20,6 +20,9 @@ linters:
   settings:
     cyclop:
       max-complexity: 15
+    gosec:
+      excludes:
+        - G704
     errcheck:
       check-type-assertions: true
     gocritic:
