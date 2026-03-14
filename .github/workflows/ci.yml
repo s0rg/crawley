@@ -57,13 +57,13 @@ jobs:
         run: make code/test-cover
       - name: coverage badge
         uses: tj-actions/coverage-badge-go@v3
-        if: github.event_name == 'push'
+        if: ${{ github.event_name == 'push' }}
         with:
           green: 80
           filename: cover.out
       - name: apply bage
         uses: stefanzweifel/git-auto-commit-action@v7
-        if: github.event_name == 'push'
+        if: ${{ github.event_name != 'push' }}
         id: auto-commit-action
         with:
           commit_message: Apply Code Coverage Badge
@@ -71,13 +71,13 @@ jobs:
           skip_checkout: true
           file_pattern: ./README.md
       - name: push changes
-        if: steps.auto-commit-action.outputs.changes_detected == 'true'
+        if: ${{ steps.auto-commit-action.outputs.changes_detected == 'true' }}
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ github.token }}
           branch: ${{ github.ref }}
   codeql:
-    if: github.event_name == 'push'
+    if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
     needs: [lint, test]
     environment:
