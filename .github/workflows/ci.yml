@@ -47,8 +47,10 @@ jobs:
       - name: checkout
         uses: actions/checkout@v6
         with:
-          persist-credentials: true
+          token: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
           ref: ${{ github.head_ref }}
+          persist-credentials: true
+          fetch-depth: 0
       - name: setup golang
         uses: actions/setup-go@v6
         with:
@@ -57,13 +59,11 @@ jobs:
         run: make code/test-cover
       - name: coverage badge
         uses: tj-actions/coverage-badge-go@v3
-        if: ${{ github.event_name == 'push' }}
         with:
           green: 80
           filename: cover.out
       - name: apply bage
         uses: stefanzweifel/git-auto-commit-action@v7
-        if: ${{ github.event_name != 'push' }}
         id: auto-commit-action
         with:
           commit_message: Apply Code Coverage Badge
@@ -74,8 +74,9 @@ jobs:
         if: ${{ steps.auto-commit-action.outputs.changes_detected == 'true' }}
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ github.token }}
-          branch: ${{ github.ref }}
+          github_token: ${{ secrets.PAT }}
+          branch: ${{ github.head_ref }}
+          force: true
   codeql:
     if: ${{ github.event_name == 'push' }}
     runs-on: ubuntu-latest
