@@ -1,5 +1,5 @@
 [![CI](https://github.com/s0rg/crawley/workflows/ci/badge.svg)](https://github.com/s0rg/crawley/actions?query=workflow%3Aci)
-![Coverage](https://img.shields.io/badge/Coverage-85.4%25-brightgreen)
+![coverage](https://img.shields.io/badge/coverage-85.4%25-brightgreen)
 [![Go Report Card](https://goreportcard.com/badge/github.com/s0rg/crawley)](https://goreportcard.com/report/github.com/s0rg/crawley)
 [![libraries.io](https://img.shields.io/librariesio/github/s0rg/crawley)](https://libraries.io/github/s0rg/crawley)
 ![Issues](https://img.shields.io/github/issues/s0rg/crawley)
@@ -20,7 +20,7 @@ Crawls web pages and prints any link it can find.
 
 - fast html SAX-parser (powered by [x/net/html](https://golang.org/x/net/html))
 - js/css lexical parsers (powered by [tdewolff/parse](https://github.com/tdewolff/parse)) - extract api endpoints from js code and `url()` properties
-- small (below 1500 SLOC), idiomatic, 100% test covered codebase
+- small (below 1500 SLOC), idiomatic, more than 80% test covered codebase
 - grabs most of useful resources urls (pics, videos, audios, forms, etc...)
 - found urls are streamed to stdout and guranteed to be unique (with fragments omitted)
 - scan depth (limited by starting host and path, by default - 0) can be configured
