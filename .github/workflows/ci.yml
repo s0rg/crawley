@@ -61,6 +61,7 @@ jobs:
         uses: tj-actions/coverage-badge-go@v3
         with:
           green: 80
+          text: 'coverage'
           filename: cover.out
       - name: apply bage
         uses: stefanzweifel/git-auto-commit-action@v7

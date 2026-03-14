@@ -20,7 +20,7 @@ Crawls web pages and prints any link it can find.
 
 - fast html SAX-parser (powered by [x/net/html](https://golang.org/x/net/html))
 - js/css lexical parsers (powered by [tdewolff/parse](https://github.com/tdewolff/parse)) - extract api endpoints from js code and `url()` properties
-- small (below 1500 SLOC), idiomatic, 100% test covered codebase
+- small (below 1500 SLOC), idiomatic, more than 80% test covered codebase
 - grabs most of useful resources urls (pics, videos, audios, forms, etc...)
 - found urls are streamed to stdout and guranteed to be unique (with fragments omitted)
 - scan depth (limited by starting host and path, by default - 0) can be configured
