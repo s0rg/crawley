@@ -1,5 +1,5 @@
 [![CI](https://github.com/s0rg/crawley/workflows/ci/badge.svg)](https://github.com/s0rg/crawley/actions?query=workflow%3Aci)
-![Coverage](https://img.shields.io/badge/Coverage-85.4%25-brightgreen)
+![coverage](https://img.shields.io/badge/coverage-85.4%25-brightgreen)
 [![Go Report Card](https://goreportcard.com/badge/github.com/s0rg/crawley)](https://goreportcard.com/report/github.com/s0rg/crawley)
 [![libraries.io](https://img.shields.io/librariesio/github/s0rg/crawley)](https://libraries.io/github/s0rg/crawley)
 ![Issues](https://img.shields.io/github/issues/s0rg/crawley)
