@@ -18,18 +18,12 @@ jobs:
       - name: set up golang
         uses: actions/setup-go@v6
         with:
-          go-version: ^1.26
+          go-version-file: 'go.mod'
       - name: build
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
           version: latest
           distribution: goreleaser
           args: release -f .goreleaser.yml --clean
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-  reportcard:
-    runs-on: ubuntu-latest
-    needs: release
-    steps:
-      - name: update goreportcard
-        uses: creekorful/goreportcard-action@v1.0

@@ -1,16 +1,14 @@
+[![CI](https://github.com/s0rg/crawley/workflows/ci/badge.svg)](https://github.com/s0rg/crawley/actions?query=workflow%3Aci)
+[![Go Report Card](https://goreportcard.com/badge/github.com/s0rg/crawley)](https://goreportcard.com/report/github.com/s0rg/crawley)
+[![libraries.io](https://img.shields.io/librariesio/github/s0rg/crawley)](https://libraries.io/github/s0rg/crawley)
+![Issues](https://img.shields.io/github/issues/s0rg/crawley)
+
 [![License](https://img.shields.io/badge/license-MIT%20License-blue.svg)](https://github.com/s0rg/crawley/blob/main/LICENSE)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fs0rg%2Fcrawley.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fs0rg%2Fcrawley?ref=badge_shield)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/s0rg/crawley)](go.mod)
 [![Release](https://img.shields.io/github/v/release/s0rg/crawley)](https://github.com/s0rg/crawley/releases/latest)
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)
 ![Downloads](https://img.shields.io/github/downloads/s0rg/crawley/total.svg)
-
-[![CI](https://github.com/s0rg/crawley/workflows/ci/badge.svg)](https://github.com/s0rg/crawley/actions?query=workflow%3Aci)
-[![Go Report Card](https://goreportcard.com/badge/github.com/s0rg/crawley)](https://goreportcard.com/report/github.com/s0rg/crawley)
-[![Maintainability](https://qlty.sh/badges/f6bbc710-32a4-430b-ba73-51ae05fd0916/maintainability.svg)](https://qlty.sh/gh/s0rg/projects/crawley)
-[![Code Coverage](https://qlty.sh/badges/f6bbc710-32a4-430b-ba73-51ae05fd0916/test_coverage.svg)](https://qlty.sh/gh/s0rg/projects/crawley)
-[![libraries.io](https://img.shields.io/librariesio/github/s0rg/crawley)](https://libraries.io/github/s0rg/crawley)
-![Issues](https://img.shields.io/github/issues/s0rg/crawley)
 
 # crawley
 
