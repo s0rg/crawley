@@ -57,15 +57,14 @@ jobs:
         run: make code/test-cover
       - name: coverage badge
         uses: tj-actions/coverage-badge-go@v3
-        if: ${{ github.event_name == 'push' }}
         with:
           green: 80
           filename: cover.out
       - name: apply bage
         uses: stefanzweifel/git-auto-commit-action@v7
-        if: ${{ github.event_name != 'push' }}
         id: auto-commit-action
         with:
+          branch: test-coverage-bage
           commit_message: Apply Code Coverage Badge
           skip_fetch: true
           skip_checkout: true
