@@ -66,7 +66,7 @@ code/lint: code/vet
 ## code/test-all: Runs tests suite
 code/test-all: code/vet
 	@echo "Running all tests"
-	@CGO_ENABLED=1 ${TSTFLAGS} -coverprofile="${COP}" "${ALL}"
+	@CGO_ENABLED=1 ${TSTFLAGS} -tags test -coverprofile="${COP}" "${ALL}"
 
 ## code/test [name]: Runs specified test
 code/test: code/vet
@@ -76,7 +76,7 @@ code/test: code/vet
 ## code/test-cover: Runs test-coverage
 code/test-cover: code/vet
 	@echo "Running test covarage"
-	@go test -v -coverprofile="$(COP)" -cover ./... -coverpkg ./... -covermode=count
+	@go test -v -coverprofile="$(COP)" -tags test -cover ./... -coverpkg ./... -covermode=count
 	@go tool cover -func="$(COP)" -o="$(COP)"
 
 ## code/benchmark: Runs code benchmarks
