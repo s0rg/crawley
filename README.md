@@ -110,6 +110,8 @@ possible flags with default values:
     show version
 -workers int
       number of workers (default - number of CPU cores)
+-ignore-query
+    ignore query parameters in URL
 ```
 
 
