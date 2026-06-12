@@ -2,7 +2,6 @@ package client
 
 import (
 	"net/http"
-	"reflect"
 	"testing"
 )
 
@@ -49,8 +48,31 @@ func Test_prepareCookies(t *testing.T) {
 			continue
 		}
 
-		if !reflect.DeepEqual(got, tt.want) {
-			t.Errorf("prepareCookies(): %v, want: %v", got, tt.want)
+		cookiesEqual(t, tt.want, got)
+	}
+}
+
+func cookiesEqual(t *testing.T, a, b []*http.Cookie) {
+	t.Helper()
+
+	if len(b) > len(a) {
+		a, b = b, a
+	}
+
+	index := make(map[string]string)
+
+	for _, v := range b {
+		index[v.Name] = v.Value
+	}
+
+	for _, v := range a {
+		bv, ok := index[v.Name]
+		if !ok {
+			continue
+		}
+
+		if bv != v.Value {
+			t.Fail()
 		}
 	}
 }

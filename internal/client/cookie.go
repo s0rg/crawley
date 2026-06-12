@@ -43,8 +43,11 @@ func parseOne(raw string) (rv *http.Cookie, ok bool) {
 	}
 
 	rv = &http.Cookie{
-		Name:  name,
-		Value: strings.TrimSpace(pair[1]),
+		Name:     name,
+		Value:    strings.TrimSpace(pair[1]),
+		SameSite: http.SameSiteStrictMode,
+		HttpOnly: true,
+		Secure:   true,
 	}
 
 	return rv, true
