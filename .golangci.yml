@@ -57,6 +57,8 @@ linters:
           - dupword
           - funlen
           - ifshort
+          - gosec
+          - goconst
         path: ._test\.go
       - linters:
           - nakedret
