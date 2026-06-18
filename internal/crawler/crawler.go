@@ -85,6 +85,10 @@ func (c *Crawler) Run(uri string, urlcb func(string)) (err error) {
 		return fmt.Errorf("parse url: %w", err)
 	}
 
+	if c.cfg.IgnoreQuery {
+		normalizeURL(base)
+	}
+
 	workers := c.cfg.Client.Workers
 
 	n := (workers + 1)
@@ -95,7 +99,7 @@ func (c *Crawler) Run(uri string, urlcb func(string)) (err error) {
 	defer c.close()
 
 	seen := make(set.Unordered[uint64])
-	seen.Add(urlhash(uri))
+	seen.Add(urlhash(base.String()))
 
 	web := client.New(&c.cfg.Client)
 	c.initRobots(base, web)
@@ -273,6 +277,16 @@ func (c *Crawler) isIgnored(v string) (yes bool) {
 }
 
 func (c *Crawler) linkHandler(a atom.Atom, s string) {
+	u, err := url.Parse(s)
+	if err != nil {
+		return
+	}
+
+	if c.cfg.IgnoreQuery {
+		normalizeURL(u)
+		s = u.String()
+	}
+
 	r := crawlResult{
 		URI:  s,
 		Hash: urlhash(s),
