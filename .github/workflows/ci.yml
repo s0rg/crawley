@@ -27,7 +27,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v6
       - name: setup golang
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: 'go.mod'
       - name: golangci-lint
@@ -52,7 +52,7 @@ jobs:
           persist-credentials: true
           fetch-depth: 0
       - name: setup golang
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: 'go.mod'
       - name: test cover
@@ -88,7 +88,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v6
       - name: setup golang
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: 'go.mod'
       - name: init codeql
