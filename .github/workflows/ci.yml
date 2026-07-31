@@ -92,10 +92,10 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - name: init codeql
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@v4.37.3
         with:
           languages: 'go'
       - name: run analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@v4.37.3
       - name: update goreportcard
         uses: creekorful/goreportcard-action@v1.0
